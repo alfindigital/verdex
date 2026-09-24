@@ -58,6 +58,26 @@ Honest limits documented in README: no OHLCV on Basic tier → PUMP uses vol/mca
 
 (Replace XXXX after DoraHacks BUIDL page exists.)
 
+## DoraHacks form fields (exact)
+
+| Field | Value |
+|---|---|
+| BUIDL name | `Verdex` |
+| BUIDL logo | `public/logo.png` (480×480, 18KB ✅) |
+| Vision | "Make 'is this token behaving like a trap?' a checkable fact before every DEX buy — evidence-backed verdicts, not dashboards." |
+| Category | Markets and Trading Tools |
+| GitHub * | `https://github.com/alfindigital/verdex` |
+| Project website | `https://verdex-alpha.vercel.app` |
+| Demo video * | **YouTube link — user must record** (script below) |
+| Social link (≥1) | X post URL (after posting) |
+
+## Positioning vs closest BUIDLs (43 total)
+
+- **CMC Witness** — pre-trade *gate for AI agents* (x402 paid, allow|caution|block). Verdex is **trader-facing** with full metric surface (third-party sells, maker concentration, LP pulls) + falsifier + Jev cross-exam. Gate vs courtroom.
+- **Middleman / Forwarding Address** (Edy Cu) — evidence over suspicion, but about slippage/pool choice and LP-pull adjudication. Verdex adjudicates the *token itself* pre-entry.
+- **Argus / Market Detective** — "why did it move" investigation + receipts. Verdex answers "should I buy" — receipts shared as pattern, verdict is the differentiator.
+- **MarketSentinel** — TEE manipulation signals, infra-heavy. Verdex is zero-infra, deterministic, reproducible by anyone.
+
 ## Checklist for submission form
 
 - [ ] Public repo: https://github.com/alfindigital/verdex
