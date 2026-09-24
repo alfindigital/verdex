@@ -7,6 +7,11 @@ export interface TokenRef {
   address: string;
   name: string;
   symbol: string;
+  // stats carried from dex/search (keeps call count low)
+  mcapUsd?: number | null;
+  vol24hUsd?: number | null;
+  priceChange24h?: number | null;
+  liqUsd?: number | null;
 }
 
 export interface Swap {
@@ -133,11 +138,16 @@ export async function resolveToken(client: DexClient, input: string, platformHin
       tks.find((t) => String(t.addr).toLowerCase() === q.toLowerCase())
     : tks.find((t) => !platformHint || String(t.plt) === platformHint) ?? tks[0];
   if (!pick) throw new TokenNotFoundError(q);
+  const num = (v: unknown) => (v === undefined || v === null || v === "" ? null : Number(v));
   return {
     platform: String(pick.plt),
     address: String(pick.addr),
     name: String(pick.n),
     symbol: String(pick.s),
+    mcapUsd: num(pick.mc),
+    vol24hUsd: num(pick.v24h),
+    priceChange24h: num(pick.pc24h),
+    liqUsd: num(pick.liq),
   };
 }
 
