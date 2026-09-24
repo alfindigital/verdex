@@ -1,0 +1,216 @@
+{
+  "kind": "verdict",
+  "id": "aff8a4e8d2a7",
+  "ts": "2026-09-24T22:52:27.617Z",
+  "token": {
+    "platform": "Solana",
+    "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+    "name": "dogwifhat",
+    "symbol": "$WIF",
+    "mcapUsd": 232774288.43426585,
+    "vol24hUsd": 2410580.9340140526,
+    "priceChange24h": -0.0661,
+    "liqUsd": 6681647.147842624
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 48,
+      "sellCount": 52,
+      "buyUsd": 1791.162307225355,
+      "sellUsd": 3032.9221604735712,
+      "netBuyUsd": -1241.7598532482161,
+      "netBuyRatio": -0.25740839771002844,
+      "uniqueMakers": 39,
+      "top5MakerShare": 0.8446071612973433,
+      "thirdPartySells": 36
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 8155236.519144987,
+      "netLpDeltaUsd": 3368.468242350775,
+      "maxSinglePullPct": 0,
+      "addCount": 6,
+      "removeCount": 14
+    },
+    "pump": {
+      "volMcapRatio": 0.010355872851029194,
+      "makersPer100kVol": 1.6178672721458043,
+      "priceChange24h": -0.0661
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "JANGAN",
+    "score": 45,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "DANGER",
+        "metrics": [
+          {
+            "name": "thirdPartySells",
+            "value": 36,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 39,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.84,
+            "threshold": "<0.50",
+            "level": "DANGER"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": -0.26,
+            "threshold": ">0",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 8155237,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0.01,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 1.62,
+            "threshold": "≥1",
+            "level": "WARN"
+          }
+        ]
+      }
+    ],
+    "confidence": "medium",
+    "falsifier": "This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.84."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.54,
+    "tokensUsed": 770
+  },
+  "agreement": "lean",
+  "narration": {
+    "source": "template",
+    "headline": "Avoid $WIF on Solana — the evidence is bad",
+    "bullets": [
+      "top5MakerShare = 0.84 (threshold: <0.50)",
+      "makersPer100kVol = 1.62 (threshold: ≥1)",
+      "Confidence: medium. Falsifier: This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.84."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "limit": 100,
+        "platform": "Solana"
+      },
+      "ts": "2026-09-24T22:52:27.371Z",
+      "credits": 1,
+      "sha256": "1d54d402ebe2018d4aed963bbe391a61d30b670b99f8aa08b1e29d16dcd27f17",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "platform": "Solana"
+      },
+      "ts": "2026-09-24T22:52:26.899Z",
+      "credits": 1,
+      "sha256": "1928f3c38f167d624f3ac7dc11f2c8c604214f61d6be0197489a4ffbfcc8ca02",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "platform": "Solana"
+      },
+      "ts": "2026-09-24T22:52:26.873Z",
+      "credits": 1,
+      "sha256": "78268cc4b94ad46da2f6d78e359a369acd1efb63b648f933c70c6eddc56980f7",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "platformName": "Solana"
+      },
+      "ts": "2026-09-24T22:52:26.759Z",
+      "credits": 1,
+      "sha256": "271f32a0be685037a635c75ffc332f46572ae7d64bff8e1dbf99bb6fad8975f2",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

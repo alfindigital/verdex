@@ -9,7 +9,7 @@ describe("jevSecondOpinion", () => {
   afterEach(() => vi.unstubAllEnvs());
 
   it("returns risky probability from noul response", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => okJson({ output: { risky: { noul: 0.91 } }, usage: { input_tokens: 300, output_tokens: 20 } })));
+    vi.stubGlobal("fetch", vi.fn(async () => okJson({ answers: { risky: { noul: 0.91 } }, usage: { input_tokens: 300, output_tokens: 20 } })));
     const r = await jevSecondOpinion({ swapCount: 100, uniqueMakers: 3, top5MakerShare: 0.9, thirdPartySells: 0 });
     expect(r.available).toBe(true);
     expect(r.riskyProb).toBeCloseTo(0.91);
@@ -32,7 +32,7 @@ describe("jevSecondOpinion", () => {
   });
 
   it("unavailable on malformed body", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => okJson({ output: {} })));
+    vi.stubGlobal("fetch", vi.fn(async () => okJson({ answers: {} })));
     const r = await jevSecondOpinion({ swapCount: 10 });
     expect(r.available).toBe(false);
   });
@@ -43,7 +43,7 @@ describe("jevRoute", () => {
   afterEach(() => vi.unstubAllEnvs());
 
   it("picks a candidate token via choice response", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => okJson({ output: { pick: { choice: "PEPE on Solana" } } })));
+    vi.stubGlobal("fetch", vi.fn(async () => okJson({ answers: { pick: { choice: "PEPE on Solana" } } })));
     const r = await jevRoute("is pepe safe", ["PEPE on Solana", "PEPE on BSC"]);
     expect(r.available).toBe(true);
     expect(r.choice).toBe("PEPE on Solana");

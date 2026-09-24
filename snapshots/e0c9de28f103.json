@@ -1,0 +1,217 @@
+{
+  "kind": "verdict",
+  "id": "e0c9de28f103",
+  "ts": "2026-09-24T22:52:29.380Z",
+  "token": {
+    "platform": "BSC",
+    "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+    "name": "PancakeSwap Token",
+    "symbol": "Cake",
+    "mcapUsd": 14789932615.87762,
+    "vol24hUsd": 10796901.441696195,
+    "priceChange24h": 0.0702,
+    "liqUsd": 19546799.89033261
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 65,
+      "sellCount": 35,
+      "buyUsd": 17849.71107756643,
+      "sellUsd": 2479.737577581497,
+      "netBuyUsd": 15369.973499984932,
+      "netBuyRatio": 0.7560447782283003,
+      "uniqueMakers": 50,
+      "top5MakerShare": 0.44435376196349524,
+      "thirdPartySells": 22
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 59928188.68854485,
+      "netLpDeltaUsd": 144333.54694222473,
+      "maxSinglePullPct": 0,
+      "addCount": 12,
+      "removeCount": 8
+    },
+    "pump": {
+      "volMcapRatio": 0.0007300169461289677,
+      "makersPer100kVol": 0.4630958267981095,
+      "priceChange24h": 0.0702
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "mintable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 60,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "thirdPartySells",
+            "value": 22,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 50,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.44,
+            "threshold": "<0.50",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": 0.76,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 59928189,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "DANGER",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 0.46,
+            "threshold": "≥1",
+            "level": "DANGER"
+          }
+        ]
+      }
+    ],
+    "confidence": "medium",
+    "falsifier": "This verdict (RAWAN) flips if makersPer100kVol moves back inside ≥1 — currently 0.46."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.26,
+    "tokensUsed": 771
+  },
+  "agreement": "contested",
+  "narration": {
+    "source": "template",
+    "headline": "Cake on BSC shows warning signs — size accordingly",
+    "bullets": [
+      "makersPer100kVol = 0.46 (threshold: ≥1)",
+      "Confidence: medium. Falsifier: This verdict (RAWAN) flips if makersPer100kVol moves back inside ≥1 — currently 0.46."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "limit": 100,
+        "platform": "BSC"
+      },
+      "ts": "2026-09-24T22:52:29.134Z",
+      "credits": 1,
+      "sha256": "504fa239e9409292346077956b83249a66806ecefc2349261128f7596dc1643f",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-24T22:52:28.766Z",
+      "credits": 1,
+      "sha256": "aa87c656e624aa8a02665eaa1e7a8140aa943ae242b1aa36feae1002cec29a46",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-24T22:52:28.805Z",
+      "credits": 1,
+      "sha256": "684626a4290076d771a67363b9573d81671b41be31d12f56c67985df5fd1f002",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "platformName": "BSC"
+      },
+      "ts": "2026-09-24T22:52:28.746Z",
+      "credits": 1,
+      "sha256": "40629ed052e2bc59be53bd31211fee83e04ef154957eb4c968e186a16f72d78b",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

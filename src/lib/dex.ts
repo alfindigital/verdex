@@ -147,7 +147,7 @@ function toRef(t: Record<string, unknown>): TokenRef {
 /** All distinct-address candidates for a query (for ambiguity resolution). */
 export async function searchTokenCandidates(client: DexClient, input: string): Promise<{ candidates: TokenRef[]; receipt: import("./cmc-client").Receipt }> {
   const q = input.trim().replace(/^\$/, "");
-  const res = await client.get<{ tks?: Record<string, unknown>[] }>("/v1/dex/search", { query: q });
+  const res = await client.get<{ tks?: Record<string, unknown>[] }>("/v1/dex/search", { q });
   const seen = new Set<string>();
   const candidates: TokenRef[] = [];
   for (const t of res.data?.tks ?? []) {
@@ -184,7 +184,7 @@ export async function getTokenMeta(client: DexClient, ref: TokenRef) {
   return r;
 }
 
-export async function getSwaps(client: DexClient, ref: TokenRef, limit = 500) {
+export async function getSwaps(client: DexClient, ref: TokenRef, limit = 100) {
   const r = await client.get<{ swaps?: Record<string, unknown>[] }>("/v1/dex/tokens/transactions", {
     platform: ref.platform,
     address: ref.address,

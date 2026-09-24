@@ -71,7 +71,7 @@ describe("resolveToken", () => {
   });
   it("strips $ prefix", async () => {
     let q = "";
-    const c: DexClient = { get: async <T,>(_e: string, p?: Record<string, unknown>) => { q = String(p?.query); return { data: { tks: [] } as T, receipt: {} as never }; } };
+    const c: DexClient = { get: async <T,>(_e: string, p?: Record<string, unknown>) => { q = String(p?.q); return { data: { tks: [] } as T, receipt: {} as never }; } };
     await resolveToken(c, "$FOO").catch(() => {});
     expect(q).toBe("FOO");
   });

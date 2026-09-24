@@ -1,0 +1,216 @@
+{
+  "kind": "verdict",
+  "id": "3ba71827286a",
+  "ts": "2026-09-24T22:52:25.588Z",
+  "token": {
+    "platform": "Solana",
+    "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+    "name": "Bonk",
+    "symbol": "Bonk",
+    "mcapUsd": 322168276.5064575,
+    "vol24hUsd": 3343363.534959355,
+    "priceChange24h": 0.0604,
+    "liqUsd": 6137368.444756164
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 45,
+      "sellCount": 55,
+      "buyUsd": 943.4829832668643,
+      "sellUsd": 966.3596696382423,
+      "netBuyUsd": -22.876686371378014,
+      "netBuyRatio": -0.011978309488784193,
+      "uniqueMakers": 61,
+      "top5MakerShare": 0.5827949418948913,
+      "thirdPartySells": 47
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 6416517.493751698,
+      "netLpDeltaUsd": 455564.4997180654,
+      "maxSinglePullPct": 0,
+      "addCount": 13,
+      "removeCount": 7
+    },
+    "pump": {
+      "volMcapRatio": 0.010377693208078298,
+      "makersPer100kVol": 1.824509939232246,
+      "priceChange24h": 0.0604
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 70,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "thirdPartySells",
+            "value": 47,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 61,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.58,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": -0.01,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.07,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 6416517,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0.01,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 1.82,
+            "threshold": "≥1",
+            "level": "WARN"
+          }
+        ]
+      }
+    ],
+    "confidence": "medium",
+    "falsifier": "This verdict (RAWAN) flips if thirdPartySells moves back inside ≥3 (0 sells w/ buys = hidden honeypot) — currently 47."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.17,
+    "tokensUsed": 767
+  },
+  "agreement": "contested",
+  "narration": {
+    "source": "template",
+    "headline": "Bonk on Solana shows warning signs — size accordingly",
+    "bullets": [
+      "top5MakerShare = 0.58 (threshold: <0.50)",
+      "makersPer100kVol = 1.82 (threshold: ≥1)",
+      "Confidence: medium. Falsifier: This verdict (RAWAN) flips if thirdPartySells moves back inside ≥3 (0 sells w/ buys = hidden honeypot) — currently 47."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "limit": 100,
+        "platform": "Solana"
+      },
+      "ts": "2026-09-24T22:52:24.882Z",
+      "credits": 1,
+      "sha256": "d74e722de13fb6cd9a2413e87e0fdb1583ce258cc92cc8f39961d25a5b1b1fb6",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "platform": "Solana"
+      },
+      "ts": "2026-09-24T22:52:24.576Z",
+      "credits": 1,
+      "sha256": "4004adac9743d080542e89b6ba1640e49d26c3301c4c278fcab002d226ab80ba",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "platform": "Solana"
+      },
+      "ts": "2026-09-24T22:52:24.795Z",
+      "credits": 1,
+      "sha256": "7c687504259e2720ad3db5b652e1431f5a69c40c8e596a4f81194414baddb250",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "platformName": "Solana"
+      },
+      "ts": "2026-09-24T22:52:24.112Z",
+      "credits": 1,
+      "sha256": "97ae70a6569b1dd198f54c0d8fab2cbd63fd75d2f536c4c148bf6e381cb5844b",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

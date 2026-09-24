@@ -19,17 +19,19 @@ export interface JevRouteResult {
 export type Agreement = "consensus" | "contested" | "lean" | "unavailable";
 
 function key(): string {
-  return process.env.TYPESAFE_API_KEY ?? "";
+  // TYPESAFE_API_KEYS may hold a comma-separated rotation list — use the first.
+  const raw = process.env.TYPESAFE_API_KEY ?? process.env.TYPESAFE_API_KEYS ?? "";
+  return raw.split(",")[0]?.trim() ?? "";
 }
 
-async function callJev(state: Record<string, unknown>, outputSpec: Record<string, unknown>) {
+async function callJev(state: Record<string, unknown>, questions: Record<string, unknown>) {
   const res = await fetch(JEV_URL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       authorization: `Bearer ${key()}`,
     },
-    body: JSON.stringify({ model: MODEL, state, output: outputSpec }),
+    body: JSON.stringify({ model: MODEL, state, questions }),
     signal: AbortSignal.timeout(10_000),
   });
   if (!res.ok) throw new Error(`jev http ${res.status}`);
@@ -42,12 +44,22 @@ export async function jevSecondOpinion(metrics: Record<string, unknown>): Promis
   try {
     const body = await callJev(
       {
-        task: "estimate probability that this DEX token is risky (honeypot, rug, manufactured pump) from these computed metrics",
+        task: "estimate probability that this DEX token is risky to buy (honeypot, rug, manufactured pump) from these computed metrics",
         metrics,
       },
-      { risky: { type: "noul", question: "Is this token risky to buy?" } },
+      {
+        risky: {
+          type: "noul",
+          instructions:
+            "Is this token risky to buy right now? Yes means likely honeypot, rug pull, or manufactured pump. Judge only from the metrics in state.",
+          criteria: {
+            true: "evidence of concentrated/manipulated flow, honeypot-shaped sells, security flags, or draining liquidity",
+            false: "broad maker participation, real third-party sells, stable or growing liquidity, clean security",
+          },
+        },
+      },
     );
-    const noul = body?.output?.risky?.noul;
+    const noul = body?.answers?.risky?.noul;
     if (typeof noul !== "number") return { available: false, riskyProb: null, error: "malformed response" };
     return { available: true, riskyProb: noul, tokensUsed: body?.usage?.input_tokens };
   } catch (e) {
@@ -60,10 +72,16 @@ export async function jevRoute(query: string, candidates: string[]): Promise<Jev
   if (!key()) return { available: false, choice: null, error: "TYPESAFE_API_KEY missing" };
   try {
     const body = await callJev(
-      { task: "route this user query to the best matching token candidate", query, candidates },
-      { pick: { type: "choice", question: "Which candidate matches the query?", options: candidates } },
+      { task: "route this user query to the best matching token candidate", query },
+      {
+        pick: {
+          type: "choice",
+          instructions: "Which candidate token does the query most likely refer to?",
+          criteria: Object.fromEntries(candidates.map((c) => [c, null])),
+        },
+      },
     );
-    const choice = body?.output?.pick?.choice;
+    const choice = body?.answers?.pick?.choice;
     if (typeof choice !== "string" || !candidates.includes(choice)) {
       return { available: false, choice: null, error: "malformed response" };
     }
