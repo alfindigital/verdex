@@ -1,6 +1,6 @@
 # Verdex — Don't be the exit liquidity
 
-**Track: Markets & Trading Tools** · Built with the CoinMarketCap API
+**Live: https://verdex-alpha.vercel.app** · **Track: Markets & Trading Tools** · Built with the CoinMarketCap API
 
 Paste a token address or ticker. Get a deterministic, evidence-backed verdict —
 **ENTRY-WORTHY / CAUTION / AVOID / INSUFFICIENT EVIDENCE** — computed from
