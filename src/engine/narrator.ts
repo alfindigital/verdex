@@ -37,9 +37,10 @@ function templateNarration(symbol: string, platform: string, r: CompositeResult)
 }
 
 export async function narrate(symbol: string, platform: string, r: CompositeResult): Promise<Narration> {
-  const base = process.env.NARRATOR_BASE_URL;
-  const apiKey = process.env.NARRATOR_API_KEY;
-  const model = process.env.NARRATOR_MODEL;
+  const groq = process.env.GROQ_API_KEY;
+  const base = process.env.NARRATOR_BASE_URL ?? (groq ? "https://api.groq.com/openai/v1" : undefined);
+  const apiKey = process.env.NARRATOR_API_KEY ?? groq;
+  const model = process.env.NARRATOR_MODEL ?? (groq ? "llama-3.3-70b-versatile" : undefined);
   if (!base || !apiKey || !model) return templateNarration(symbol, platform, r);
 
   try {
