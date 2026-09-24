@@ -1,31 +1,24 @@
-"use client";
+import Link from "next/link";
+import { Checker } from "@/components/checker";
+import { listSnapshotIds, loadVerdict } from "@/lib/verdict-store";
+import { VERDICT_STYLE } from "@/components/verdict-card";
 
-import { useState } from "react";
-import { VerdictCard, type TokenRef, type VerdictRecord } from "@/components/verdict-card";
+export const dynamic = "force-dynamic";
 
-type ApiResult = VerdictRecord | { kind: "ambiguous"; candidates: TokenRef[] } | { kind: "notFound"; query: string } | { error: string };
+const ENDPOINTS = [
+  "dex/search",
+  "dex/tokens/transactions",
+  "dex/token/pools",
+  "dex/liquidity-change/list",
+  "dex/security/detail",
+  "global-metrics/quotes",
+  "fear-and-greed/latest",
+];
 
 export default function Home() {
-  const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [out, setOut] = useState<ApiResult | null>(null);
-
-  async function run(q: string, pick?: number) {
-    setLoading(true);
-    setOut(null);
-    try {
-      const res = await fetch("/api/verdict", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ query: q, pick }),
-      });
-      setOut((await res.json()) as ApiResult);
-    } catch (e) {
-      setOut({ error: e instanceof Error ? e.message : "request failed" });
-    } finally {
-      setLoading(false);
-    }
-  }
+  const snapshots = listSnapshotIds()
+    .map((id) => loadVerdict(id))
+    .filter((v): v is NonNullable<typeof v> => v !== null);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
@@ -35,60 +28,90 @@ export default function Home() {
           Don&apos;t be the exit liquidity. Paste a token address or ticker — get a deterministic, evidence-backed verdict
           computed from CoinMarketCap DEX data, cross-examined by Jev.
         </p>
+        <p className="mt-1 text-xs text-neutral-600">
+          Structure tells you <em>could it rug</em>. Verdex tells you <em>is it rugging</em>.
+        </p>
       </header>
 
-      <form
-        className="flex gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (query.trim()) run(query.trim());
-        }}
-      >
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Token address or ticker — e.g. PEPE, 0x…, So111…"
-          className="flex-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 font-mono text-sm outline-none focus:border-emerald-500"
-        />
-        <button
-          disabled={loading}
-          className="rounded-lg bg-emerald-500 px-5 py-3 font-semibold text-neutral-950 hover:bg-emerald-400 disabled:opacity-50"
-        >
-          {loading ? "…" : "Check"}
-        </button>
-      </form>
+      <Checker />
 
-      {out && "error" in out && (
-        <p className="mt-4 rounded-lg border border-red-800 bg-red-950/40 px-4 py-3 text-sm text-red-300">{out.error}</p>
-      )}
-
-      {out && "kind" in out && out.kind === "notFound" && (
-        <p className="mt-4 rounded-lg border border-neutral-700 px-4 py-3 text-sm text-neutral-300">
-          No token found for “{out.query}”. Try the contract address.
-        </p>
-      )}
-
-      {out && "kind" in out && out.kind === "ambiguous" && (
-        <div className="mt-4 rounded-lg border border-neutral-700 p-4">
-          <p className="mb-3 text-sm text-neutral-300">Multiple matches — pick one (we never silently choose):</p>
-          <div className="space-y-2">
-            {out.candidates.map((c, i) => (
-              <button
-                key={`${c.platform}:${c.address}`}
-                onClick={() => run(query, i)}
-                className="block w-full rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-3 text-left hover:border-emerald-500"
-              >
-                <span className="font-semibold">{c.symbol}</span>
-                <span className="ml-2 text-neutral-400">{c.name}</span>
-                <span className="ml-2 rounded bg-neutral-800 px-2 py-0.5 text-xs">{c.platform}</span>
-                <span className="mt-1 block font-mono text-xs text-neutral-500">{c.address}</span>
-              </button>
-            ))}
+      {snapshots.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+            Recent verdicts — real CMC data
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {snapshots.map((v) => {
+              const st = VERDICT_STYLE[v.result.verdict] ?? VERDICT_STYLE.BELUM_CUKUP_BUKTI;
+              return (
+                <Link
+                  key={v.id}
+                  href={`/verdict/${v.id}`}
+                  className="rounded-xl border border-neutral-800 bg-neutral-900 p-4 transition hover:border-emerald-600"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">
+                      {v.token.symbol} <span className="text-xs text-neutral-500">{v.token.platform}</span>
+                    </span>
+                    <span className={`rounded px-2 py-0.5 text-xs font-bold ${st.cls}`}>{st.label}</span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-xs text-neutral-400">
+                    <span>
+                      score {v.result.score}/100 · {v.agreement}
+                    </span>
+                    <span className="font-mono">{v.receipts.length} receipts</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
-        </div>
+        </section>
       )}
 
-      {out && "kind" in out && out.kind === "verdict" && <VerdictCard v={out} />}
+      <section className="mt-12 rounded-xl border border-neutral-800 bg-neutral-900/50 p-5">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">How a verdict is reached</h2>
+        <ol className="space-y-2 text-sm text-neutral-300">
+          <li>
+            <span className="font-mono text-emerald-400">1.</span> Resolve token — address or ticker; ambiguous names show
+            candidates, never silently picked.
+          </li>
+          <li>
+            <span className="font-mono text-emerald-400">2.</span> Fetch swap-level DEX data, pool depth, LP adds/pulls, and
+            security flags — all from CoinMarketCap.
+          </li>
+          <li>
+            <span className="font-mono text-emerald-400">3.</span> Score 4 dimensions with published thresholds: SAFETY ·
+            FLOW · LIQUIDITY · PUMP. Including the check nobody automates:{" "}
+            <em>are there real third-party sells?</em>
+          </li>
+          <li>
+            <span className="font-mono text-emerald-400">4.</span> Jev (TypeSafe) cross-examines the same metrics —
+            consensus, contested, or lean. Never overrides the rules.
+          </li>
+          <li>
+            <span className="font-mono text-emerald-400">5.</span> Every verdict ships a falsifier and SHA-256 receipts
+            for each API call. Auditable down to the response body.
+          </li>
+        </ol>
+      </section>
+
+      <section className="mt-6 rounded-xl border border-neutral-800 p-5">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">CMC endpoints used</h2>
+        <div className="flex flex-wrap gap-2">
+          {ENDPOINTS.map((e) => (
+            <code key={e} className="rounded bg-neutral-900 px-2 py-1 text-xs text-neutral-300">
+              /v1/{e}
+            </code>
+          ))}
+        </div>
+      </section>
+
+      <footer className="mt-10 flex items-center justify-between border-t border-neutral-800 pt-6 text-xs text-neutral-500">
+        <span>Built for the Build with CMC hackathon · Markets &amp; Trading Tools</span>
+        <a href="https://github.com/alfindigital/verdex" className="hover:text-neutral-300">
+          GitHub ↗
+        </a>
+      </footer>
     </main>
   );
 }
