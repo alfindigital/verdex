@@ -129,26 +129,47 @@ export function isAddress(input: string): boolean {
   return /^0x[a-fA-F0-9]{40}$/.test(input) || /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(input);
 }
 
-export async function resolveToken(client: DexClient, input: string, platformHint?: string): Promise<TokenRef> {
+const num = (v: unknown) => (v === undefined || v === null || v === "" ? null : Number(v));
+
+function toRef(t: Record<string, unknown>): TokenRef {
+  return {
+    platform: String(t.plt),
+    address: String(t.addr),
+    name: String(t.n),
+    symbol: String(t.s),
+    mcapUsd: num(t.mc),
+    vol24hUsd: num(t.v24h),
+    priceChange24h: num(t.pc24h),
+    liqUsd: num(t.liq),
+  };
+}
+
+/** All distinct-address candidates for a query (for ambiguity resolution). */
+export async function searchTokenCandidates(client: DexClient, input: string): Promise<{ candidates: TokenRef[]; receipt: import("./cmc-client").Receipt }> {
   const q = input.trim().replace(/^\$/, "");
   const res = await client.get<{ tks?: Record<string, unknown>[] }>("/v1/dex/search", { query: q });
-  const tks = res.data?.tks ?? [];
+  const seen = new Set<string>();
+  const candidates: TokenRef[] = [];
+  for (const t of res.data?.tks ?? []) {
+    const ref = toRef(t);
+    const k = `${ref.platform}:${ref.address.toLowerCase()}`;
+    if (!seen.has(k)) {
+      seen.add(k);
+      candidates.push(ref);
+    }
+  }
+  return { candidates, receipt: res.receipt };
+}
+
+export async function resolveToken(client: DexClient, input: string, platformHint?: string): Promise<TokenRef> {
+  const q = input.trim().replace(/^\$/, "");
+  const { candidates } = await searchTokenCandidates(client, q);
   const pick = isAddress(q)
-    ? tks.find((t) => String(t.addr).toLowerCase() === q.toLowerCase() && (!platformHint || String(t.plt) === platformHint)) ??
-      tks.find((t) => String(t.addr).toLowerCase() === q.toLowerCase())
-    : tks.find((t) => !platformHint || String(t.plt) === platformHint) ?? tks[0];
+    ? candidates.find((t) => t.address.toLowerCase() === q.toLowerCase() && (!platformHint || t.platform === platformHint)) ??
+      candidates.find((t) => t.address.toLowerCase() === q.toLowerCase())
+    : candidates.find((t) => !platformHint || t.platform === platformHint) ?? candidates[0];
   if (!pick) throw new TokenNotFoundError(q);
-  const num = (v: unknown) => (v === undefined || v === null || v === "" ? null : Number(v));
-  return {
-    platform: String(pick.plt),
-    address: String(pick.addr),
-    name: String(pick.n),
-    symbol: String(pick.s),
-    mcapUsd: num(pick.mc),
-    vol24hUsd: num(pick.v24h),
-    priceChange24h: num(pick.pc24h),
-    liqUsd: num(pick.liq),
-  };
+  return pick;
 }
 
 export class TokenNotFoundError extends Error {
