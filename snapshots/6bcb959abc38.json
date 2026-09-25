@@ -1,56 +1,54 @@
 {
   "kind": "verdict",
-  "id": "e0c9de28f103",
-  "ts": "2026-09-24T22:52:29.380Z",
+  "id": "6bcb959abc38",
+  "ts": "2026-09-25T10:25:44.606Z",
   "token": {
-    "platform": "BSC",
-    "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
-    "name": "PancakeSwap Token",
-    "symbol": "Cake",
-    "mcapUsd": 14789932615.87762,
-    "vol24hUsd": 10796901.441696195,
-    "priceChange24h": 0.0702,
-    "liqUsd": 19546799.89033261
+    "platform": "Solana",
+    "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+    "name": "Bonk",
+    "symbol": "Bonk",
+    "mcapUsd": 326383806.6409859,
+    "vol24hUsd": 3012592.8121788483,
+    "priceChange24h": 0.0566,
+    "liqUsd": 4883058.14229649
   },
   "metrics": {
     "flow": {
       "swapCount": 100,
-      "buyCount": 65,
-      "sellCount": 35,
-      "buyUsd": 17849.71107756643,
-      "sellUsd": 2479.737577581497,
-      "netBuyUsd": 15369.973499984932,
-      "netBuyRatio": 0.7560447782283003,
-      "uniqueMakers": 50,
-      "top5MakerShare": 0.44435376196349524,
-      "thirdPartySells": 22
+      "buyCount": 57,
+      "sellCount": 43,
+      "buyUsd": 946.0895937966421,
+      "sellUsd": 1235.7872785010918,
+      "netBuyUsd": -289.69768470444967,
+      "netBuyRatio": -0.13277453388071764,
+      "uniqueMakers": 58,
+      "top5MakerShare": 0.8952789787211607,
+      "thirdPartySells": 40
     },
     "liq": {
       "poolCount": 20,
-      "totalLiqUsd": 59928188.68854485,
-      "netLpDeltaUsd": 144333.54694222473,
+      "totalLiqUsd": 6179418.142685624,
+      "netLpDeltaUsd": 393398.3131111504,
       "maxSinglePullPct": 0,
       "addCount": 12,
       "removeCount": 8
     },
     "pump": {
-      "volMcapRatio": 0.0007300169461289677,
-      "makersPer100kVol": 0.4630958267981095,
-      "priceChange24h": 0.0702
+      "volMcapRatio": 0.00923021531975888,
+      "makersPer100kVol": 1.9252518881916765,
+      "priceChange24h": 0.0566
     },
     "safety": {
       "level": "safe",
-      "hits": [
-        "mintable"
-      ],
+      "hits": [],
       "buyTax": 0,
       "sellTax": 0,
       "flaggedByVendor": false
     }
   },
   "result": {
-    "verdict": "RAWAN",
-    "score": 60,
+    "verdict": "JANGAN",
+    "score": 45,
     "subs": [
       {
         "dim": "SAFETY",
@@ -78,31 +76,31 @@
       },
       {
         "dim": "FLOW",
-        "level": "CLEAN",
+        "level": "DANGER",
         "metrics": [
           {
             "name": "thirdPartySells",
-            "value": 22,
+            "value": 40,
             "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
             "level": "CLEAN"
           },
           {
             "name": "uniqueMakers",
-            "value": 50,
+            "value": 58,
             "threshold": "≥20",
             "level": "CLEAN"
           },
           {
             "name": "top5MakerShare",
-            "value": 0.44,
+            "value": 0.9,
             "threshold": "<0.50",
-            "level": "CLEAN"
+            "level": "DANGER"
           },
           {
             "name": "netBuyRatio",
-            "value": 0.76,
+            "value": -0.13,
             "threshold": ">0",
-            "level": "CLEAN"
+            "level": "WARN"
           }
         ]
       },
@@ -118,13 +116,13 @@
           },
           {
             "name": "netLpDeltaPct",
-            "value": 0,
+            "value": 0.06,
             "threshold": "≥0",
             "level": "CLEAN"
           },
           {
             "name": "totalLiqUsd",
-            "value": 59928189,
+            "value": 6179418,
             "threshold": "≥$10k",
             "level": "CLEAN"
           }
@@ -132,84 +130,101 @@
       },
       {
         "dim": "PUMP",
-        "level": "DANGER",
+        "level": "WARN",
         "metrics": [
           {
             "name": "volMcapRatio",
-            "value": 0,
+            "value": 0.01,
             "threshold": "<0.5",
             "level": "CLEAN"
           },
           {
             "name": "makersPer100kVol",
-            "value": 0.46,
+            "value": 1.93,
             "threshold": "≥1",
-            "level": "DANGER"
+            "level": "WARN"
           }
         ]
       }
     ],
-    "confidence": "medium",
-    "falsifier": "This verdict (RAWAN) flips if makersPer100kVol moves back inside ≥1 — currently 0.46."
+    "confidence": "high",
+    "falsifier": "This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.9."
   },
   "jev": {
     "available": true,
-    "riskyProb": 0.26,
-    "tokensUsed": 771
+    "riskyProb": 0.12250000000000001,
+    "dims": {
+      "SAFETY": 0.05,
+      "FLOW": 0.17,
+      "LIQUIDITY": 0.09,
+      "PUMP": 0.18
+    },
+    "tokensUsed": 914
   },
   "agreement": "contested",
   "narration": {
     "source": "template",
-    "headline": "Cake on BSC shows warning signs — size accordingly",
+    "headline": "Avoid Bonk on Solana — the evidence is bad",
     "bullets": [
-      "makersPer100kVol = 0.46 (threshold: ≥1)",
-      "Confidence: medium. Falsifier: This verdict (RAWAN) flips if makersPer100kVol moves back inside ≥1 — currently 0.46."
+      "top5MakerShare = 0.9 (threshold: <0.50)",
+      "makersPer100kVol = 1.93 (threshold: ≥1)",
+      "Confidence: high. Falsifier: This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.9."
     ]
   },
   "receipts": [
     {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"
+      },
+      "ts": "2026-09-25T10:25:42.411Z",
+      "credits": 1,
+      "sha256": "2a1302b5874da0509d658cf40a44ede58dcaf211aff315bd9fa33c9993d9b5e7",
+      "cached": false
+    },
+    {
       "endpoint": "/v1/dex/tokens/transactions",
       "params": {
-        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
         "limit": 100,
-        "platform": "BSC"
+        "platform": "Solana"
       },
-      "ts": "2026-09-24T22:52:29.134Z",
+      "ts": "2026-09-25T10:25:43.387Z",
       "credits": 1,
-      "sha256": "504fa239e9409292346077956b83249a66806ecefc2349261128f7596dc1643f",
+      "sha256": "413555173e7c23b53ab128641a7bbcb92f72a3ffa3b1906d6406522032d8338b",
       "cached": false
     },
     {
       "endpoint": "/v1/dex/token/pools",
       "params": {
-        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
-        "platform": "BSC"
+        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "platform": "Solana"
       },
-      "ts": "2026-09-24T22:52:28.766Z",
+      "ts": "2026-09-25T10:25:43.693Z",
       "credits": 1,
-      "sha256": "aa87c656e624aa8a02665eaa1e7a8140aa943ae242b1aa36feae1002cec29a46",
+      "sha256": "29fe54070088fb6d6fb9345075518e396fe52b286320b0d234d4cbe61e84e593",
       "cached": false
     },
     {
       "endpoint": "/v1/dex/liquidity-change/list",
       "params": {
-        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
-        "platform": "BSC"
+        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "platform": "Solana"
       },
-      "ts": "2026-09-24T22:52:28.805Z",
+      "ts": "2026-09-25T10:25:43.194Z",
       "credits": 1,
-      "sha256": "684626a4290076d771a67363b9573d81671b41be31d12f56c67985df5fd1f002",
+      "sha256": "f50cd59e76fc393de7817d8315aaff9ab6385170879000b50a5de9cede42b79f",
       "cached": false
     },
     {
       "endpoint": "/v1/dex/security/detail",
       "params": {
-        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
-        "platformName": "BSC"
+        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "platformName": "Solana"
       },
-      "ts": "2026-09-24T22:52:28.746Z",
+      "ts": "2026-09-25T10:25:43.607Z",
       "credits": 1,
-      "sha256": "40629ed052e2bc59be53bd31211fee83e04ef154957eb4c968e186a16f72d78b",
+      "sha256": "49ef8841447e1fda7e64a3fde25a325daf74f00a70665f0426dde171ef9b9ead",
       "cached": false
     }
   ],

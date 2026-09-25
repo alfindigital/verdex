@@ -1,54 +1,54 @@
 {
   "kind": "verdict",
-  "id": "aff8a4e8d2a7",
-  "ts": "2026-09-24T22:52:27.617Z",
+  "id": "298cca788e24",
+  "ts": "2026-09-25T10:25:49.530Z",
   "token": {
-    "platform": "Solana",
-    "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
-    "name": "dogwifhat",
-    "symbol": "$WIF",
-    "mcapUsd": 232774288.43426585,
-    "vol24hUsd": 2410580.9340140526,
-    "priceChange24h": -0.0661,
-    "liqUsd": 6681647.147842624
+    "platform": "BSC",
+    "address": "0xfb5b838b6cfeedc2873ab27866079ac55363d37e",
+    "name": "FLOKI",
+    "symbol": "FLOKI",
+    "mcapUsd": 284757531.9904992,
+    "vol24hUsd": 317668.5848719207,
+    "priceChange24h": 0.0565,
+    "liqUsd": 10813763.906740448
   },
   "metrics": {
     "flow": {
       "swapCount": 100,
-      "buyCount": 48,
-      "sellCount": 52,
-      "buyUsd": 1791.162307225355,
-      "sellUsd": 3032.9221604735712,
-      "netBuyUsd": -1241.7598532482161,
-      "netBuyRatio": -0.25740839771002844,
-      "uniqueMakers": 39,
-      "top5MakerShare": 0.8446071612973433,
-      "thirdPartySells": 36
+      "buyCount": 76,
+      "sellCount": 24,
+      "buyUsd": 16753.162213216074,
+      "sellUsd": 871.1288872881324,
+      "netBuyUsd": 15882.033325927941,
+      "netBuyRatio": 0.9011445189686851,
+      "uniqueMakers": 58,
+      "top5MakerShare": 0.7101862208262146,
+      "thirdPartySells": 19
     },
     "liq": {
       "poolCount": 20,
-      "totalLiqUsd": 8155236.519144987,
-      "netLpDeltaUsd": 3368.468242350775,
+      "totalLiqUsd": 10845037.699496187,
+      "netLpDeltaUsd": 335.76702625398025,
       "maxSinglePullPct": 0,
-      "addCount": 6,
-      "removeCount": 14
+      "addCount": 18,
+      "removeCount": 2
     },
     "pump": {
-      "volMcapRatio": 0.010355872851029194,
-      "makersPer100kVol": 1.6178672721458043,
-      "priceChange24h": -0.0661
+      "volMcapRatio": 0.0011155757062907806,
+      "makersPer100kVol": 18.258021964427094,
+      "priceChange24h": 0.0565
     },
     "safety": {
       "level": "safe",
       "hits": [],
-      "buyTax": 0,
-      "sellTax": 0,
+      "buyTax": 0.0029,
+      "sellTax": 0.003,
       "flaggedByVendor": false
     }
   },
   "result": {
     "verdict": "JANGAN",
-    "score": 45,
+    "score": 60,
     "subs": [
       {
         "dim": "SAFETY",
@@ -80,27 +80,27 @@
         "metrics": [
           {
             "name": "thirdPartySells",
-            "value": 36,
+            "value": 19,
             "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
             "level": "CLEAN"
           },
           {
             "name": "uniqueMakers",
-            "value": 39,
+            "value": 58,
             "threshold": "≥20",
             "level": "CLEAN"
           },
           {
             "name": "top5MakerShare",
-            "value": 0.84,
+            "value": 0.71,
             "threshold": "<0.50",
             "level": "DANGER"
           },
           {
             "name": "netBuyRatio",
-            "value": -0.26,
+            "value": 0.9,
             "threshold": ">0",
-            "level": "WARN"
+            "level": "CLEAN"
           }
         ]
       },
@@ -122,7 +122,7 @@
           },
           {
             "name": "totalLiqUsd",
-            "value": 8155237,
+            "value": 10845038,
             "threshold": "≥$10k",
             "level": "CLEAN"
           }
@@ -130,85 +130,100 @@
       },
       {
         "dim": "PUMP",
-        "level": "WARN",
+        "level": "CLEAN",
         "metrics": [
           {
             "name": "volMcapRatio",
-            "value": 0.01,
+            "value": 0,
             "threshold": "<0.5",
             "level": "CLEAN"
           },
           {
             "name": "makersPer100kVol",
-            "value": 1.62,
+            "value": 18.26,
             "threshold": "≥1",
-            "level": "WARN"
+            "level": "CLEAN"
           }
         ]
       }
     ],
-    "confidence": "medium",
-    "falsifier": "This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.84."
+    "confidence": "high",
+    "falsifier": "This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.71."
   },
   "jev": {
     "available": true,
-    "riskyProb": 0.54,
-    "tokensUsed": 770
+    "riskyProb": 0.1425,
+    "dims": {
+      "SAFETY": 0.04,
+      "FLOW": 0.29,
+      "LIQUIDITY": 0.07,
+      "PUMP": 0.17
+    },
+    "tokensUsed": 915
   },
-  "agreement": "lean",
+  "agreement": "consensus",
   "narration": {
     "source": "template",
-    "headline": "Avoid $WIF on Solana — the evidence is bad",
+    "headline": "Avoid FLOKI on BSC — the evidence is bad",
     "bullets": [
-      "top5MakerShare = 0.84 (threshold: <0.50)",
-      "makersPer100kVol = 1.62 (threshold: ≥1)",
-      "Confidence: medium. Falsifier: This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.84."
+      "top5MakerShare = 0.71 (threshold: <0.50)",
+      "Confidence: high. Falsifier: This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.71."
     ]
   },
   "receipts": [
     {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0xfb5b838b6cfeedc2873ab27866079ac55363d37e"
+      },
+      "ts": "2026-09-25T10:25:48.320Z",
+      "credits": 1,
+      "sha256": "1b685bbd11d5d675d801342f672a1fd1c592be31452ba25f76bcd246d40dd82f",
+      "cached": false
+    },
+    {
       "endpoint": "/v1/dex/tokens/transactions",
       "params": {
-        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "address": "0xfb5b838b6cfeedc2873ab27866079ac55363d37e",
         "limit": 100,
-        "platform": "Solana"
+        "platform": "BSC"
       },
-      "ts": "2026-09-24T22:52:27.371Z",
+      "ts": "2026-09-25T10:25:48.999Z",
       "credits": 1,
-      "sha256": "1d54d402ebe2018d4aed963bbe391a61d30b670b99f8aa08b1e29d16dcd27f17",
+      "sha256": "0f4b47deae51daf3b264152e79662bc4c65137fe70772177126e43721a9e97cd",
       "cached": false
     },
     {
       "endpoint": "/v1/dex/token/pools",
       "params": {
-        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
-        "platform": "Solana"
+        "address": "0xfb5b838b6cfeedc2873ab27866079ac55363d37e",
+        "platform": "BSC"
       },
-      "ts": "2026-09-24T22:52:26.899Z",
+      "ts": "2026-09-25T10:25:48.871Z",
       "credits": 1,
-      "sha256": "1928f3c38f167d624f3ac7dc11f2c8c604214f61d6be0197489a4ffbfcc8ca02",
+      "sha256": "c498a48a7789e4636f85c2e6cfce988e9a27545e4a1b5b2b83efe150ebef61ed",
       "cached": false
     },
     {
       "endpoint": "/v1/dex/liquidity-change/list",
       "params": {
-        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
-        "platform": "Solana"
+        "address": "0xfb5b838b6cfeedc2873ab27866079ac55363d37e",
+        "platform": "BSC"
       },
-      "ts": "2026-09-24T22:52:26.873Z",
+      "ts": "2026-09-25T10:25:48.845Z",
       "credits": 1,
-      "sha256": "78268cc4b94ad46da2f6d78e359a369acd1efb63b648f933c70c6eddc56980f7",
+      "sha256": "dfc633b85ae64558ea3972e88e60b70dee44c8cef56e77bf75ce763231417061",
       "cached": false
     },
     {
       "endpoint": "/v1/dex/security/detail",
       "params": {
-        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
-        "platformName": "Solana"
+        "address": "0xfb5b838b6cfeedc2873ab27866079ac55363d37e",
+        "platformName": "BSC"
       },
-      "ts": "2026-09-24T22:52:26.759Z",
+      "ts": "2026-09-25T10:25:49.238Z",
       "credits": 1,
-      "sha256": "271f32a0be685037a635c75ffc332f46572ae7d64bff8e1dbf99bb6fad8975f2",
+      "sha256": "61844e8f5026049c624ed074533a2eabf26a33d9499c5f3852bb9127afb95f4e",
       "cached": false
     }
   ],

@@ -1,0 +1,234 @@
+{
+  "kind": "verdict",
+  "id": "7ce923e7e3b9",
+  "ts": "2026-09-25T10:25:47.860Z",
+  "token": {
+    "platform": "BSC",
+    "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+    "name": "PancakeSwap Token",
+    "symbol": "Cake",
+    "mcapUsd": 14614073420.703037,
+    "vol24hUsd": 9239684.279387379,
+    "priceChange24h": 0.0356,
+    "liqUsd": 19450992.53942146
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 32,
+      "sellCount": 68,
+      "buyUsd": 4550.459139468391,
+      "sellUsd": 9101.214422592077,
+      "netBuyUsd": -4550.755283123685,
+      "netBuyRatio": -0.3333477952308166,
+      "uniqueMakers": 55,
+      "top5MakerShare": 0.6138497756817362,
+      "thirdPartySells": 51
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 58172186.89624787,
+      "netLpDeltaUsd": 164458.13561158814,
+      "maxSinglePullPct": 0,
+      "addCount": 12,
+      "removeCount": 8
+    },
+    "pump": {
+      "volMcapRatio": 0.0006322456452352275,
+      "makersPer100kVol": 0.5952584345625138,
+      "priceChange24h": 0.0356
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "mintable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "JANGAN",
+    "score": 20,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "DANGER",
+        "metrics": [
+          {
+            "name": "thirdPartySells",
+            "value": 51,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 55,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.61,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": -0.33,
+            "threshold": ">0",
+            "level": "DANGER"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 58172187,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "DANGER",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 0.6,
+            "threshold": "≥1",
+            "level": "DANGER"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (JANGAN) flips if netBuyRatio moves back inside >0 — currently -0.33."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.255,
+    "dims": {
+      "SAFETY": 0.62,
+      "FLOW": 0.15,
+      "LIQUIDITY": 0.09,
+      "PUMP": 0.16
+    },
+    "tokensUsed": 918
+  },
+  "agreement": "contested",
+  "narration": {
+    "source": "template",
+    "headline": "Avoid Cake on BSC — the evidence is bad",
+    "bullets": [
+      "netBuyRatio = -0.33 (threshold: >0)",
+      "makersPer100kVol = 0.6 (threshold: ≥1)",
+      "Confidence: high. Falsifier: This verdict (JANGAN) flips if netBuyRatio moves back inside >0 — currently -0.33."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82"
+      },
+      "ts": "2026-09-25T10:25:46.675Z",
+      "credits": 1,
+      "sha256": "821f4d31a39a9e0358de487fb7874fca8437f934bb306d03fdd847315080c5cb",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "limit": 100,
+        "platform": "BSC"
+      },
+      "ts": "2026-09-25T10:25:47.301Z",
+      "credits": 1,
+      "sha256": "8ae850c4219a21e395d42330cfb2f070a1f8ce842e37b76c4371cd4040861807",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-25T10:25:47.246Z",
+      "credits": 1,
+      "sha256": "d2236832423142b30710c3b34be8139950c557fc6e55f53acfb6eba42568f5c3",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-25T10:25:47.232Z",
+      "credits": 1,
+      "sha256": "ce9ad27e6506da7f28a2c18950fe54ae6a956f025ac16306e59e9075af346691",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "platformName": "BSC"
+      },
+      "ts": "2026-09-25T10:25:47.380Z",
+      "credits": 1,
+      "sha256": "a0e2862c667e5a98f2a50caa936ad120761dbc885d605970d0d4bba8bb4b0046",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

@@ -34,7 +34,8 @@ async function main() {
   }
 
   for (const q of queries) {
-    const r = await analyze(client, { query: q });
+    const at = q.lastIndexOf("@");
+    const r = await analyze(client, at > 0 ? { query: q.slice(0, at), platform: q.slice(at + 1) } : { query: q });
     if (r.kind !== "verdict") {
       console.log(`${q}: ${r.kind}${r.kind === "ambiguous" ? ` (${r.candidates.length} candidates)` : ""}`);
       continue;

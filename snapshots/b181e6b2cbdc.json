@@ -1,46 +1,48 @@
 {
   "kind": "verdict",
-  "id": "3ba71827286a",
-  "ts": "2026-09-24T22:52:25.588Z",
+  "id": "b181e6b2cbdc",
+  "ts": "2026-09-25T10:29:35.134Z",
   "token": {
     "platform": "Solana",
-    "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
-    "name": "Bonk",
-    "symbol": "Bonk",
-    "mcapUsd": 322168276.5064575,
-    "vol24hUsd": 3343363.534959355,
-    "priceChange24h": 0.0604,
-    "liqUsd": 6137368.444756164
+    "address": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
+    "name": "Orca",
+    "symbol": "ORCA",
+    "mcapUsd": 122898908.63392472,
+    "vol24hUsd": 984487.092958156,
+    "priceChange24h": 0.0754,
+    "liqUsd": 2464146.590907438
   },
   "metrics": {
     "flow": {
       "swapCount": 100,
-      "buyCount": 45,
-      "sellCount": 55,
-      "buyUsd": 943.4829832668643,
-      "sellUsd": 966.3596696382423,
-      "netBuyUsd": -22.876686371378014,
-      "netBuyRatio": -0.011978309488784193,
-      "uniqueMakers": 61,
-      "top5MakerShare": 0.5827949418948913,
-      "thirdPartySells": 47
+      "buyCount": 53,
+      "sellCount": 47,
+      "buyUsd": 3327.9882513380217,
+      "sellUsd": 3994.595012134387,
+      "netBuyUsd": -666.6067607963655,
+      "netBuyRatio": -0.09103437090591128,
+      "uniqueMakers": 48,
+      "top5MakerShare": 0.6731132248482996,
+      "thirdPartySells": 23
     },
     "liq": {
       "poolCount": 20,
-      "totalLiqUsd": 6416517.493751698,
-      "netLpDeltaUsd": 455564.4997180654,
+      "totalLiqUsd": 3257387.998260814,
+      "netLpDeltaUsd": 3142.334944464709,
       "maxSinglePullPct": 0,
-      "addCount": 13,
-      "removeCount": 7
+      "addCount": 15,
+      "removeCount": 5
     },
     "pump": {
-      "volMcapRatio": 0.010377693208078298,
-      "makersPer100kVol": 1.824509939232246,
-      "priceChange24h": 0.0604
+      "volMcapRatio": 0.008010543819315907,
+      "makersPer100kVol": 4.8756352768192315,
+      "priceChange24h": 0.0754
     },
     "safety": {
       "level": "safe",
-      "hits": [],
+      "hits": [
+        "mintable"
+      ],
       "buyTax": 0,
       "sellTax": 0,
       "flaggedByVendor": false
@@ -80,27 +82,27 @@
         "metrics": [
           {
             "name": "thirdPartySells",
-            "value": 47,
+            "value": 23,
             "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
             "level": "CLEAN"
           },
           {
             "name": "uniqueMakers",
-            "value": 61,
+            "value": 48,
             "threshold": "≥20",
             "level": "CLEAN"
           },
           {
             "name": "top5MakerShare",
-            "value": 0.58,
+            "value": 0.67,
             "threshold": "<0.50",
             "level": "WARN"
           },
           {
             "name": "netBuyRatio",
-            "value": -0.01,
+            "value": -0.09,
             "threshold": ">0",
-            "level": "CLEAN"
+            "level": "WARN"
           }
         ]
       },
@@ -116,13 +118,13 @@
           },
           {
             "name": "netLpDeltaPct",
-            "value": 0.07,
+            "value": 0,
             "threshold": "≥0",
             "level": "CLEAN"
           },
           {
             "name": "totalLiqUsd",
-            "value": 6416517,
+            "value": 3257388,
             "threshold": "≥$10k",
             "level": "CLEAN"
           }
@@ -140,75 +142,92 @@
           },
           {
             "name": "makersPer100kVol",
-            "value": 1.82,
+            "value": 4.88,
             "threshold": "≥1",
             "level": "WARN"
           }
         ]
       }
     ],
-    "confidence": "medium",
-    "falsifier": "This verdict (RAWAN) flips if thirdPartySells moves back inside ≥3 (0 sells w/ buys = hidden honeypot) — currently 47."
+    "confidence": "high",
+    "falsifier": "This verdict (RAWAN) flips if thirdPartySells moves back inside ≥3 (0 sells w/ buys = hidden honeypot) — currently 23."
   },
   "jev": {
     "available": true,
-    "riskyProb": 0.17,
-    "tokensUsed": 767
+    "riskyProb": 0.2725,
+    "dims": {
+      "SAFETY": 0.66,
+      "FLOW": 0.16,
+      "LIQUIDITY": 0.08,
+      "PUMP": 0.19
+    },
+    "tokensUsed": 918
   },
   "agreement": "contested",
   "narration": {
     "source": "template",
-    "headline": "Bonk on Solana shows warning signs — size accordingly",
+    "headline": "ORCA on Solana shows warning signs — size accordingly",
     "bullets": [
-      "top5MakerShare = 0.58 (threshold: <0.50)",
-      "makersPer100kVol = 1.82 (threshold: ≥1)",
-      "Confidence: medium. Falsifier: This verdict (RAWAN) flips if thirdPartySells moves back inside ≥3 (0 sells w/ buys = hidden honeypot) — currently 47."
+      "top5MakerShare = 0.67 (threshold: <0.50)",
+      "netBuyRatio = -0.09 (threshold: >0)",
+      "makersPer100kVol = 4.88 (threshold: ≥1)",
+      "Confidence: high. Falsifier: This verdict (RAWAN) flips if thirdPartySells moves back inside ≥3 (0 sells w/ buys = hidden honeypot) — currently 23."
     ]
   },
   "receipts": [
     {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE"
+      },
+      "ts": "2026-09-25T10:29:33.989Z",
+      "credits": 1,
+      "sha256": "c8990f257331e397c057867734b58155ac37b1fdd693a4fb513b11fbe0911ea9",
+      "cached": false
+    },
+    {
       "endpoint": "/v1/dex/tokens/transactions",
       "params": {
-        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "address": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
         "limit": 100,
         "platform": "Solana"
       },
-      "ts": "2026-09-24T22:52:24.882Z",
+      "ts": "2026-09-25T10:29:34.607Z",
       "credits": 1,
-      "sha256": "d74e722de13fb6cd9a2413e87e0fdb1583ce258cc92cc8f39961d25a5b1b1fb6",
+      "sha256": "43cba56df1a7400f59224186f520b970f9d1fb3641493e31f4681337a11ad38a",
       "cached": false
     },
     {
       "endpoint": "/v1/dex/token/pools",
       "params": {
-        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "address": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
         "platform": "Solana"
       },
-      "ts": "2026-09-24T22:52:24.576Z",
+      "ts": "2026-09-25T10:29:34.535Z",
       "credits": 1,
-      "sha256": "4004adac9743d080542e89b6ba1640e49d26c3301c4c278fcab002d226ab80ba",
+      "sha256": "fb81d32e2af2f02654e8d7e97242b1d6f32726b74c1cd3430aeeb4a872a86223",
       "cached": false
     },
     {
       "endpoint": "/v1/dex/liquidity-change/list",
       "params": {
-        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "address": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
         "platform": "Solana"
       },
-      "ts": "2026-09-24T22:52:24.795Z",
+      "ts": "2026-09-25T10:29:34.531Z",
       "credits": 1,
-      "sha256": "7c687504259e2720ad3db5b652e1431f5a69c40c8e596a4f81194414baddb250",
+      "sha256": "2871102f66e95d6b0666746167ef687aad9df2d0908f15ec7882dca1445760e4",
       "cached": false
     },
     {
       "endpoint": "/v1/dex/security/detail",
       "params": {
-        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "address": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
         "platformName": "Solana"
       },
-      "ts": "2026-09-24T22:52:24.112Z",
+      "ts": "2026-09-25T10:29:34.271Z",
       "credits": 1,
-      "sha256": "97ae70a6569b1dd198f54c0d8fab2cbd63fd75d2f536c4c148bf6e381cb5844b",
+      "sha256": "79cdde0a4596afd46a1cb06ea0e6e643e122100b095cd1af2f91a120b9dcf3b9",
       "cached": false
     }
   ],
