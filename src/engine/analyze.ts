@@ -19,7 +19,7 @@ import {
 } from "@/lib/dex";
 import { flowMetrics, liquidityMetrics, pumpMetrics, safetyMetrics, type FlowMetrics, type LiquidityMetrics, type PumpMetrics, type SafetyMetrics } from "@/engine/metrics";
 import { composite, type CompositeResult } from "@/engine/rules";
-import { jevSecondOpinion, agreement, type JevOpinion, type Agreement } from "@/lib/jev";
+import { jevCrossExamine, agreement, type JevOpinion, type Agreement } from "@/lib/jev";
 import { narrate, type Narration } from "@/engine/narrator";
 
 export interface AnalyzeQuery {
@@ -56,7 +56,7 @@ export type AnalyzeResult =
 
 export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeDeps = {}): Promise<AnalyzeResult> {
   const now = deps.now ?? Date.now;
-  const jev = deps.jev ?? jevSecondOpinion;
+  const jev = deps.jev ?? jevCrossExamine;
   const narrateFn = deps.narrate ?? narrate;
   const receipts: Receipt[] = [];
   const failures: FailedCall[] = [];
@@ -66,7 +66,8 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
   try {
     if (isAddress(q.query.trim())) {
       const r = await resolveToken(client, q.query, q.platform);
-      token = r;
+      receipts.push(r.receipt);
+      token = r.token;
     } else {
       const { candidates, receipt } = await searchTokenCandidates(client, q.query);
       receipts.push(receipt);
@@ -127,7 +128,7 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     ...metrics.pump,
     securityLevel: metrics.safety.level,
     securityHits: metrics.safety.hits,
-    rulesVerdict: result.verdict,
+    // NB: rules verdict deliberately excluded — Jev judges independently.
   };
   const [jevOp, narration] = await Promise.all([
     jev(metricsSummary).catch(() => ({ available: false, riskyProb: null }) as JevOpinion),
@@ -143,7 +144,7 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     metrics,
     result,
     jev: jevOp,
-    agreement: agreement(result.verdict, jevOp.riskyProb),
+    agreement: agreement(result.verdict, jevOp, result.subs),
     narration: narration ?? null,
     receipts,
     failures,

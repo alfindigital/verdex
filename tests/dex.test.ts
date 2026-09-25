@@ -54,15 +54,16 @@ describe("resolveToken", () => {
 
   it("resolves ticker → top result", async () => {
     const c = stubClient([{ plt: "Solana", addr: "SoX", n: "Foo", s: "FOO" }]);
-    const t = await resolveToken(c, "FOO");
+    const { token: t, receipt } = await resolveToken(c, "FOO");
     expect(t).toMatchObject({ platform: "Solana", address: "SoX", symbol: "FOO" });
+    expect(receipt).toBeDefined();
   });
   it("resolves address → exact addr match, honoring platform hint", async () => {
     const c = stubClient([
       { plt: "BSC", addr: "0xAaA", n: "X", s: "X" },
       { plt: "Base", addr: "0xaaa", n: "X", s: "X" },
     ]);
-    const t = await resolveToken(c, "0xaaa", "Base");
+    const { token: t } = await resolveToken(c, "0xaaa", "Base");
     expect(t.platform).toBe("Base");
   });
   it("throws TokenNotFoundError on empty search", async () => {

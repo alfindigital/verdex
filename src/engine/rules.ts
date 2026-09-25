@@ -132,8 +132,9 @@ export function composite(i: EngineInput): CompositeResult {
   else if (score >= 70) verdict = "LAYAK";
   else verdict = "RAWAN";
 
+  // CMC caps swap history at 100 — "high" means we saw the full window with no gaps.
   const confidence: CompositeResult["confidence"] =
-    i.flow.swapCount >= 200 && insuf === 0 ? "high" : i.flow.swapCount >= 50 ? "medium" : "low";
+    i.flow.swapCount >= 100 && insuf === 0 ? "high" : i.flow.swapCount >= 50 ? "medium" : "low";
 
   const falsifier = buildFalsifier(subs, verdict);
   return { verdict, score, subs, confidence, falsifier };

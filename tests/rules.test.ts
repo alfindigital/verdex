@@ -108,8 +108,9 @@ describe("composite", () => {
     expect(r.score).toBeLessThan(60);
   });
   it("confidence reflects data depth", () => {
-    expect(composite(input({})).confidence).toBe("medium"); // 100 swaps
-    expect(composite(input({ flow: fm({ swapCount: 300 }) })).confidence).toBe("high");
+    expect(composite(input({})).confidence).toBe("high"); // 100 swaps = full CMC window
+    expect(composite(input({ flow: fm({ swapCount: 75 }) })).confidence).toBe("medium");
+    expect(composite(input({ flow: fm({ swapCount: 10 }) })).confidence).toBe("low");
   });
   it("falsifier names concrete flip conditions", () => {
     const r = composite(input({ flow: fm({ thirdPartySells: 0 }) }));

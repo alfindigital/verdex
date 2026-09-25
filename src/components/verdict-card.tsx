@@ -13,7 +13,7 @@ export type VerdictRecord = {
   token: TokenRef;
   metrics: Record<string, Record<string, number | string | boolean | null | (string | number)[]>>;
   result: { verdict: string; score: number; confidence: string; falsifier: string; subs: SubVerdict[] };
-  jev: { available: boolean; riskyProb: number | null };
+  jev: { available: boolean; riskyProb: number | null; dims?: Record<string, number | null> };
   agreement: string;
   narration: { source: string; headline: string; bullets: string[] } | null;
   receipts: { endpoint: string; params: Record<string, unknown>; ts: string; credits: number; sha256: string; cached: boolean }[];
@@ -279,6 +279,26 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
                 <span className="num font-bold">{jevScore}</span>
                 <span className="text-faint">P(risky)={v.jev.riskyProb?.toFixed(2)}</span>
               </div>
+              {v.jev.dims && (
+                <div className="flex items-end gap-1.5" title="Jev P(risky) per dimension">
+                  {(["SAFETY", "FLOW", "LIQUIDITY", "PUMP"] as const).map((d) => {
+                    const p = v.jev.dims?.[d];
+                    return (
+                      <div key={d} className="flex flex-col items-center gap-0.5">
+                        <div className="flex h-6 w-2.5 items-end rounded-sm bg-line/50">
+                          {p != null && (
+                            <div
+                              className={`w-full rounded-sm ${p > 0.5 ? "bg-danger/80" : "bg-safe/80"}`}
+                              style={{ height: `${Math.round(p * 100)}%` }}
+                            />
+                          )}
+                        </div>
+                        <span className="font-data text-[8px] uppercase text-faint">{d.slice(0, 3)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </>
           ) : (
             <span className="font-data text-xs text-faint">unavailable — verdict stands on rules alone</span>

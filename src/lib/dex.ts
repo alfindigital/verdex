@@ -161,15 +161,19 @@ export async function searchTokenCandidates(client: DexClient, input: string): P
   return { candidates, receipt: res.receipt };
 }
 
-export async function resolveToken(client: DexClient, input: string, platformHint?: string): Promise<TokenRef> {
+export async function resolveToken(
+  client: DexClient,
+  input: string,
+  platformHint?: string,
+): Promise<{ token: TokenRef; receipt: import("./cmc-client").Receipt }> {
   const q = input.trim().replace(/^\$/, "");
-  const { candidates } = await searchTokenCandidates(client, q);
+  const { candidates, receipt } = await searchTokenCandidates(client, q);
   const pick = isAddress(q)
     ? candidates.find((t) => t.address.toLowerCase() === q.toLowerCase() && (!platformHint || t.platform.toLowerCase() === platformHint.toLowerCase())) ??
       candidates.find((t) => t.address.toLowerCase() === q.toLowerCase())
     : candidates.find((t) => !platformHint || t.platform.toLowerCase() === platformHint.toLowerCase()) ?? candidates[0];
   if (!pick) throw new TokenNotFoundError(q);
-  return pick;
+  return { token: pick, receipt };
 }
 
 export class TokenNotFoundError extends Error {

@@ -55,16 +55,22 @@ Dimensi = worst-of metrics; `swaps < 50` → INSUFFICIENT.
 | Lainnya | **RAWAN** |
 
 Score = 100 − Σ penalties (DANGER −40, WARN −15 per dimensi, INSUFFICIENT −25),
-clamped 0–100. Confidence: `high` jika swaps≥200 & semua endpoint sukses;
-`medium` swaps 50–199; `low` jika ada dimensi INSUFFICIENT tapi cukup bukti
+clamped 0–100. CMC membatasi swap history ke 100 transaksi terbaru
+(param `offset`/`page` diabaikan — diprobe), sehingga confidence:
+`high` jika swaps≥100 (window penuh) & semua endpoint sukses;
+`medium` swaps 50–99; `low` jika ada dimensi INSUFFICIENT tapi cukup bukti
 untuk verdict non-abu.
 
 ## Jev cross-examination
 
-Jev menjawab `noul` per dimensi atas metrics JSON yang sama.
-`agreement = consensus` jika sign(rules) == sign(jev>0.5) pada ≥3 dari 4
-dimensi; selain itu `contested`. Jev tidak pernah mengubah verdict rules —
-ia second opinion yang ditampilkan berdampingan.
+Jev menjawab `noul` per dimensi (safety/flow/liquidity/pump) atas metrics
+JSON yang sama, dalam satu call — verdict rules tidak dikirim sebagai state
+(Jev menilai independen). `agreement = consensus` jika sign(rules) ==
+sign(jev>0.5) pada ≥3 dimensi yang comparable (dimensi INSUFFICIENT / prob
+null tidak dihitung); jika <3 dimensi comparable → fallback ke band
+probabilitas agregat (mean dims): ≥0.65 risky / ≤0.35 aman / tengah `lean`.
+Jev tidak pernah mengubah verdict rules — ia second opinion yang
+ditampilkan berdampingan.
 
 ## Keterbatasan yang diakui (ditulis juga di submission note)
 

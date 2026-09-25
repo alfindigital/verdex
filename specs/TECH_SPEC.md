@@ -31,7 +31,8 @@ interface Swap { ts: number; side: 'buy'|'sell'; maker: string; usd: number; tx:
 interface Receipt { endpoint: string; params: Record<string,unknown>; ts: string; credits: number; sha256: string; }
 interface Metric { name: string; value: number; threshold: number; level: SubVerdictLevel; note?: string; }
 interface SubVerdict { dim: SubDim; level: SubVerdictLevel; metrics: Metric[]; }
-interface JevOpinion { risky: number | null; perDim: Partial<Record<SubDim, number>>; agreement: 'consensus'|'contested'|'unavailable'; }
+interface JevOpinion { available: boolean; riskyProb: number | null; dims?: Partial<Record<SubDim, number|null>>; }
+// agreement dihitung terpisah: 'consensus'|'contested'|'lean'|'unavailable'
 interface VerdictCard {
   id: string;                 // `${platform}:${address}` sanitized
   token: { platform: Platform; address: string; name: string; symbol: string };
@@ -55,7 +56,8 @@ interface VerdictCard {
   `platformName=` (BEDA param).
 - `dex/tokens/transactions` → `data.swaps[]` fields: `ts` (ms string),
   `tp` ('buy'|'sell'), `ma` (maker addr), `v` (USD number), `tx` (hash),
-  `f` (pool), `en` (dex name). Param `limit`.
+  `f` (pool), `en` (dex name). Param `limit` (max 100). Params `offset`/
+  `page` DIABAIKAN API (diprobe 2025) — window fixed 100 swaps terbaru.
 - `dex/security/detail` → `data[0].securityItems[]` {`riskCode`,`isHit`,
   `riskyLevel`}, `securityLevel`, `extra.{buyTax,sellTax,isFlaggedByVendor}`.
 - `dex/liquidity-change/list` → per-pool liquidity add/remove events.
@@ -70,10 +72,14 @@ interface VerdictCard {
 ## 4. Jev (TypeSafe AI)
 
 - `POST https://api.typesafe.ai/v1/systemone`, `Authorization: Bearer <key>`.
-- Body: `{model:'jev-latest', state: <metrics JSON compact>, questions:{...}}`.
-- Pertanyaan: `risky:noul`, `flow_ok:noul`, `liq_ok:noul`, `pump_organic:noul`.
-- Timeout 3s, rotate key dari `TYPESAFE_API_KEYS` pool on 401/429/5xx,
-  fallback `{agreement:'unavailable'}` — TIDAK PERNAH memblokir verdict.
+- Body: `{model:'jev-1.13.0', state: <metrics JSON compact>, questions:{...}}`.
+- Pertanyaan (1 call, cross-examination per dimensi): `safety:noul`,
+  `flow:noul`, `liquidity:noul`, `pump:noul` — rules verdict TIDAK
+  disertakan di state (independensi). `riskyProb` = mean prob dims.
+- Timeout 10s, rotasi semua key di pool `TYPESAFE_API_KEY(S)` pada error,
+  fallback `available:false` — TIDAK PERNAH memblokir verdict.
+- `agreement(verdict, jev, subs)`: consensus jika sign match ≥3/4 dimensi
+  comparable; <3 comparable → band agregat (≥0.65 / ≤0.35 / lean).
 
 ## 5. Narrator (opsional)
 
