@@ -1,5 +1,6 @@
-// Pure presentational verdict card — safe for server and client rendering.
-// Motif: forensic evidence file. Verdict = rubber stamp, metrics = ledger.
+// Verdex terminal verdict card — dense data-viz layout, minimal prose.
+
+import { Donut, HBar, LevelMeter, NeedleGauge, ScoreGauge, SplitBar, Stat, fmtNum, fmtPct, fmtUsd } from "./viz";
 
 export type TokenRef = { platform: string; address: string; name: string; symbol: string; mcapUsd?: number | null; vol24hUsd?: number | null };
 export type MetricRow = { name: string; value: number | string; threshold: string; level: string };
@@ -18,178 +19,328 @@ export type VerdictRecord = {
   failures: { endpoint: string; error: string }[];
 };
 
-type Tone = { text: string; chip: string; meter: string; bar: string };
-const TONE: Record<string, Tone> = {
-  safe: { text: "text-safe", chip: "border-safe/50 text-safe", meter: "bg-safe", bar: "bg-safe" },
-  warn: { text: "text-warn", chip: "border-warn/50 text-warn", meter: "bg-warn", bar: "bg-warn" },
-  danger: { text: "text-danger", chip: "border-danger/50 text-danger", meter: "bg-danger", bar: "bg-danger" },
-  unknown: { text: "text-unknown", chip: "border-unknown/50 text-unknown", meter: "bg-unknown", bar: "bg-unknown" },
-};
+type ToneKey = "safe" | "warn" | "danger" | "unknown";
+const HEX: Record<ToneKey, string> = { safe: "#34d399", warn: "#fbbf24", danger: "#f87171", unknown: "#8a9189" };
+const TEXT: Record<ToneKey, string> = { safe: "text-safe", warn: "text-warn", danger: "text-danger", unknown: "text-unknown" };
 
-export const VERDICT_STYLE: Record<string, { label: string; tone: keyof typeof TONE }> = {
+export const VERDICT_STYLE: Record<string, { label: string; tone: ToneKey }> = {
   LAYAK: { label: "ENTRY-WORTHY", tone: "safe" },
   RAWAN: { label: "CAUTION", tone: "warn" },
   JANGAN: { label: "AVOID", tone: "danger" },
-  BELUM_CUKUP_BUKTI: { label: "INSUFFICIENT EVIDENCE", tone: "unknown" },
+  BELUM_CUKUP_BUKTI: { label: "INSUFFICIENT", tone: "unknown" },
+};
+const LEVEL_TONE: Record<string, ToneKey> = { CLEAN: "safe", WARN: "warn", DANGER: "danger", INSUFFICIENT: "unknown" };
+
+const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+const shortAddr = (a: string) => (a.length > 20 ? `${a.slice(0, 10)}…${a.slice(-8)}` : a);
+
+function DimPanel({ sub, children }: { sub: SubVerdict; children: React.ReactNode }) {
+  const t = LEVEL_TONE[sub.level] ?? "unknown";
+  return (
+    <div className="flex flex-col border-line p-4 sm:p-5 [&:not(:last-child)]:border-b sm:[&:not(:last-child)]:border-b-0 lg:border-b-0 lg:[&:nth-child(-n+2)]:border-b lg:odd:border-r">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <span className="font-data text-xs font-bold tracking-[0.2em] text-faint">{sub.dim}</span>
+        <span className="flex items-center gap-2.5">
+          <LevelMeter level={sub.level} />
+          <span className={`font-data text-[10px] font-bold tracking-widest ${TEXT[t]}`}>{sub.level}</span>
+        </span>
+      </div>
+      {children}
+      <details className="mt-auto pt-3">
+        <summary className="cursor-pointer select-none font-data text-[10px] uppercase tracking-widest text-faint transition-colors hover:text-dim">
+          ▸ thresholds
+        </summary>
+        <table className="mt-2 w-full text-[11px]">
+          <tbody>
+            {sub.metrics.map((m) => (
+              <tr key={m.name} className="border-t border-line/40">
+                <td className="py-1 pr-2 text-faint">{m.name}</td>
+                <td className="num py-1 font-data">{String(m.value)}</td>
+                <td className="py-1 pl-2 text-right font-data text-faint">{m.threshold}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+    </div>
+  );
+}
+
+function FlowViz({ m }: { m: Record<string, number | string | null> }) {
+  const buy = num(m.buyUsd);
+  const sell = num(m.sellUsd);
+  return (
+    <div className="space-y-3">
+      <div>
+        <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
+          <span>BUY {fmtUsd(buy)} · {fmtNum(num(m.buyCount))}tx</span>
+          <span>SELL {fmtUsd(sell)} · {fmtNum(num(m.sellCount))}tx</span>
+        </div>
+        <SplitBar buy={buy} sell={sell} />
+      </div>
+      <div>
+        <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
+          <span>NET BUY RATIO</span>
+          <span className="text-text">{num(m.netBuyRatio).toFixed(2)}</span>
+        </div>
+        <NeedleGauge value={num(m.netBuyRatio)} />
+      </div>
+      <div className="flex items-end justify-between gap-3">
+        <div className="grid flex-1 grid-cols-2 gap-3">
+          <Stat k="swaps" v={fmtNum(num(m.swapCount))} />
+          <Stat k="makers" v={fmtNum(num(m.uniqueMakers))} />
+          <Stat k="3rd-party sells" v={fmtNum(num(m.thirdPartySells))} tone={num(m.thirdPartySells) === 0 ? "text-danger" : "text-safe"} />
+          <Stat k="net flow" v={fmtUsd(num(m.netBuyUsd))} />
+        </div>
+        <div className="text-center">
+          <Donut share={num(m.top5MakerShare)} label="top-5 maker share" tone={num(m.top5MakerShare) > 0.6 ? HEX.danger : num(m.top5MakerShare) > 0.4 ? HEX.warn : HEX.safe} />
+          <div className="mt-1 font-data text-[9px] uppercase tracking-widest text-faint">top-5 maker</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LiqViz({ m }: { m: Record<string, number | string | null> }) {
+  const adds = num(m.addCount);
+  const pulls = num(m.removeCount);
+  const pullPct = num(m.maxSinglePullPct);
+  return (
+    <div className="space-y-3">
+      <div>
+        <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
+          <span>LP ADDS {fmtNum(adds)}</span>
+          <span>LP REMOVES {fmtNum(pulls)}</span>
+        </div>
+        <SplitBar buy={adds} sell={pulls} />
+      </div>
+      <div>
+        <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
+          <span>MAX SINGLE PULL</span>
+          <span className={pullPct > 0.2 ? "text-danger" : "text-text"}>{fmtPct(pullPct)}</span>
+        </div>
+        <HBar value={pullPct} max={1} tone={pullPct > 0.2 ? "bg-danger" : pullPct > 0.08 ? "bg-warn" : "bg-safe"} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Stat k="liquidity" v={fmtUsd(num(m.totalLiqUsd))} />
+        <Stat k="pools" v={fmtNum(num(m.poolCount))} />
+        <Stat k="net LP Δ" v={fmtUsd(num(m.netLpDeltaUsd))} tone={num(m.netLpDeltaUsd) < 0 ? "text-danger" : "text-safe"} />
+      </div>
+    </div>
+  );
+}
+
+function PumpViz({ m }: { m: Record<string, number | string | null> }) {
+  const vr = num(m.volMcapRatio);
+  const chg = num(m.priceChange24h);
+  return (
+    <div className="space-y-3">
+      <div>
+        <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
+          <span>VOL/MCAP</span>
+          <span className={vr > 0.8 ? "text-danger" : vr > 0.3 ? "text-warn" : "text-text"}>{fmtPct(vr, 2)}</span>
+        </div>
+        <HBar value={vr} max={1} tone={vr > 0.8 ? "bg-danger" : vr > 0.3 ? "bg-warn" : "bg-safe"} />
+      </div>
+      <div>
+        <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
+          <span>PRICE Δ 24H</span>
+          <span className={chg >= 0 ? "text-safe" : "text-danger"}>
+            {chg >= 0 ? "+" : ""}{(chg * 100).toFixed(2)}%
+          </span>
+        </div>
+        <NeedleGauge value={Math.max(-0.5, Math.min(0.5, chg))} min={-0.5} max={0.5} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Stat k="makers /$100k vol" v={num(m.makersPer100kVol).toFixed(1)} />
+        <Stat k="vol/mcap" v={num(m.volMcapRatio).toFixed(4)} />
+      </div>
+    </div>
+  );
+}
+
+function SafetyViz({ m }: { m: Record<string, number | string | null> }) {
+  const hits = Array.isArray(m.hits) ? (m.hits as (string | number)[]) : [];
+  const flagged = m.flaggedByVendor === 1 || m.flaggedByVendor === "true";
+  const bt = typeof m.buyTax === "number" ? m.buyTax : null;
+  const st = typeof m.sellTax === "number" ? m.sellTax : null;
+  return (
+    <div className="space-y-3">
+      <div>
+        <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
+          <span>BUY TAX {bt != null ? fmtPct(bt, 2) : "—"}</span>
+          <span>SELL TAX {st != null ? fmtPct(st, 2) : "—"}</span>
+        </div>
+        <div className="flex h-3 w-full overflow-hidden rounded-sm">
+          <div className="bg-safe" style={{ width: `${Math.min(100, (bt ?? 0) * 100 * 10)}%` }} />
+          <div className="bg-danger" style={{ width: `${Math.min(100, (st ?? 0) * 100 * 10)}%` }} />
+          <div className="flex-1 bg-line" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Stat k="security lvl" v={String(m.level ?? "unknown")} tone={String(m.level) === "safe" ? "text-safe" : "text-warn"} />
+        <Stat k="flag hits" v={fmtNum(hits.length)} tone={hits.length > 0 ? "text-danger" : "text-safe"} />
+        <Stat k="vendor flag" v={flagged ? "YES" : "no"} tone={flagged ? "text-danger" : "text-dim"} />
+      </div>
+      {hits.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {hits.slice(0, 8).map((h, i) => (
+            <span key={i} className="rounded-sm border border-danger/40 px-1.5 py-0.5 font-data text-[9px] text-danger">
+              {String(h)}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const DIM_VIZ: Record<string, (m: Record<string, number | string | null>) => React.ReactNode> = {
+  FLOW: (m) => <FlowViz m={m} />,
+  LIQUIDITY: (m) => <LiqViz m={m} />,
+  PUMP: (m) => <PumpViz m={m} />,
+  SAFETY: (m) => <SafetyViz m={m} />,
 };
 
-const LEVEL_TONE: Record<string, keyof typeof TONE> = {
-  CLEAN: "safe",
-  WARN: "warn",
-  DANGER: "danger",
-  INSUFFICIENT: "unknown",
-};
+const DIM_KEY: Record<string, string> = { FLOW: "flow", LIQUIDITY: "liq", PUMP: "pump", SAFETY: "safety" };
 
 export function VerdictCard({ v }: { v: VerdictRecord }) {
   const style = VERDICT_STYLE[v.result.verdict] ?? VERDICT_STYLE.BELUM_CUKUP_BUKTI;
-  const tone = TONE[style.tone];
+  const tone = style.tone;
+  const chg = num(v.metrics.pump?.priceChange24h);
+  const jevScore = v.jev.riskyProb != null ? Math.round((1 - v.jev.riskyProb) * 100) : null;
+
   return (
-    <section className="reveal space-y-5" aria-label={`Verdict for ${v.token.symbol}`}>
-      {/* ——— Verdict stamp panel ——— */}
-      <div className="rounded-lg border border-line bg-panel p-6 sm:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-6">
-          <div className="min-w-0">
-            <span className={`stamp stamp-lg ${tone.text}`}>{style.label}</span>
-            <h2 className="mt-4 text-2xl font-bold tracking-tight">
-              {v.token.name} <span className="font-data text-dim">${v.token.symbol}</span>
-            </h2>
-            <p className="mt-1 font-data text-xs text-faint break-all">
-              {v.token.platform.toUpperCase()} · {v.token.address}
-            </p>
-          </div>
-          <div className="text-right">
-            <div className={`num font-data text-5xl font-bold ${tone.text}`}>
-              {v.result.score}
-              <span className="text-lg text-faint">/100</span>
-            </div>
-            <div className="meter mt-2 w-40">
-              <span className={tone.bar} style={{ width: `${v.result.score}%` }} />
-            </div>
-            <div className="mt-2 font-data text-xs text-dim">
-              confidence <span className="text-text">{v.result.confidence}</span>
-            </div>
-          </div>
-        </div>
-        <p className="mt-4 font-data text-[11px] text-faint">
-          verdict id {v.id} · computed {v.ts} · deterministic rules
-        </p>
+    <section className="reveal overflow-hidden rounded-md border border-line bg-panel" aria-label={`Verdict for ${v.token.symbol}`}>
+      {/* ——— Scan header ——— */}
+      <div className="border-b border-line bg-raised px-4 py-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">
+        verdex://scan/{v.id} · {v.ts.slice(0, 19).replace("T", " ")}Z · deterministic rules
       </div>
 
-      {/* ——— Narration ——— */}
-      {v.narration && (
-        <div className="rounded-lg border border-line bg-panel p-5">
-          <p className="font-semibold leading-snug">{v.narration.headline}</p>
-          <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-dim marker:text-faint">
-            {v.narration.bullets.map((b, i) => (
-              <li key={i}>{b}</li>
-            ))}
-          </ul>
-          <p className="mt-3 font-data text-[11px] text-faint">
-            AI narration ({v.narration.source}) — verdict computed by rules
+      {/* ——— Token + verdict band ——— */}
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-5 border-b border-line px-5 py-5 sm:px-6">
+        <div className="min-w-0">
+          <span className={`stamp ${TEXT[tone]}`}>{style.label}</span>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight">
+            {v.token.name} <span className="font-data text-dim">${v.token.symbol.replace(/^\$/, "")}</span>
+          </h2>
+          <p className="mt-1 font-data text-[11px] text-faint">
+            {v.token.platform.toUpperCase()} · {shortAddr(v.token.address)}
           </p>
         </div>
-      )}
-
-      {/* ——— Evidence ledger: one block per dimension ——— */}
-      <div className="rounded-lg border border-line bg-panel">
-        <div className="border-b border-line px-5 py-3 font-data text-[11px] uppercase tracking-[0.18em] text-faint">
-          Evidence ledger
+        <div className="flex items-center gap-6">
+          <ScoreGauge score={v.result.score} tone={HEX[tone]} />
+          <div>
+            <div className="font-data text-[10px] uppercase tracking-widest text-faint">confidence</div>
+            <div className="font-data text-sm font-bold uppercase">{v.result.confidence}</div>
+            <div className={`mt-2 font-data text-[10px] uppercase tracking-widest ${TEXT[tone]}`}>{v.agreement}</div>
+          </div>
         </div>
-        {v.result.subs.map((s) => {
-          const lt = TONE[LEVEL_TONE[s.level] ?? "unknown"];
-          return (
-            <div key={s.dim} className="border-b border-line/60 px-5 py-4 last:border-b-0">
-              <div className="mb-3 flex items-baseline justify-between">
-                <span className="font-data text-sm font-bold tracking-wide">{s.dim}</span>
-                <span className={`rounded-sm border px-1.5 py-0.5 font-data text-[10px] font-bold tracking-widest ${lt.chip}`}>
-                  {s.level}
-                </span>
+        <div className="ml-auto grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+          <Stat k="mcap" v={fmtUsd(v.token.mcapUsd)} />
+          <Stat k="vol 24h" v={fmtUsd(v.token.vol24hUsd)} />
+          <Stat k="liquidity" v={fmtUsd(num(v.metrics.liq?.totalLiqUsd))} />
+          <Stat k="Δ 24h" v={`${chg >= 0 ? "+" : ""}${(chg * 100).toFixed(2)}%`} tone={chg >= 0 ? "text-safe" : "text-danger"} />
+        </div>
+      </div>
+
+      {/* ——— 4-dimension evidence grid ——— */}
+      <div className="grid lg:grid-cols-2">
+        {v.result.subs.map((s) => (
+          <DimPanel key={s.dim} sub={s}>
+            {(DIM_VIZ[s.dim] ?? (() => null))(v.metrics[DIM_KEY[s.dim] ?? s.dim.toLowerCase()] ?? {})}
+          </DimPanel>
+        ))}
+      </div>
+
+      {/* ——— Second opinion band ——— */}
+      <div className="border-t border-line bg-raised/60 px-5 py-4 sm:px-6">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <span className="font-data text-[10px] uppercase tracking-[0.2em] text-faint">Jev · 2nd opinion</span>
+          {v.jev.available && jevScore != null ? (
+            <>
+              <div className="flex items-center gap-2 font-data text-xs">
+                <span className="text-faint">rules</span>
+                <div className="w-28"><HBar value={v.result.score} max={100} tone={tone === "safe" ? "bg-safe" : tone === "warn" ? "bg-warn" : tone === "danger" ? "bg-danger" : "bg-unknown"} height={5} /></div>
+                <span className="num font-bold">{v.result.score}</span>
               </div>
-              <table className="w-full text-xs">
-                <tbody>
-                  {s.metrics.map((m) => (
-                    <tr key={m.name} className="border-t border-line/40">
-                      <td className="py-1.5 pr-3 text-dim">{m.name}</td>
-                      <td className="num py-1.5 font-data font-medium">{String(m.value)}</td>
-                      <td className="py-1.5 pl-3 text-right font-data text-faint">{m.threshold}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ——— Second opinion ——— */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-line bg-panel px-5 py-4 text-sm">
-        <span className="font-data text-[11px] uppercase tracking-[0.18em] text-faint">Jev second opinion</span>
-        {v.jev.available ? (
-          <span className="num font-data">
-            P(risky) = <span className="font-bold">{v.jev.riskyProb?.toFixed(2)}</span>
+              <div className="flex items-center gap-2 font-data text-xs">
+                <span className="text-faint">jev</span>
+                <div className="w-28"><HBar value={jevScore} max={100} tone="bg-text/60" height={5} /></div>
+                <span className="num font-bold">{jevScore}</span>
+                <span className="text-faint">P(risky)={v.jev.riskyProb?.toFixed(2)}</span>
+              </div>
+            </>
+          ) : (
+            <span className="font-data text-xs text-faint">unavailable — verdict stands on rules alone</span>
+          )}
+          <span className={`ml-auto rounded-sm border px-1.5 py-0.5 font-data text-[10px] font-bold uppercase tracking-widest ${TEXT[v.agreement === "consensus" ? "safe" : v.agreement === "contested" ? "danger" : "unknown"]} border-current`}>
+            {v.agreement}
           </span>
-        ) : (
-          <span className="text-faint">unavailable — verdict stands on rules alone</span>
-        )}
-        <span
-          className={`ml-auto rounded-sm border px-1.5 py-0.5 font-data text-[10px] font-bold uppercase tracking-widest ${
-            v.agreement === "consensus"
-              ? TONE.safe.chip
-              : v.agreement === "contested"
-                ? TONE.danger.chip
-                : TONE.unknown.chip
-          }`}
-        >
-          {v.agreement}
-        </span>
+        </div>
       </div>
 
-      {/* ——— Falsifier ——— */}
-      <div className="rounded-lg border border-warn/30 bg-warn/5 p-5">
-        <p className="font-data text-[11px] uppercase tracking-[0.18em] text-warn">Falsifier condition</p>
-        <p className="mt-2 text-sm leading-relaxed text-text/85">{v.result.falsifier}</p>
+      {/* ——— Falsifier + narration ——— */}
+      <div className="grid border-t border-line md:grid-cols-2">
+        <div className="border-line p-4 sm:p-5 md:border-r">
+          <p className="font-data text-[10px] uppercase tracking-[0.2em] text-warn">Falsifier</p>
+          <p className="mt-1.5 font-data text-xs leading-relaxed text-dim">{v.result.falsifier}</p>
+        </div>
+        <div className="border-t border-line p-4 sm:p-5 md:border-t-0">
+          {v.narration ? (
+            <>
+              <p className="font-data text-[10px] uppercase tracking-[0.2em] text-faint">AI narration · {v.narration.source}</p>
+              <p className="mt-1.5 text-sm font-semibold leading-snug">{v.narration.headline}</p>
+              <ul className="mt-1.5 space-y-1 font-data text-[11px] leading-relaxed text-dim">
+                {v.narration.bullets.map((b, i) => (
+                  <li key={i}>· {b}</li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="font-data text-xs text-faint">narration unavailable</p>
+          )}
+        </div>
       </div>
 
       {v.failures.length > 0 && (
-        <div className="rounded-lg border border-line p-4 text-xs text-dim">
-          {v.failures.length} endpoint(s) failed — affected dimensions marked INSUFFICIENT:
-          <ul className="mt-1.5 list-disc space-y-0.5 pl-5 font-data">
-            {v.failures.map((f, i) => (
-              <li key={i}>
-                {f.endpoint}: {f.error}
-              </li>
-            ))}
-          </ul>
+        <div className="border-t border-line px-5 py-3 font-data text-[11px] text-dim">
+          <span className="text-warn">{v.failures.length} endpoint(s) failed</span>
+          {v.failures.map((f, i) => (
+            <span key={i} className="ml-3 text-faint">
+              {f.endpoint}
+            </span>
+          ))}
         </div>
       )}
 
       {/* ——— Receipts ——— */}
-      <details className="group rounded-lg border border-line bg-panel">
-        <summary className="cursor-pointer select-none px-5 py-3.5 font-data text-xs text-dim transition-colors hover:text-text [&::-webkit-details-marker]:hidden">
+      <details className="group border-t border-line">
+        <summary className="cursor-pointer select-none px-5 py-3 font-data text-[11px] text-dim transition-colors hover:text-text [&::-webkit-details-marker]:hidden">
           <span className="mr-2 inline-block transition-transform group-open:rotate-90">▸</span>
-          Evidence receipts — {v.receipts.length} CMC calls · SHA-256 logged
+          receipts — {v.receipts.length} CMC calls · SHA-256
         </summary>
         <div className="overflow-x-auto border-t border-line">
-          <table className="w-full text-xs">
+          <table className="w-full text-[11px]">
             <thead>
-              <tr className="border-b border-line bg-raised text-left font-data text-[10px] uppercase tracking-widest text-faint">
-                <th className="p-2.5">endpoint</th>
-                <th className="p-2.5">params</th>
-                <th className="p-2.5">credits</th>
-                <th className="p-2.5">sha256</th>
-                <th className="p-2.5">source</th>
+              <tr className="bg-raised text-left font-data text-[9px] uppercase tracking-widest text-faint">
+                <th className="p-2">endpoint</th>
+                <th className="p-2">params</th>
+                <th className="p-2">cr</th>
+                <th className="p-2">sha256</th>
+                <th className="p-2">src</th>
               </tr>
             </thead>
             <tbody>
               {v.receipts.map((r, i) => (
                 <tr key={i} className="border-t border-line/40 font-data">
-                  <td className="p-2.5">{r.endpoint}</td>
-                  <td className="max-w-48 truncate p-2.5 text-faint" title={JSON.stringify(r.params)}>
+                  <td className="p-2">{r.endpoint}</td>
+                  <td className="max-w-44 truncate p-2 text-faint" title={JSON.stringify(r.params)}>
                     {JSON.stringify(r.params)}
                   </td>
-                  <td className="num p-2.5">{r.credits}</td>
-                  <td className="p-2.5 text-dim">{r.sha256.slice(0, 12)}…</td>
-                  <td className="p-2.5 text-faint">{r.cached ? "cache" : "live"}</td>
+                  <td className="num p-2">{r.credits}</td>
+                  <td className="p-2 text-dim">{r.sha256.slice(0, 12)}…</td>
+                  <td className="p-2 text-faint">{r.cached ? "cache" : "live"}</td>
                 </tr>
               ))}
             </tbody>

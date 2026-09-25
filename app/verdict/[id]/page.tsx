@@ -21,15 +21,12 @@ export default async function VerdictPage({ params }: { params: Promise<{ id: st
   const v = loadVerdict(id);
   if (!v) notFound();
   return (
-    <main className="relative z-[1] mx-auto max-w-3xl px-5 py-8 sm:px-6">
-      <header className="mb-8 flex items-center justify-between">
-        <Link
-          href="/"
-          className="font-data text-xs font-bold tracking-[0.25em] text-dim transition-colors hover:text-safe"
-        >
+    <main className="relative z-[1] mx-auto max-w-7xl px-4 py-6 sm:px-6">
+      <header className="mb-5 flex items-center justify-between border-b border-line pb-3">
+        <Link href="/" className="font-data text-xs font-bold tracking-[0.25em] text-dim transition-colors hover:text-safe">
           ← VERDEX
         </Link>
-        <span className="font-data text-[11px] uppercase tracking-widest text-faint">permanent verdict record</span>
+        <span className="font-data text-[10px] uppercase tracking-widest text-faint">verdict/{v.id} · permanent record</span>
       </header>
       <VerdictCard v={v} />
     </main>

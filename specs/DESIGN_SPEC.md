@@ -2,10 +2,11 @@
 
 ## 1. Rasa & Tone
 
-"Forensic evidence board" — gelap, tajam, dokumen-investigasi. Bukan dashboard
-crypto neon, bukan template SaaS. Identitas visual: **verdict stamp** (cap
-karet miring di atas bukti) dan **case file** (deret berkas, bukan kartu grid).
-Satu keputusan besar di tengah; bukti di bawahnya; semua angka mono.
+"Trading terminal" — gelap, mono-dominan, data-dense seperti CMC/CoinGecko
+terminal. Minim prosa: angka, grafik SVG murni (gauge, split-bar, donut,
+needle, level meter), tabel rapat. Identitas visual: **verdict stamp** +
+**prompt console** (`verdex@cmc:~$ scan`). Desktop-first (max-w-7xl), panel
+tipis 1px, section header bergaya shell.
 
 ## 2. Tokens
 

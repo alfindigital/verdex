@@ -1,7 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Checker } from "@/components/checker";
 import { listSnapshotIds, loadVerdict } from "@/lib/verdict-store";
 import { VERDICT_STYLE } from "@/components/verdict-card";
+import { fmtNum, fmtUsd, num, Stat } from "@/components/viz";
 
 export const dynamic = "force-dynamic";
 
@@ -15,15 +17,7 @@ const ENDPOINTS = [
   "fear-and-greed/latest",
 ];
 
-const PIPELINE = [
-  { n: "01", t: "Resolve", d: "Address or ticker. Ambiguous names surface candidates — never silently picked." },
-  { n: "02", t: "Fetch evidence", d: "Swap-level DEX flow, pool depth, LP adds/pulls, security flags — all CoinMarketCap." },
-  { n: "03", t: "Score 4 dimensions", d: "SAFETY · FLOW · LIQUIDITY · PUMP on published thresholds — including the check nobody automates: are there real third-party sells?" },
-  { n: "04", t: "Cross-examine", d: "Jev (TypeSafe) re-judges the same metrics — consensus, contested, or lean. Never overrides the rules." },
-  { n: "05", t: "Publish falsifier", d: "Every verdict states what evidence would flip it, plus SHA-256 receipts per API call." },
-];
-
-const TONE_TEXT: Record<string, string> = {
+const TEXT: Record<string, string> = {
   safe: "text-safe",
   warn: "text-warn",
   danger: "text-danger",
@@ -36,124 +30,197 @@ export default function Home() {
     .map((id) => loadVerdict(id))
     .filter((v): v is NonNullable<typeof v> => v !== null);
 
+  const totalSwaps = snapshots.reduce((a, v) => a + num(v.metrics.flow?.swapCount), 0);
+  const totalReceipts = snapshots.reduce((a, v) => a + v.receipts.length, 0);
+  const chains = new Set(snapshots.map((v) => v.token.platform)).size;
+  const avgScore = snapshots.length
+    ? Math.round(snapshots.reduce((a, v) => a + v.result.score, 0) / snapshots.length)
+    : 0;
+
   return (
-    <main className="relative z-[1] mx-auto max-w-3xl px-5 pb-16 pt-8 sm:px-6">
+    <main className="relative z-[1] mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6">
       <a
-        href="#checker"
+        href="#scan"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-safe focus:px-3 focus:py-2 focus:font-data focus:text-xs focus:font-bold focus:text-ink"
       >
-        Skip to token checker
+        Skip to scanner
       </a>
 
-      <header className="flex items-center justify-between">
-        <span className="font-data text-sm font-bold tracking-[0.25em]">VERDEX</span>
-        <span className="flex items-center gap-2 font-data text-[11px] uppercase tracking-widest text-dim">
-          <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-safe" : "bg-warn"}`} aria-hidden="true" />
-          {live ? "live CMC data" : "snapshot mode"}
-        </span>
+      {/* ——— Top bar ——— */}
+      <header className="flex items-center justify-between border-b border-line pb-3">
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image src="/logo.png" alt="Verdex" width={28} height={28} className="rounded-sm" />
+          <span className="font-data text-sm font-bold tracking-[0.3em]">VERDEX</span>
+          <span className="hidden font-data text-[10px] uppercase tracking-widest text-faint sm:inline">
+            pre-trade DEX forensics
+          </span>
+        </Link>
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5 font-data text-[10px] uppercase tracking-widest text-dim">
+            <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-safe" : "bg-warn"}`} aria-hidden="true" />
+            {live ? "live" : "snapshot"}
+          </span>
+          <a
+            href="https://github.com/alfindigital/verdex"
+            rel="noopener noreferrer"
+            className="font-data text-[10px] uppercase tracking-widest text-dim transition-colors hover:text-safe"
+          >
+            GitHub ↗
+          </a>
+        </div>
       </header>
 
-      {/* ——— Hero: asymmetric, verdict-stamp energy ——— */}
-      <section className="mt-14 sm:mt-20">
-        <h1 className="max-w-[16ch] text-balance text-5xl font-extrabold leading-[0.98] tracking-tight sm:text-6xl">
-          Don&apos;t be the
-          <br />
-          <span className="text-danger">exit liquidity</span>.
-        </h1>
-        <p className="mt-5 max-w-[62ch] text-base leading-relaxed text-dim">
-          Paste a DEX token. Get an auditable verdict — computed from CoinMarketCap swap flow, liquidity, and
-          security evidence, then cross-examined by an independent decision model. Structure tells you{" "}
-          <em className="text-text">could it rug</em>. Verdex tells you <em className="text-text">is it rugging</em>.
-        </p>
+      {/* ——— Scan console ——— */}
+      <section id="scan" className="mt-6 grid gap-4 lg:grid-cols-[1fr_300px]">
+        <div className="rounded-md border border-line bg-panel">
+          <div className="border-b border-line px-4 py-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">
+            <span className="text-safe">verdex@cmc</span>:~$ scan
+          </div>
+          <div className="p-4">
+            <Checker live={live} />
+          </div>
+        </div>
+
+        {/* ——— Aside: engine stats, always real numbers ——— */}
+        <aside className="flex flex-col rounded-md border border-line bg-panel">
+          <div className="border-b border-line px-4 py-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">
+            engine
+          </div>
+          <div className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-1">
+            <Stat k="verdicts on file" v={String(snapshots.length)} />
+            <Stat k="swaps analyzed" v={fmtNum(totalSwaps)} />
+            <Stat k="CMC receipts" v={fmtNum(totalReceipts)} />
+            <Stat k="chains" v={String(chains)} sub="sol · bsc" />
+            <Stat k="avg score" v={String(avgScore)} />
+          </div>
+          <div className="mt-auto border-t border-line p-4">
+            <div className="font-data text-[10px] uppercase tracking-widest text-faint">verdict scale</div>
+            <div className="mt-2 space-y-1 font-data text-[11px]">
+              <div className="flex justify-between"><span className="text-safe">ENTRY-WORTHY</span><span className="text-faint">≥80</span></div>
+              <div className="flex justify-between"><span className="text-warn">CAUTION</span><span className="text-faint">50–79</span></div>
+              <div className="flex justify-between"><span className="text-danger">AVOID</span><span className="text-faint">&lt;50</span></div>
+            </div>
+          </div>
+        </aside>
       </section>
 
-      <section id="checker" className="mt-8 scroll-mt-8">
-        <Checker live={live} />
-      </section>
-
-      {/* ——— Case files: committed verdicts as ledger rows ——— */}
+      {/* ——— Case files: dense data table ——— */}
       {snapshots.length > 0 && (
-        <section className="mt-16">
-          <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="font-data text-[11px] uppercase tracking-[0.22em] text-faint">Case files — committed evidence</h2>
-            <span className="font-data text-[11px] text-faint">{snapshots.length} verdicts</span>
+        <section className="mt-8">
+          <div className="mb-2 flex items-baseline justify-between">
+            <h2 className="font-data text-[10px] uppercase tracking-[0.25em] text-faint">case_files/</h2>
+            <span className="font-data text-[10px] text-faint">{snapshots.length} records</span>
           </div>
-          <div className="overflow-hidden rounded-lg border border-line bg-panel">
-            {snapshots.map((v) => {
-              const st = VERDICT_STYLE[v.result.verdict] ?? VERDICT_STYLE.BELUM_CUKUP_BUKTI;
-              const tone = TONE_TEXT[st.tone] ?? TONE_TEXT.unknown;
-              return (
-                <Link
-                  key={v.id}
-                  href={`/verdict/${v.id}`}
-                  className="case-row group flex items-center gap-4 border-b border-line/60 px-4 py-4 last:border-b-0 hover:bg-raised sm:px-5"
-                >
-                  <span className={`stamp shrink-0 text-[10px] ${tone}`}>{st.label}</span>
-                  <span className="min-w-0 flex-1">
-                    <span className="font-semibold">{v.token.symbol}</span>
-                    <span className="ml-2 font-data text-[11px] uppercase text-faint">{v.token.platform}</span>
-                    <span className="mt-0.5 hidden truncate font-data text-[11px] text-faint sm:block">
-                      {v.token.address}
-                    </span>
-                  </span>
-                  <span className="num font-data text-xl font-bold">
-                    {v.result.score}
-                    <span className="text-xs text-faint">/100</span>
-                  </span>
-                  <span className="hidden font-data text-[11px] text-faint sm:block">
-                    {v.agreement} · {v.receipts.length} receipts
-                  </span>
-                  <span className="text-faint transition-transform group-hover:translate-x-0.5 group-hover:text-text">
-                    →
-                  </span>
-                </Link>
-              );
-            })}
+          <div className="overflow-x-auto rounded-md border border-line bg-panel">
+            <table className="w-full min-w-[760px] text-left">
+              <thead>
+                <tr className="border-b border-line bg-raised font-data text-[9px] uppercase tracking-widest text-faint">
+                  <th className="px-4 py-2.5">verdict</th>
+                  <th className="px-4 py-2.5">token</th>
+                  <th className="px-4 py-2.5">chain</th>
+                  <th className="px-4 py-2.5 text-right">mcap</th>
+                  <th className="px-4 py-2.5 text-right">liq</th>
+                  <th className="px-4 py-2.5 text-right">net flow</th>
+                  <th className="px-4 py-2.5 text-right">3p sells</th>
+                  <th className="px-4 py-2.5 text-right">score</th>
+                  <th className="px-4 py-2.5">jev</th>
+                  <th className="px-4 py-2.5"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {snapshots.map((v) => {
+                  const st = VERDICT_STYLE[v.result.verdict] ?? VERDICT_STYLE.BELUM_CUKUP_BUKTI;
+                  const tone = TEXT[st.tone] ?? TEXT.unknown;
+                  const net = num(v.metrics.flow?.netBuyUsd);
+                  return (
+                    <tr key={v.id} className="group border-b border-line/50 last:border-b-0 hover:bg-raised">
+                      <td className="px-4 py-3">
+                        <span className={`stamp text-[9px] ${tone}`}>{st.label}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Link href={`/verdict/${v.id}`} className="font-semibold hover:text-safe">
+                          {v.token.symbol.replace(/^\$/, "")}
+                        </Link>
+                        <span className="ml-1.5 hidden font-data text-[10px] text-faint xl:inline">
+                          {v.token.address.slice(0, 8)}…
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-data text-[11px] uppercase text-dim">{v.token.platform}</td>
+                      <td className="num px-4 py-3 text-right font-data text-xs">{fmtUsd(v.token.mcapUsd)}</td>
+                      <td className="num px-4 py-3 text-right font-data text-xs">{fmtUsd(num(v.metrics.liq?.totalLiqUsd))}</td>
+                      <td className={`num px-4 py-3 text-right font-data text-xs ${net >= 0 ? "text-safe" : "text-danger"}`}>
+                        {net >= 0 ? "+" : ""}{fmtUsd(net)}
+                      </td>
+                      <td className="num px-4 py-3 text-right font-data text-xs">
+                        {fmtNum(num(v.metrics.flow?.thirdPartySells))}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className={`num font-data text-base font-bold ${tone}`}>{v.result.score}</span>
+                      </td>
+                      <td className="px-4 py-3 font-data text-[10px] text-dim">
+                        {v.jev.riskyProb != null ? `P=${v.jev.riskyProb.toFixed(2)}` : "—"}
+                        <span className={`ml-1 ${v.agreement === "consensus" ? "text-safe" : v.agreement === "contested" ? "text-danger" : "text-faint"}`}>
+                          {v.agreement === "consensus" ? "✓" : v.agreement === "contested" ? "✗" : "·"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Link href={`/verdict/${v.id}`} className="font-data text-xs text-faint transition-colors group-hover:text-safe">
+                          open →
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
+          <p className="mt-2 font-data text-[10px] text-faint">
+            every row = committed evidence · SHA-256 receipts per CMC call · falsifier per verdict
+          </p>
         </section>
       )}
 
-      {/* ——— Pipeline as a numbered chain ——— */}
-      <section className="mt-16">
-        <h2 className="mb-3 font-data text-[11px] uppercase tracking-[0.22em] text-faint">How a verdict is reached</h2>
-        <ol className="rounded-lg border border-line bg-panel">
-          {PIPELINE.map((s) => (
-            <li key={s.n} className="flex gap-4 border-b border-line/60 px-5 py-4 last:border-b-0">
-              <span className="num shrink-0 font-data text-sm font-bold text-safe">{s.n}</span>
-              <div>
-                <p className="font-semibold leading-snug">{s.t}</p>
-                <p className="mt-0.5 text-sm leading-relaxed text-dim">{s.d}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* ——— Endpoint receipts strip ——— */}
-      <section className="mt-10">
-        <h2 className="mb-3 font-data text-[11px] uppercase tracking-[0.22em] text-faint">CoinMarketCap endpoints used</h2>
-        <div className="flex flex-wrap gap-1.5">
-          {ENDPOINTS.map((e) => (
-            <code key={e} className="rounded-sm border border-line bg-panel px-2 py-1 font-data text-[11px] text-dim">
-              /v1/{e}
-            </code>
-          ))}
+      {/* ——— Method, compressed to a data row ——— */}
+      <section className="mt-8 grid gap-4 md:grid-cols-2">
+        <div className="rounded-md border border-line bg-panel">
+          <div className="border-b border-line px-4 py-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">
+            pipeline
+          </div>
+          <ol className="font-data text-[11px] leading-relaxed text-dim">
+            {[
+              "resolve → dex/search (address|ticker|ambiguous=list)",
+              "evidence → swaps×100 · pools · lpΔ · security",
+              "score → SAFETY·FLOW·LIQ·PUMP published thresholds",
+              "audit → jev 2nd opinion (consensus|contested|lean)",
+              "publish → falsifier + sha256 receipts",
+            ].map((s, i) => (
+              <li key={i} className="flex gap-3 border-b border-line/40 px-4 py-2 last:border-b-0">
+                <span className="text-safe">{String(i + 1).padStart(2, "0")}</span>
+                <span>{s}</span>
+              </li>
+            ))}
+          </ol>
         </div>
-        <p className="mt-3 text-xs leading-relaxed text-faint">
-          Deterministic rules are the verdict. Jev is the second opinion — consensus or contested, always labeled.
-          Not financial advice.
-        </p>
+        <div className="rounded-md border border-line bg-panel">
+          <div className="border-b border-line px-4 py-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">
+            cmc endpoints
+          </div>
+          <div className="flex flex-wrap content-start gap-1.5 p-4">
+            {ENDPOINTS.map((e) => (
+              <code key={e} className="rounded-sm border border-line bg-raised px-2 py-1 font-data text-[10px] text-dim">
+                /v1/{e}
+              </code>
+            ))}
+            <p className="mt-2 w-full font-data text-[10px] leading-relaxed text-faint">
+              rules = verdict · jev = labeled second opinion · not financial advice
+            </p>
+          </div>
+        </div>
       </section>
 
-      <footer className="mt-14 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6 font-data text-[11px] uppercase tracking-widest text-faint">
-        <span>Build with CMC hackathon · Markets &amp; Trading Tools</span>
-        <a
-          href="https://github.com/alfindigital/verdex"
-          className="text-dim transition-colors hover:text-safe"
-          rel="noopener noreferrer"
-        >
-          GitHub ↗
-        </a>
+      <footer className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 font-data text-[10px] uppercase tracking-widest text-faint">
+        <span>build with cmc hackathon · markets &amp; trading tools</span>
+        <span>don&apos;t be the exit liquidity</span>
       </footer>
     </main>
   );
