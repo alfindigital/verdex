@@ -90,15 +90,16 @@ export default function Home() {
             <Stat k="verdicts on file" v={String(snapshots.length)} />
             <Stat k="swaps analyzed" v={fmtNum(totalSwaps)} />
             <Stat k="CMC receipts" v={fmtNum(totalReceipts)} />
-            <Stat k="chains" v={String(chains)} sub="sol · bsc" />
+            <Stat k="chains" v={String(chains)} sub={[...new Set(snapshots.map((v) => v.token.platform.toLowerCase()))].join(" · ") || "—"} />
             <Stat k="avg score" v={String(avgScore)} />
           </div>
           <div className="mt-auto border-t border-line p-4">
-            <div className="font-data text-[10px] uppercase tracking-widest text-faint">verdict scale</div>
-            <div className="mt-2 space-y-1 font-data text-[11px]">
-              <div className="flex justify-between"><span className="text-safe">ENTRY-WORTHY</span><span className="text-faint">≥80</span></div>
-              <div className="flex justify-between"><span className="text-warn">CAUTION</span><span className="text-faint">50–79</span></div>
-              <div className="flex justify-between"><span className="text-danger">AVOID</span><span className="text-faint">&lt;50</span></div>
+            <div className="font-data text-[10px] uppercase tracking-widest text-faint">verdict logic</div>
+            <div className="mt-2 space-y-1.5 font-data text-[10px] leading-relaxed text-dim">
+              <div><span className="text-danger">AVOID</span> ← DANGER in SAFETY|FLOW</div>
+              <div><span className="text-warn">CAUTION</span> ← any DANGER, ≥2 WARN, or score&lt;70</div>
+              <div><span className="text-safe">ENTRY</span> ← all CLEAN + score≥70</div>
+              <div><span className="text-unknown">INSUFFICIENT</span> ← data missing</div>
             </div>
           </div>
         </aside>

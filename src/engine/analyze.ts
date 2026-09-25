@@ -70,7 +70,8 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     } else {
       const { candidates, receipt } = await searchTokenCandidates(client, q.query);
       receipts.push(receipt);
-      const filtered = q.platform ? candidates.filter((c) => c.platform === q.platform) : candidates;
+      const plat = q.platform?.toLowerCase();
+      const filtered = plat ? candidates.filter((c) => c.platform.toLowerCase() === plat) : candidates;
       if (filtered.length === 0) return { kind: "notFound", query: q.query };
       if (filtered.length > 1 && q.pick === undefined) return { kind: "ambiguous", query: q.query, candidates: filtered };
       token = filtered[q.pick ?? 0];

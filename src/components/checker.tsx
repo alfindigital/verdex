@@ -118,6 +118,7 @@ export function Checker({ live }: { live: boolean }) {
             <button
               key={p.id || "auto"}
               type="button"
+              aria-pressed={platform === p.id}
               onClick={() => setPlatform(p.id)}
               className={`rounded-sm border px-2 py-0.5 font-data text-[10px] transition-colors ${
                 platform === p.id
@@ -174,8 +175,16 @@ export function Checker({ live }: { live: boolean }) {
                 {out.candidates.map((c, i) => (
                   <tr
                     key={`${c.platform}:${c.address}`}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => run(query, i)}
-                    className="cursor-pointer border-b border-line/40 font-data text-xs last:border-b-0 hover:bg-panel"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        run(query, i);
+                      }
+                    }}
+                    className="cursor-pointer border-b border-line/40 font-data text-xs last:border-b-0 hover:bg-panel focus-visible:bg-panel"
                   >
                     <td className="px-4 py-2.5 font-bold text-text">{c.symbol}</td>
                     <td className="px-4 py-2.5 text-dim">{c.name}</td>

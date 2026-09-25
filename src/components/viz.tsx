@@ -2,11 +2,12 @@
 
 export function fmtUsd(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
+  const sign = n < 0 ? "-" : "";
   const abs = Math.abs(n);
-  if (abs >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
-  if (abs >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
-  if (abs >= 1e3) return `$${(n / 1e3).toFixed(1)}K`;
-  return `$${n.toFixed(0)}`;
+  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(2)}B`;
+  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(2)}M`;
+  if (abs >= 1e3) return `${sign}$${(abs / 1e3).toFixed(1)}K`;
+  return `${sign}$${abs.toFixed(0)}`;
 }
 
 export function fmtPct(n: number | null | undefined, digits = 1): string {
@@ -50,7 +51,10 @@ export function HBar({
 
 /** Diverging buy/sell bar — buy left(green) vs sell right(red) around center. */
 export function SplitBar({ buy, sell }: { buy: number; sell: number }) {
-  const total = buy + sell || 1;
+  const total = buy + sell;
+  if (total <= 0) {
+    return <div className="h-3 w-full rounded-sm bg-line" role="img" aria-label="no data" />;
+  }
   const b = (buy / total) * 100;
   const s = 100 - b;
   return (

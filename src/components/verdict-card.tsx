@@ -10,7 +10,7 @@ export type VerdictRecord = {
   id: string;
   ts: string;
   token: TokenRef;
-  metrics: Record<string, Record<string, number | string | null>>;
+  metrics: Record<string, Record<string, number | string | boolean | null | (string | number)[]>>;
   result: { verdict: string; score: number; confidence: string; falsifier: string; subs: SubVerdict[] };
   jev: { available: boolean; riskyProb: number | null };
   agreement: string;
@@ -32,6 +32,7 @@ export const VERDICT_STYLE: Record<string, { label: string; tone: ToneKey }> = {
 const LEVEL_TONE: Record<string, ToneKey> = { CLEAN: "safe", WARN: "warn", DANGER: "danger", INSUFFICIENT: "unknown" };
 
 const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+type MetricsBag = Record<string, number | string | boolean | null | (string | number)[]>;
 const shortAddr = (a: string) => (a.length > 20 ? `${a.slice(0, 10)}…${a.slice(-8)}` : a);
 
 function DimPanel({ sub, children }: { sub: SubVerdict; children: React.ReactNode }) {
@@ -66,7 +67,7 @@ function DimPanel({ sub, children }: { sub: SubVerdict; children: React.ReactNod
   );
 }
 
-function FlowViz({ m }: { m: Record<string, number | string | null> }) {
+function FlowViz({ m }: { m: MetricsBag }) {
   const buy = num(m.buyUsd);
   const sell = num(m.sellUsd);
   return (
@@ -93,7 +94,7 @@ function FlowViz({ m }: { m: Record<string, number | string | null> }) {
           <Stat k="net flow" v={fmtUsd(num(m.netBuyUsd))} />
         </div>
         <div className="text-center">
-          <Donut share={num(m.top5MakerShare)} label="top-5 maker share" tone={num(m.top5MakerShare) > 0.6 ? HEX.danger : num(m.top5MakerShare) > 0.4 ? HEX.warn : HEX.safe} />
+          <Donut share={num(m.top5MakerShare)} label="top-5 maker share" tone={num(m.top5MakerShare) > 0.7 ? HEX.danger : num(m.top5MakerShare) >= 0.5 ? HEX.warn : HEX.safe} />
           <div className="mt-1 font-data text-[9px] uppercase tracking-widest text-faint">top-5 maker</div>
         </div>
       </div>
@@ -101,7 +102,7 @@ function FlowViz({ m }: { m: Record<string, number | string | null> }) {
   );
 }
 
-function LiqViz({ m }: { m: Record<string, number | string | null> }) {
+function LiqViz({ m }: { m: MetricsBag }) {
   const adds = num(m.addCount);
   const pulls = num(m.removeCount);
   const pullPct = num(m.maxSinglePullPct);
@@ -117,9 +118,9 @@ function LiqViz({ m }: { m: Record<string, number | string | null> }) {
       <div>
         <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
           <span>MAX SINGLE PULL</span>
-          <span className={pullPct > 0.2 ? "text-danger" : "text-text"}>{fmtPct(pullPct)}</span>
+          <span className={pullPct > 0.5 ? "text-danger" : pullPct >= 0.15 ? "text-warn" : "text-text"}>{fmtPct(pullPct)}</span>
         </div>
-        <HBar value={pullPct} max={1} tone={pullPct > 0.2 ? "bg-danger" : pullPct > 0.08 ? "bg-warn" : "bg-safe"} />
+        <HBar value={pullPct} max={1} tone={pullPct > 0.5 ? "bg-danger" : pullPct >= 0.15 ? "bg-warn" : "bg-safe"} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <Stat k="liquidity" v={fmtUsd(num(m.totalLiqUsd))} />
@@ -130,38 +131,41 @@ function LiqViz({ m }: { m: Record<string, number | string | null> }) {
   );
 }
 
-function PumpViz({ m }: { m: Record<string, number | string | null> }) {
-  const vr = num(m.volMcapRatio);
-  const chg = num(m.priceChange24h);
+function PumpViz({ m }: { m: MetricsBag }) {
+  const vr = typeof m.volMcapRatio === "number" ? m.volMcapRatio : null;
+  const chg = typeof m.priceChange24h === "number" ? m.priceChange24h : null;
+  const mpv = typeof m.makersPer100kVol === "number" ? m.makersPer100kVol : null;
   return (
     <div className="space-y-3">
       <div>
         <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
           <span>VOL/MCAP</span>
-          <span className={vr > 0.8 ? "text-danger" : vr > 0.3 ? "text-warn" : "text-text"}>{fmtPct(vr, 2)}</span>
+          <span className={vr == null ? "text-faint" : vr > 1 ? "text-danger" : vr >= 0.5 ? "text-warn" : "text-text"}>
+            {vr == null ? "—" : fmtPct(vr, 2)}
+          </span>
         </div>
-        <HBar value={vr} max={1} tone={vr > 0.8 ? "bg-danger" : vr > 0.3 ? "bg-warn" : "bg-safe"} />
+        <HBar value={vr ?? 0} max={1} tone={vr != null && vr > 1 ? "bg-danger" : vr != null && vr >= 0.5 ? "bg-warn" : "bg-safe"} />
       </div>
       <div>
         <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
           <span>PRICE Δ 24H</span>
-          <span className={chg >= 0 ? "text-safe" : "text-danger"}>
-            {chg >= 0 ? "+" : ""}{(chg * 100).toFixed(2)}%
+          <span className={chg == null ? "text-faint" : chg >= 0 ? "text-safe" : "text-danger"}>
+            {chg == null ? "—" : `${chg >= 0 ? "+" : ""}${(chg * 100).toFixed(2)}%`}
           </span>
         </div>
-        <NeedleGauge value={Math.max(-0.5, Math.min(0.5, chg))} min={-0.5} max={0.5} />
+        {chg != null && <NeedleGauge value={Math.max(-0.5, Math.min(0.5, chg))} min={-0.5} max={0.5} />}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Stat k="makers /$100k vol" v={num(m.makersPer100kVol).toFixed(1)} />
-        <Stat k="vol/mcap" v={num(m.volMcapRatio).toFixed(4)} />
+        <Stat k="makers /$100k vol" v={mpv != null ? mpv.toFixed(1) : "—"} />
+        <Stat k="vol/mcap" v={vr != null ? vr.toFixed(4) : "—"} />
       </div>
     </div>
   );
 }
 
-function SafetyViz({ m }: { m: Record<string, number | string | null> }) {
+function SafetyViz({ m }: { m: MetricsBag }) {
   const hits = Array.isArray(m.hits) ? (m.hits as (string | number)[]) : [];
-  const flagged = m.flaggedByVendor === 1 || m.flaggedByVendor === "true";
+  const flagged = m.flaggedByVendor === true;
   const bt = typeof m.buyTax === "number" ? m.buyTax : null;
   const st = typeof m.sellTax === "number" ? m.sellTax : null;
   return (
@@ -195,7 +199,7 @@ function SafetyViz({ m }: { m: Record<string, number | string | null> }) {
   );
 }
 
-const DIM_VIZ: Record<string, (m: Record<string, number | string | null>) => React.ReactNode> = {
+const DIM_VIZ: Record<string, (m: MetricsBag) => React.ReactNode> = {
   FLOW: (m) => <FlowViz m={m} />,
   LIQUIDITY: (m) => <LiqViz m={m} />,
   PUMP: (m) => <PumpViz m={m} />,
@@ -207,7 +211,7 @@ const DIM_KEY: Record<string, string> = { FLOW: "flow", LIQUIDITY: "liq", PUMP: 
 export function VerdictCard({ v }: { v: VerdictRecord }) {
   const style = VERDICT_STYLE[v.result.verdict] ?? VERDICT_STYLE.BELUM_CUKUP_BUKTI;
   const tone = style.tone;
-  const chg = num(v.metrics.pump?.priceChange24h);
+  const chg = typeof v.metrics.pump?.priceChange24h === "number" ? (v.metrics.pump.priceChange24h as number) : null;
   const jevScore = v.jev.riskyProb != null ? Math.round((1 - v.jev.riskyProb) * 100) : null;
 
   return (
@@ -240,7 +244,11 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
           <Stat k="mcap" v={fmtUsd(v.token.mcapUsd)} />
           <Stat k="vol 24h" v={fmtUsd(v.token.vol24hUsd)} />
           <Stat k="liquidity" v={fmtUsd(num(v.metrics.liq?.totalLiqUsd))} />
-          <Stat k="Δ 24h" v={`${chg >= 0 ? "+" : ""}${(chg * 100).toFixed(2)}%`} tone={chg >= 0 ? "text-safe" : "text-danger"} />
+          <Stat
+            k="Δ 24h"
+            v={chg == null ? "—" : `${chg >= 0 ? "+" : ""}${(chg * 100).toFixed(2)}%`}
+            tone={chg == null ? "text-faint" : chg >= 0 ? "text-safe" : "text-danger"}
+          />
         </div>
       </div>
 

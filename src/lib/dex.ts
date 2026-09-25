@@ -165,9 +165,9 @@ export async function resolveToken(client: DexClient, input: string, platformHin
   const q = input.trim().replace(/^\$/, "");
   const { candidates } = await searchTokenCandidates(client, q);
   const pick = isAddress(q)
-    ? candidates.find((t) => t.address.toLowerCase() === q.toLowerCase() && (!platformHint || t.platform === platformHint)) ??
+    ? candidates.find((t) => t.address.toLowerCase() === q.toLowerCase() && (!platformHint || t.platform.toLowerCase() === platformHint.toLowerCase())) ??
       candidates.find((t) => t.address.toLowerCase() === q.toLowerCase())
-    : candidates.find((t) => !platformHint || t.platform === platformHint) ?? candidates[0];
+    : candidates.find((t) => !platformHint || t.platform.toLowerCase() === platformHint.toLowerCase()) ?? candidates[0];
   if (!pick) throw new TokenNotFoundError(q);
   return pick;
 }
