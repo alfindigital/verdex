@@ -41,11 +41,13 @@ export async function POST(req: NextRequest) {
   // can never fail on a judge's machine or burn API credits.
   if (process.env.VERDEX_LIVE !== "1") {
     const q = body.query.trim().toLowerCase();
+    const plat = body.platform?.trim().toLowerCase();
     const match = listSnapshotIds()
       .map((id) => loadVerdict(id))
       .find(
         (v) =>
           v &&
+          (!plat || v.token.platform.toLowerCase() === plat) &&
           (v.token.address.toLowerCase() === q ||
             v.token.symbol.toLowerCase() === q ||
             v.token.symbol.toLowerCase() === q.replace(/^\$/, "") ||

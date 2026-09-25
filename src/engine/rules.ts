@@ -37,8 +37,20 @@ export interface CompositeResult {
   falsifier: string;
 }
 
-const DANGER_SAFETY = new Set(["honeypot", "rug_pull"]);
-const WARN_SAFETY = new Set(["wash_trading", "whitelist_function", "low_liquidity"]);
+/** Shared thresholds — single source for rules AND UI viz tones. */
+export const THRESHOLDS = {
+  sellTaxDanger: 0.1,
+  top5MakerShare: { warn: 0.5, danger: 0.7 },
+  maxSinglePullPct: { warn: 0.15, danger: 0.5 },
+  netLpDeltaPct: { warn: 0, danger: -0.1 },
+  volMcapRatio: { warn: 0.5, danger: 1.0 },
+  makersPer100k: { warn: 5, danger: 1 },
+  netBuyRatio: { warnAbove: 0, danger: -0.2 },
+  thirdPartySellsClean: 3,
+} as const;
+
+const DANGER_SAFETY = new Set(["honeypot", "rug_pull", "unusual_sell_tax"]);
+const WARN_SAFETY = new Set(["wash_trading", "whitelist_function", "low_liquidity", "unusual_buy_tax"]);
 
 const lvl = (name: string, value: number | string, threshold: string, level: SubLevel): MetricRow => ({ name, value, threshold, level });
 const worst = (rows: MetricRow[]): SubLevel => {
@@ -54,7 +66,7 @@ export function evalSafety(s: SafetyMetrics): SubVerdict {
   const rows: MetricRow[] = [];
   const dangerHits = s.hits.filter((h) => DANGER_SAFETY.has(h));
   const warnHits = s.hits.filter((h) => WARN_SAFETY.has(h));
-  rows.push(lvl("dangerFlags", dangerHits.join(",") || "none", "no honeypot/rug_pull/sell-tax>10%", dangerHits.length || (s.sellTax ?? 0) > 10 ? "DANGER" : "CLEAN"));
+  rows.push(lvl("dangerFlags", dangerHits.join(",") || "none", "no honeypot/rug_pull/sell-tax>10%", dangerHits.length || (s.sellTax ?? 0) > THRESHOLDS.sellTaxDanger ? "DANGER" : "CLEAN"));
   rows.push(lvl("warnFlags", warnHits.join(",") || "none", "no wash_trading/whitelist/low_liquidity", warnHits.length ? "WARN" : "CLEAN"));
   rows.push(lvl("securityLevel", s.level, "safe", s.level === "safe" ? "CLEAN" : s.level === "caution" || s.level === "risky" ? "WARN" : "CLEAN"));
   return { dim: "SAFETY", level: worst(rows), metrics: rows };
@@ -66,10 +78,10 @@ export function evalFlow(f: FlowMetrics): SubVerdict {
   }
   const rows: MetricRow[] = [
     lvl("thirdPartySells", f.thirdPartySells, "≥3 (0 sells w/ buys = hidden honeypot)",
-      f.thirdPartySells === 0 && f.buyCount >= 20 ? "DANGER" : f.thirdPartySells >= 3 ? "CLEAN" : "WARN"),
+      f.thirdPartySells === 0 && f.buyCount >= 20 ? "DANGER" : f.thirdPartySells >= THRESHOLDS.thirdPartySellsClean ? "CLEAN" : "WARN"),
     lvl("uniqueMakers", f.uniqueMakers, "≥20", f.uniqueMakers < 5 ? "DANGER" : f.uniqueMakers < 20 ? "WARN" : "CLEAN"),
-    lvl("top5MakerShare", round2(f.top5MakerShare), "<0.50", f.top5MakerShare > 0.7 ? "DANGER" : f.top5MakerShare >= 0.5 ? "WARN" : "CLEAN"),
-    lvl("netBuyRatio", round2(f.netBuyRatio), ">0", f.netBuyRatio < -0.2 ? "WARN" : "CLEAN"),
+    lvl("top5MakerShare", round2(f.top5MakerShare), "<0.50", f.top5MakerShare > THRESHOLDS.top5MakerShare.danger ? "DANGER" : f.top5MakerShare >= THRESHOLDS.top5MakerShare.warn ? "WARN" : "CLEAN"),
+    lvl("netBuyRatio", round2(f.netBuyRatio), ">0", f.netBuyRatio < THRESHOLDS.netBuyRatio.danger ? "DANGER" : f.netBuyRatio <= THRESHOLDS.netBuyRatio.warnAbove ? "WARN" : "CLEAN"),
   ];
   return { dim: "FLOW", level: worst(rows), metrics: rows };
 }
@@ -80,7 +92,7 @@ export function evalLiquidity(l: LiquidityMetrics): SubVerdict {
   }
   const lpDeltaPct = l.totalLiqUsd > 0 ? l.netLpDeltaUsd / l.totalLiqUsd : 0;
   const rows: MetricRow[] = [
-    lvl("maxSinglePullPct", round2(l.maxSinglePullPct), "<15%", l.maxSinglePullPct > 0.5 ? "DANGER" : l.maxSinglePullPct >= 0.15 ? "WARN" : "CLEAN"),
+    lvl("maxSinglePullPct", round2(l.maxSinglePullPct), "<15%", l.maxSinglePullPct > THRESHOLDS.maxSinglePullPct.danger ? "DANGER" : l.maxSinglePullPct >= THRESHOLDS.maxSinglePullPct.warn ? "WARN" : "CLEAN"),
     lvl("netLpDeltaPct", round2(lpDeltaPct), "≥0", lpDeltaPct < -0.1 ? "DANGER" : lpDeltaPct < 0 ? "WARN" : "CLEAN"),
     lvl("totalLiqUsd", Math.round(l.totalLiqUsd), "≥$10k", l.totalLiqUsd < 10_000 ? "WARN" : "CLEAN"),
   ];
@@ -92,12 +104,12 @@ export function evalPump(p: PumpMetrics, ctx: Context | null): SubVerdict {
     return { dim: "PUMP", level: "INSUFFICIENT", metrics: [lvl("volMcapRatio", "n/a", "mcap+vol available", "INSUFFICIENT")] };
   }
   const rows: MetricRow[] = [
-    lvl("volMcapRatio", round2(p.volMcapRatio), "<0.5", p.volMcapRatio > 1.0 ? "DANGER" : p.volMcapRatio >= 0.5 ? "WARN" : "CLEAN"),
+    lvl("volMcapRatio", round2(p.volMcapRatio), "<0.5", p.volMcapRatio > THRESHOLDS.volMcapRatio.danger ? "DANGER" : p.volMcapRatio >= THRESHOLDS.volMcapRatio.warn ? "WARN" : "CLEAN"),
     lvl("makersPer100kVol", p.makersPer100kVol === null ? "n/a" : round2(p.makersPer100kVol), "≥1",
-      p.makersPer100kVol !== null && p.makersPer100kVol < 1 ? "DANGER" : p.makersPer100kVol !== null && p.makersPer100kVol < 5 ? "WARN" : "CLEAN"),
+      p.makersPer100kVol !== null && p.makersPer100kVol < THRESHOLDS.makersPer100k.danger ? "DANGER" : p.makersPer100kVol !== null && p.makersPer100kVol < THRESHOLDS.makersPer100k.warn ? "WARN" : "CLEAN"),
   ];
-  if (ctx && p.priceChange24h !== null && p.priceChange24h > 30 && (ctx.btcDomDelta7d ?? 0) > 0 && (ctx.fearGreed ?? 100) < 30) {
-    rows.push(lvl("counterMarketPump", `+${p.priceChange24h}% while BTC.D rising & fear`, "pump with market", "WARN"));
+  if (ctx && p.priceChange24h !== null && p.priceChange24h > 0.3 && (ctx.btcDomDelta7d ?? 0) > 0 && (ctx.fearGreed ?? 100) < 30) {
+    rows.push(lvl("counterMarketPump", `+${(p.priceChange24h * 100).toFixed(0)}% while BTC.D rising & fear`, "pump with market", "WARN"));
   }
   return { dim: "PUMP", level: worst(rows), metrics: rows };
 }

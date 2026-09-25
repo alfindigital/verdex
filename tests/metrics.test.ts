@@ -91,7 +91,7 @@ describe("safetyMetrics", () => {
     const m = safetyMetrics(sec);
     expect(m.hits).toContain("honeypot");
     expect(m.level).toBe("caution");
-    expect(m.sellTax).toBe(15);
+    expect(m.sellTax).toBe(0.15);
   });
   it("null security → insufficient", () => {
     const m = safetyMetrics(null);

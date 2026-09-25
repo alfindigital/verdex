@@ -13,7 +13,7 @@ gray zone selalu menghasilkan `BELUM_CUKUP_BUKTI`, bukan tebakan.
 | Rule | Level |
 |---|---|
 | `isHit` pada `honeypot`, `rug_pull`, `unusual_sell_tax` (sell_tax > 10%) | DANGER |
-| `isHit` pada `wash_trading`, `whitelist_function`, `low_liquidity`, atau `securityLevel=caution`/`risky` | WARN |
+| `isHit` pada `wash_trading`, `whitelist_function`, `low_liquidity`, `unusual_buy_tax`, atau `securityLevel=caution`/`risky` | WARN |
 | Semua flag bersih dan `securityLevel=safe` | CLEAN |
 | Endpoint error / token tidak ada data | INSUFFICIENT |
 

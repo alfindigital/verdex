@@ -1,6 +1,7 @@
 // Verdex terminal verdict card — dense data-viz layout, minimal prose.
 
 import { Donut, HBar, LevelMeter, NeedleGauge, ScoreGauge, SplitBar, Stat, fmtNum, fmtPct, fmtUsd } from "./viz";
+import { THRESHOLDS } from "@/engine/rules";
 
 export type TokenRef = { platform: string; address: string; name: string; symbol: string; mcapUsd?: number | null; vol24hUsd?: number | null };
 export type MetricRow = { name: string; value: number | string; threshold: string; level: string };
@@ -90,11 +91,11 @@ function FlowViz({ m }: { m: MetricsBag }) {
         <div className="grid flex-1 grid-cols-2 gap-3">
           <Stat k="swaps" v={fmtNum(num(m.swapCount))} />
           <Stat k="makers" v={fmtNum(num(m.uniqueMakers))} />
-          <Stat k="3rd-party sells" v={fmtNum(num(m.thirdPartySells))} tone={num(m.thirdPartySells) === 0 ? "text-danger" : "text-safe"} />
+          <Stat k="3rd-party sells" v={fmtNum(num(m.thirdPartySells))} tone={num(m.thirdPartySells) === 0 && num(m.buyCount) >= 20 ? "text-danger" : num(m.thirdPartySells) >= THRESHOLDS.thirdPartySellsClean ? "text-safe" : "text-warn"} />
           <Stat k="net flow" v={fmtUsd(num(m.netBuyUsd))} />
         </div>
         <div className="text-center">
-          <Donut share={num(m.top5MakerShare)} label="top-5 maker share" tone={num(m.top5MakerShare) > 0.7 ? HEX.danger : num(m.top5MakerShare) >= 0.5 ? HEX.warn : HEX.safe} />
+          <Donut share={num(m.top5MakerShare)} label="top-5 maker share" tone={num(m.top5MakerShare) > THRESHOLDS.top5MakerShare.danger ? HEX.danger : num(m.top5MakerShare) >= THRESHOLDS.top5MakerShare.warn ? HEX.warn : HEX.safe} />
           <div className="mt-1 font-data text-[9px] uppercase tracking-widest text-faint">top-5 maker</div>
         </div>
       </div>
@@ -118,9 +119,9 @@ function LiqViz({ m }: { m: MetricsBag }) {
       <div>
         <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
           <span>MAX SINGLE PULL</span>
-          <span className={pullPct > 0.5 ? "text-danger" : pullPct >= 0.15 ? "text-warn" : "text-text"}>{fmtPct(pullPct)}</span>
+          <span className={pullPct > THRESHOLDS.maxSinglePullPct.danger ? "text-danger" : pullPct >= THRESHOLDS.maxSinglePullPct.warn ? "text-warn" : "text-text"}>{fmtPct(pullPct)}</span>
         </div>
-        <HBar value={pullPct} max={1} tone={pullPct > 0.5 ? "bg-danger" : pullPct >= 0.15 ? "bg-warn" : "bg-safe"} />
+        <HBar value={pullPct} max={1} tone={pullPct > THRESHOLDS.maxSinglePullPct.danger ? "bg-danger" : pullPct >= THRESHOLDS.maxSinglePullPct.warn ? "bg-warn" : "bg-safe"} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <Stat k="liquidity" v={fmtUsd(num(m.totalLiqUsd))} />
@@ -140,11 +141,11 @@ function PumpViz({ m }: { m: MetricsBag }) {
       <div>
         <div className="mb-1 flex justify-between font-data text-[10px] text-faint">
           <span>VOL/MCAP</span>
-          <span className={vr == null ? "text-faint" : vr > 1 ? "text-danger" : vr >= 0.5 ? "text-warn" : "text-text"}>
+          <span className={vr == null ? "text-faint" : vr > THRESHOLDS.volMcapRatio.danger ? "text-danger" : vr >= THRESHOLDS.volMcapRatio.warn ? "text-warn" : "text-text"}>
             {vr == null ? "—" : fmtPct(vr, 2)}
           </span>
         </div>
-        <HBar value={vr ?? 0} max={1} tone={vr != null && vr > 1 ? "bg-danger" : vr != null && vr >= 0.5 ? "bg-warn" : "bg-safe"} />
+        <HBar value={vr ?? 0} max={1} tone={vr != null && vr > THRESHOLDS.volMcapRatio.danger ? "bg-danger" : vr != null && vr >= THRESHOLDS.volMcapRatio.warn ? "bg-warn" : "bg-safe"} />
       </div>
       <div>
         <div className="mb-1 flex justify-between font-data text-[10px] text-faint">

@@ -21,7 +21,7 @@ describe("evalSafety", () => {
   it("danger on honeypot/rug_pull/sell-tax hits", () => {
     expect(evalSafety(sm({ hits: ["honeypot"] })).level).toBe("DANGER");
     expect(evalSafety(sm({ hits: ["rug_pull"] })).level).toBe("DANGER");
-    expect(evalSafety(sm({ sellTax: 15 })).level).toBe("DANGER");
+    expect(evalSafety(sm({ sellTax: 0.15 })).level).toBe("DANGER");
   });
   it("warn on caution level or warn-level hits", () => {
     expect(evalSafety(sm({ level: "caution" })).level).toBe("WARN");
@@ -79,7 +79,7 @@ describe("evalPump", () => {
     expect(evalPump(pm({ makersPer100kVol: 0.5 }), null).level).toBe("DANGER");
   });
   it("warn: price+30% while BTC.D rising & F&G low (counter-market pump)", () => {
-    expect(evalPump(pm({ priceChange24h: 45 }), { btcDomDelta7d: 1.2, fearGreed: 25 }).level).toBe("WARN");
+    expect(evalPump(pm({ priceChange24h: 0.45 }), { btcDomDelta7d: 1.2, fearGreed: 25 }).level).toBe("WARN");
   });
   it("clean baseline", () => {
     expect(evalPump(pm({}), null).level).toBe("CLEAN");
@@ -94,7 +94,7 @@ describe("composite", () => {
   it("RAWAN when LIQ/PUMP danger or ≥2 WARN", () => {
     expect(composite(input({ liq: lm({ maxSinglePullPct: 0.6 }) })).verdict).toBe("RAWAN");
     expect(
-      composite(input({ flow: fm({ uniqueMakers: 10 }), pump: pm({ priceChange24h: 45 }), context: { btcDomDelta7d: 1.5, fearGreed: 20 } })).verdict,
+      composite(input({ flow: fm({ uniqueMakers: 10 }), pump: pm({ priceChange24h: 0.45 }), context: { btcDomDelta7d: 1.5, fearGreed: 20 } })).verdict,
     ).toBe("RAWAN");
   });
   it("BELUM_CUKUP_BUKTI when a dim is INSUFFICIENT and no danger", () => {

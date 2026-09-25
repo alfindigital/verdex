@@ -118,11 +118,15 @@ export function pumpMetrics(
 
 export function safetyMetrics(sec: SecurityReport | null): SafetyMetrics {
   if (!sec) return { level: "unknown", hits: [], buyTax: null, sellTax: null, flaggedByVendor: false };
+  // CMC tax values are observed as fractions (0.003 = 0.3%). If a payload ever
+  // arrives as a percent number (>1), normalize to fraction — a tax can never
+  // legitimately exceed 100%, so >1 unambiguously means "percent units".
+  const frac = (v: number | null): number | null => (v == null ? null : v > 1 ? v / 100 : v);
   return {
     level: sec.level,
     hits: sec.items.filter((i) => i.hit).map((i) => i.code),
-    buyTax: sec.buyTax,
-    sellTax: sec.sellTax,
+    buyTax: frac(sec.buyTax),
+    sellTax: frac(sec.sellTax),
     flaggedByVendor: sec.flaggedByVendor,
   };
 }
