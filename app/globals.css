@@ -1,1 +1,132 @@
 @import "tailwindcss";
+
+@theme {
+  --color-ink: #0c0e0c;
+  --color-panel: #121512;
+  --color-raised: #171b17;
+  --color-line: #232823;
+  --color-line-bright: #3a423a;
+  --color-text: #eceee9;
+  --color-dim: #9aa39a;
+  --color-faint: #5c645c;
+  --color-safe: #34d399;
+  --color-warn: #fbbf24;
+  --color-danger: #f87171;
+  --color-unknown: #8a9189;
+
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-data: var(--font-plex-mono), ui-monospace, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Film-grain overlay: subtle texture so the bg isn't a flat void.
+   SVG turbulence, ~2% opacity, fixed, non-interactive. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: rgba(52, 211, 153, 0.25);
+  color: var(--color-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-safe);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ——— Verdex identity utilities ——— */
+
+/* Rubber-stamp verdict label */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-data);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  padding: 0.35em 0.7em;
+  transform: rotate(-2.5deg);
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stamp-lg {
+  font-size: clamp(1.6rem, 4.5vw, 2.6rem);
+  padding: 0.4em 0.8em;
+  border-width: 3px;
+}
+
+/* Score bar track */
+.meter {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-line);
+  overflow: hidden;
+}
+.meter > span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+}
+
+/* Case-file ledger row */
+.case-row {
+  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+.case-row:hover {
+  transform: translateX(3px);
+}
+
+/* Skeleton shaped like content, not a generic spinner */
+@keyframes vdx-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--color-panel) 25%, var(--color-raised) 50%, var(--color-panel) 75%);
+  background-size: 200% 100%;
+  animation: vdx-shimmer 1.6s linear infinite;
+}
+
+/* Verdict reveal — once, purposeful */
+@keyframes vdx-reveal {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.reveal {
+  animation: vdx-reveal 320ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .skeleton { animation: none; }
+  .case-row { transition: none; }
+}
+
+/* Numeric data always tabular */
+.num, td, th {
+  font-variant-numeric: tabular-nums;
+}
