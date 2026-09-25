@@ -24,9 +24,9 @@ Demo mode works without keys (`VERDEX_LIVE` unset). Live needs `CMC_API_KEY` (+ 
 Push to `main` → Vercel auto-deploys. Vercel CLI `--token` does NOT accept the OIDC token — use the GitHub integration path only.
 
 ## Next actions (user-side)
-1. Record ~90s demo video (scan → verdict card → receipts → share page).
-2. Submit DoraHacks (SUBMISSION.md has copy).
-3. Optional: refresh committed snapshots so `jev.dims` shows on featured verdicts.
+1. Record ~90s demo video — script updated 2026-09-25 in SUBMISSION.md (FLOKI consensus / ORCA contested arc).
+2. Submit DoraHacks (SUBMISSION.md has copy + exact form fields).
+3. Post X draft (SUBMISSION.md §X post draft), replace BUIDL link.
 
 ## Known limitations (documented in CLAIMS §Keterbatasan)
 - No OHLCV on Basic tier → no intraday sweep analysis.
