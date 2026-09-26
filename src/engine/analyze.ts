@@ -132,6 +132,7 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     liq: metrics.liq,
     pump: metrics.pump,
     context: { btcDomDelta7d: ctx.btcDomDelta7d, fearGreed: ctx.fearGreed },
+    mcapUsd: token.mcapUsd,
   });
 
   // --- Jev cross-examination + narration (both optional, never blocking) ---

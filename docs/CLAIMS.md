@@ -14,6 +14,7 @@ gray zone selalu menghasilkan `BELUM_CUKUP_BUKTI`, bukan tebakan.
 |---|---|
 | `isHit` pada `honeypot`, `rug_pull`, `unusual_sell_tax`, atau `sellTax > 10%` | DANGER |
 | `isHit` pada `wash_trading`, `whitelist_function`, `low_liquidity`, `unusual_buy_tax` | WARN |
+| `isHit` pada centralization flags `mintable`, `pausable`, `blacklist(_function)`, `upgradeable`/`proxy`, `owner_change_balance`, `hidden_owner` (kekuasaan admin nyata — bukan bukti rug, tapi vektor rug) | WARN |
 | `isHit` pada riskCode LAIN yang tak terklasifikasi (fail-open dilarang) | WARN |
 | `securityLevel` apa pun selain `safe` (termasuk level tak dikenal) | WARN |
 | Semua flag bersih dan `securityLevel=safe` | CLEAN |
@@ -34,6 +35,13 @@ address pool juga dikecualikan dari statistik maker.
 | `netBuyRatio` = (buyUSD − sellUSD)/totalUSD | >0 | −0.2..0 | <−0.2 |
 
 Dimensi = worst-of metrics; `swaps < 50` → INSUFFICIENT.
+
+**Mature-asset tier (published):** token dengan `mcapUsd ≥ $100M` diperdagangkan
+lintas CEX+DEX — window on-chain mereka didominasi infrastruktur arbitrase,
+jadi `top5MakerShare` dan `netBuyRatio` hanya boleh WARN (tidak bisa DANGER).
+Sinyal insider-exit (`thirdPartySells=0`, `uniqueMakers<5`) tetap bisa DANGER
+karena venue-independent. Row `mcapTier` ditampilkan di panel FLOW agar
+tier-nya terlihat.
 
 ## LIQUIDITY (sumber: `dex/liquidity-change/list` + `dex/token/pools`)
 
@@ -79,12 +87,15 @@ konteks/meta — semuanya terlihat di receipts/failures panel.
 
 Jev menjawab `noul` per dimensi (safety/flow/liquidity/pump) atas metrics
 JSON yang sama, dalam satu call — verdict rules tidak dikirim sebagai state
-(Jev menilai independen). `agreement = consensus` jika sign(rules) ==
-sign(jev>0.5) pada ≥3 dimensi yang comparable (dimensi INSUFFICIENT / prob
-null tidak dihitung); jika <3 dimensi comparable → fallback ke band
-probabilitas agregat (mean dims): ≥0.65 risky / ≤0.35 aman / tengah `lean`.
-Jev tidak pernah mengubah verdict rules — ia second opinion yang
-ditampilkan berdampingan.
+(Jev menilai independen). `agreement` dihitung dua jalur dan **contested
+selalu menang** — pertarungan tidak pernah disembunyikan:
+(a) per-dimensi: sign(rules) == sign(jev>0.5) pada ≥3 dimensi comparable →
+consensus, selisih → contested (dimensi INSUFFICIENT / prob null tidak dihitung);
+(b) band agregat pada mean dims: ≥0.65 risky / ≤0.35 aman — jika band
+bertentangan dengan polaritas verdict rules → contested; tengah → `lean`.
+Badge akhir: contested jika salah satu jalur contested, consensus hanya jika
+kedua jalur sepakat. Jev tidak pernah mengubah verdict rules — ia second
+opinion yang ditampilkan berdampingan.
 
 ## Keterbatasan yang diakui (ditulis juga di submission note)
 

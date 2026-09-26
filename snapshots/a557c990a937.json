@@ -1,0 +1,288 @@
+{
+  "kind": "verdict",
+  "id": "a557c990a937",
+  "ts": "2026-09-26T05:24:52.889Z",
+  "token": {
+    "platform": "Polygon",
+    "address": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+    "name": "Aave (PoS)",
+    "symbol": "AAVE",
+    "mcapUsd": 9115777.691320494,
+    "vol24hUsd": 922207.9609259296,
+    "priceChange24h": 0.0673,
+    "liqUsd": 1622880.4220895646
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 21,
+      "sellCount": 79,
+      "buyUsd": 1043.72638685142,
+      "sellUsd": 5642.184039179421,
+      "netBuyUsd": -4598.457652328001,
+      "netBuyRatio": -0.6877833173511303,
+      "uniqueMakers": 31,
+      "top5MakerShare": 0.6857529398841861,
+      "thirdPartySells": 27
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 1910764.4940171358,
+      "netLpDeltaUsd": 13945.248443946652,
+      "maxSinglePullPct": 0,
+      "addCount": 11,
+      "removeCount": 9
+    },
+    "pump": {
+      "volMcapRatio": 0.10116613109202978,
+      "makersPer100kVol": 463.66161112935333,
+      "priceChange24h": 0.0673
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [],
+      "buyTax": null,
+      "sellTax": null,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "JANGAN",
+    "score": 60,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "none",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "DANGER",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "<$100M early",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 27,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 31,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.69,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": -0.69,
+            "threshold": ">0",
+            "level": "DANGER"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.01,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 1910764,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0.1,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 463.66,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (JANGAN) flips if netBuyRatio moves back inside >0 — currently -0.69. Failing rows: top5MakerShare (0.69 vs <0.50), netBuyRatio (-0.69 vs >0)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.11500000000000002,
+    "dims": {
+      "SAFETY": 0.05,
+      "FLOW": 0.17,
+      "LIQUIDITY": 0.1,
+      "PUMP": 0.14
+    },
+    "tokensUsed": 912
+  },
+  "agreement": "contested",
+  "narration": {
+    "source": "template",
+    "headline": "Avoid AAVE on Polygon — the evidence is bad",
+    "bullets": [
+      "netBuyRatio = -0.69 (threshold: >0)",
+      "Confidence: high. Falsifier: This verdict (JANGAN) flips if netBuyRatio moves back inside >0 — currently -0.69. Failing rows: top5MakerShare (0.69 vs <0.50), netBuyRatio (-0.69 vs >0)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0xd6df932a45c0f255f85145f286ea0b292b21c90b"
+      },
+      "ts": "2026-09-26T05:24:51.295Z",
+      "credits": 1,
+      "sha256": "2194cbfbf413000df4635cbe31be189cf0122714407eb9e06a7a6120554452ad",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+        "limit": 100,
+        "platform": "Polygon"
+      },
+      "ts": "2026-09-26T05:24:52.493Z",
+      "credits": 1,
+      "sha256": "c65383daf604131c4b43db4fa388e8f9bc14f3c8ef71447c018047b647327972",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+        "platform": "Polygon"
+      },
+      "ts": "2026-09-26T05:24:51.875Z",
+      "credits": 1,
+      "sha256": "dd814103a126309a22330334e262d7ac5a126e46dcde53198a321edb1fed7c60",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+        "platform": "Polygon"
+      },
+      "ts": "2026-09-26T05:24:52.241Z",
+      "credits": 1,
+      "sha256": "ec1809c289fee6e3ddac6aa1abbb2f2894306d3fb2b152aa2a358360d2ab7463",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+        "platformName": "Polygon"
+      },
+      "ts": "2026-09-26T05:24:51.581Z",
+      "credits": 1,
+      "sha256": "97510d4c797139a92b8a53111efee3733bc6e407112b5a6b2af1652e848debd5",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+        "platform": "Polygon"
+      },
+      "ts": "2026-09-26T05:24:52.217Z",
+      "credits": 1,
+      "sha256": "10b6e2e080087867d257f18c2100883f853f21afef74ef0a53fbf96d9f1659bb",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:24:52.048Z",
+      "credits": 0,
+      "sha256": "dfa4d715a2492ff635789267dc529e5a2c2e86b140063abb6eb8a73cbc494292",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:24:52.056Z",
+      "credits": 1,
+      "sha256": "8555ef0e57fb99a7d3d2af3e2c9422772975cdf8a7aafef05d9f8a9a32799456",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:24:52.058Z",
+      "credits": 1,
+      "sha256": "8446cf298df4afb1f3e6ce57c73259cd68f0887eb27ef9fac2794b3b930ddd1d",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

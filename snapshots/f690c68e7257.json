@@ -1,0 +1,293 @@
+{
+  "kind": "verdict",
+  "id": "f690c68e7257",
+  "ts": "2026-09-26T05:25:49.730Z",
+  "token": {
+    "platform": "Ethereum",
+    "address": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",
+    "name": "Ondo",
+    "symbol": "ONDO",
+    "mcapUsd": 5426676400.991658,
+    "vol24hUsd": 2232906.178889805,
+    "priceChange24h": 0.0147,
+    "liqUsd": 2030724.7419778835
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 37,
+      "sellCount": 63,
+      "buyUsd": 12166.452172732628,
+      "sellUsd": 16976.907720170566,
+      "netBuyUsd": -4810.455547437938,
+      "netBuyRatio": -0.16506180361892142,
+      "uniqueMakers": 66,
+      "top5MakerShare": 0.532997169736306,
+      "thirdPartySells": 42
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 6745255.469103702,
+      "netLpDeltaUsd": 32151.56334806489,
+      "maxSinglePullPct": 0,
+      "addCount": 12,
+      "removeCount": 8
+    },
+    "pump": {
+      "volMcapRatio": 0.0004114684594942438,
+      "makersPer100kVol": 226.4666814071493,
+      "priceChange24h": 0.0147
+    },
+    "safety": {
+      "level": "caution",
+      "hits": [
+        "mintable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 70,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "mintable",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "WARN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "caution",
+            "threshold": "safe",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "≥$100M mature",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 42,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 66,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.53,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": -0.17,
+            "threshold": ">0",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 6745255,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 226.47,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (RAWAN) flips if centralizationFlags moves back inside no mintable/pausable/upgradeable powers — currently mintable. Failing rows: centralizationFlags (mintable vs no mintable/pausable/upgradeable powers), securityLevel (caution vs safe), top5MakerShare (0.53 vs <0.50), netBuyRatio (-0.17 vs >0)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.3275,
+    "dims": {
+      "SAFETY": 0.94,
+      "FLOW": 0.13,
+      "LIQUIDITY": 0.11,
+      "PUMP": 0.13
+    },
+    "tokensUsed": 920
+  },
+  "agreement": "contested",
+  "narration": {
+    "source": "template",
+    "headline": "ONDO on Ethereum shows warning signs — size accordingly",
+    "bullets": [
+      "centralizationFlags = mintable (threshold: no mintable/pausable/upgradeable powers)",
+      "securityLevel = caution (threshold: safe)",
+      "top5MakerShare = 0.53 (threshold: <0.50)",
+      "netBuyRatio = -0.17 (threshold: >0)",
+      "Confidence: high. Falsifier: This verdict (RAWAN) flips if centralizationFlags moves back inside no mintable/pausable/upgradeable powers — currently mintable. Failing rows: centralizationFlags (mintable vs no mintable/pausable/upgradeable powers), securityLevel (caution vs safe), top5MakerShare (0.53 vs <0.50), netBuyRatio (-0.17 vs >0)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3"
+      },
+      "ts": "2026-09-26T05:25:48.782Z",
+      "credits": 1,
+      "sha256": "9ef2e2023c64b812a8093a1636e019601bc89f0c8513466ddf8b5f31cc6968cf",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",
+        "limit": 100,
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:49.553Z",
+      "credits": 1,
+      "sha256": "a61ae717063045a72efe765368daf68fbceaf4129683c25d8224634c94d40061",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:49.273Z",
+      "credits": 1,
+      "sha256": "596d92ce6019f2d7633fc9b0167c2267577c7545453ff00f81f14e9f1e4d7496",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:49.252Z",
+      "credits": 1,
+      "sha256": "f77b0342b41f84704dc5dcc84cd66321aaacf8b3256d0149f8936c4c2af2d4f5",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",
+        "platformName": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:49.219Z",
+      "credits": 1,
+      "sha256": "98077fa1448ff8fa58d00b14aa96dfa1acb3607d3f3aecb4f4711e9801532f88",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:49.235Z",
+      "credits": 1,
+      "sha256": "c999edd87689853f4a5eebe7828614ddec067faec6d906e7541d43b50a431f9d",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:25:49.053Z",
+      "credits": 0,
+      "sha256": "5d81ea89ffa6269a527640040b0f269c9dcc440615888684d96c2dd3907899d4",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:49.049Z",
+      "credits": 0,
+      "sha256": "a3d177a3cd7ca53c8f0eeacaf6d37693593592af50ff3a474c8c61b372ffd329",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:49.058Z",
+      "credits": 0,
+      "sha256": "70735d601cb15912c5f55e7b2f668435bf31dfecf8f6bd0efc6169d7f0de34c7",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

@@ -9,9 +9,11 @@ CoinMarketCap DEX data and cross-examined by Jev (TypeSafe's decision model).
 ## The problem
 
 DEX scanners (RugCheck, TokenSniffer, GoPlus) answer *"could this contract
-rug?"* — static structure. Traders lose money to a different question:
-*"is it behaving like a rug right now?"* A token can pass every contract
-check while 4 wallets manufacture a pump and zero independent sellers exist.
+rug?"* — mostly static structure; honeypot.is goes further and simulates one
+test trade. Traders lose money to a different question: *"is it behaving
+like a rug right now?"* A token can pass every contract check while 4
+wallets manufacture a pump and zero independent sellers exist. One simulated
+trade can be whitelist-gamed; ~100 real swaps from distinct wallets can't.
 
 ## What Verdex does differently
 
@@ -85,21 +87,22 @@ pnpm dev
 
 **Demo mode (default, `VERDEX_LIVE` unset):** serves the committed
 `snapshots/` verdicts — 34 real CMC records across 7 chains (Ethereum,
-Solana, BSC, Polygon, Arbitrum, Optimism, Gnosis): 1 ENTRY-WORTHY (LDO),
-11 CAUTION (UNI, HOGE, TITANO, CRV, …), 22 AVOID. Real data harvested
-live, replayable forever, zero credits. Try `FLOKI` or `LDO`, or paste a
+Solana, BSC, Polygon, Arbitrum, Optimism, Gnosis): 1 ENTRY-WORTHY (GMX),
+30 CAUTION (AAVE, UNI, LINK, LDO, TITANO, …), 3 AVOID. Real data harvested
+live, replayable forever, zero credits. Try `GMX` or `FLOKI`, or paste a
 showcased address. Screenshots in `demo-shots/`.
 
 **Live mode:** `VERDEX_LIVE=1 pnpm dev` — real calls, receipts, and
-persisted verdicts under `data/`, capped at 30 analyses per IP per UTC day
-(in-memory, per serverless instance — a floor against casual hammering, not
-a hard global limit; rightmost XFF entry is used since leftmost is
-spoofable). Set `VERDEX_LIVE=0` for snapshot-only public deployments.
+persisted verdicts under `data/`, capped at 30 analyses per IP **and**
+200 total per UTC day (in-memory, per serverless instance — a floor against
+casual hammering and a global ceiling protecting the monthly CMC quota, but
+not a hard cross-instance limit; rightmost XFF entry is used since leftmost
+is spoofable). Set `VERDEX_LIVE=0` for snapshot-only public deployments.
 
 ## Testing
 
 ```bash
-pnpm vitest run   # 87 tests: client, normalizers, metrics, rules, jev, orchestrator
+pnpm vitest run   # 93 tests: client, normalizers, metrics, rules, jev, orchestrator
 pnpm typecheck
 pnpm build
 ```

@@ -1,0 +1,288 @@
+{
+  "kind": "verdict",
+  "id": "60884931a28c",
+  "ts": "2026-09-26T05:24:54.631Z",
+  "token": {
+    "platform": "Optimism",
+    "address": "0x4200000000000000000000000000000000000042",
+    "name": "Optimism",
+    "symbol": "OP",
+    "mcapUsd": 620270258.3610166,
+    "vol24hUsd": 1599148.012366548,
+    "priceChange24h": 0.0971,
+    "liqUsd": 1899638.798818018
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 74,
+      "sellCount": 26,
+      "buyUsd": 870.1219972368966,
+      "sellUsd": 652.4133035503522,
+      "netBuyUsd": 217.7086936865444,
+      "netBuyRatio": 0.14299090048945004,
+      "uniqueMakers": 30,
+      "top5MakerShare": 0.9949650819959975,
+      "thirdPartySells": 17
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 2614619.2842524056,
+      "netLpDeltaUsd": 63793.083012685995,
+      "maxSinglePullPct": 0,
+      "addCount": 14,
+      "removeCount": 6
+    },
+    "pump": {
+      "volMcapRatio": 0.0025781471718345616,
+      "makersPer100kVol": 1970.3976639811276,
+      "priceChange24h": 0.0971
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 85,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "none",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "≥$100M mature",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 17,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 30,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.99,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": 0.14,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.02,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 2614619,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 1970.4,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (RAWAN) flips if top5MakerShare moves back inside <0.50 — currently 0.99. Failing rows: top5MakerShare (0.99 vs <0.50)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.18,
+    "dims": {
+      "SAFETY": 0.05,
+      "FLOW": 0.39,
+      "LIQUIDITY": 0.07,
+      "PUMP": 0.21
+    },
+    "tokensUsed": 914
+  },
+  "agreement": "contested",
+  "narration": {
+    "source": "template",
+    "headline": "OP on Optimism shows warning signs — size accordingly",
+    "bullets": [
+      "top5MakerShare = 0.99 (threshold: <0.50)",
+      "Confidence: high. Falsifier: This verdict (RAWAN) flips if top5MakerShare moves back inside <0.50 — currently 0.99. Failing rows: top5MakerShare (0.99 vs <0.50)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0x4200000000000000000000000000000000000042"
+      },
+      "ts": "2026-09-26T05:24:53.457Z",
+      "credits": 1,
+      "sha256": "f28b1d379d828895a3e8cab1f954ddec8bc7ea44429f9509db89d4e3ff8f804d",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0x4200000000000000000000000000000000000042",
+        "limit": 100,
+        "platform": "Optimism"
+      },
+      "ts": "2026-09-26T05:24:54.136Z",
+      "credits": 1,
+      "sha256": "4c098bf2996a1fa63e6ec38a10f0a2336530b31bdeb58a39ffbbaea42d28c3f7",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0x4200000000000000000000000000000000000042",
+        "platform": "Optimism"
+      },
+      "ts": "2026-09-26T05:24:53.977Z",
+      "credits": 1,
+      "sha256": "f2e2dcd7f8461fad6069cc099e22414c3f2a50d3228275a1a9b0cb95a78a66c9",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0x4200000000000000000000000000000000000042",
+        "platform": "Optimism"
+      },
+      "ts": "2026-09-26T05:24:54.474Z",
+      "credits": 1,
+      "sha256": "eddd90b5c4db3144778ecc3bbb29f066ded5016620abcb9c01a0e28e079ba6e5",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0x4200000000000000000000000000000000000042",
+        "platformName": "Optimism"
+      },
+      "ts": "2026-09-26T05:24:54.365Z",
+      "credits": 1,
+      "sha256": "ec30befecd6ad11364be71eea436e739622abdc1601c29611db53ed2bf7a4307",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0x4200000000000000000000000000000000000042",
+        "platform": "Optimism"
+      },
+      "ts": "2026-09-26T05:24:53.912Z",
+      "credits": 1,
+      "sha256": "0d50ada4f357aed91b52163d048351fe6caecb4c2cba4aed93d87a3540aa2e15",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:24:53.721Z",
+      "credits": 1,
+      "sha256": "33fc136692de36190319535028aa752433ca9be7630afeeb08dcedf6773c7e8a",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:24:54.203Z",
+      "credits": 0,
+      "sha256": "2319f6a667b68d49f5f31c700228d9a1cc6a901818e82551da86845c7041c4dc",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:24:54.225Z",
+      "credits": 0,
+      "sha256": "0d4fbc1cf24632a9c05306709846a33b394d1ee68d21480e1a131e2c40c5dd0b",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

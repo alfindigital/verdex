@@ -44,6 +44,14 @@ describe("evalSafety", () => {
     expect(evalSafety(sm({ level: "malicious" })).level).toBe("WARN");
     expect(evalSafety(sm({ level: "danger" })).level).toBe("WARN");
   });
+  it("centralization flags (mintable/upgradeable) → named WARN row", () => {
+    const v = evalSafety(sm({ hits: ["mintable", "upgradeable"] }));
+    const row = v.metrics.find((m) => m.name === "centralizationFlags");
+    expect(row?.level).toBe("WARN");
+    expect(row?.value).toContain("mintable");
+    // no longer reported as generic unclassified
+    expect(v.metrics.find((m) => m.name === "unclassifiedFlags")?.value).toBe("none");
+  });
   it("unclassified isHit codes surface as WARN (no silent dead signals)", () => {
     const v = evalSafety(sm({ hits: ["proxy_admin_upgradeable"] }));
     expect(v.level).toBe("WARN");
@@ -75,6 +83,27 @@ describe("evalFlow", () => {
   });
   it("clean: distributed flow", () => {
     expect(evalFlow(fm({})).level).toBe("CLEAN");
+  });
+  it("mature tier (mcap≥$100M): concentration/direction danger caps at WARN", () => {
+    // Arb-infra dominated DEX flow of a large cap is weak evidence —
+    // never DANGER on these two rows alone (CLAIMS published rule).
+    const f = fm({ top5MakerShare: 0.8, netBuyRatio: -0.35 });
+    expect(evalFlow(f).level).toBe("DANGER"); // early tier unchanged
+    const v = evalFlow(f, true);
+    expect(v.level).toBe("WARN");
+    expect(v.metrics.find((m) => m.name === "top5MakerShare")?.level).toBe("WARN");
+    expect(v.metrics.find((m) => m.name === "netBuyRatio")?.level).toBe("WARN");
+    expect(v.metrics.find((m) => m.name === "mcapTier")?.value).toContain("mature");
+  });
+  it("mature tier: insider-exit signals keep full severity", () => {
+    // Zero third-party sells is venue-independent — still DANGER.
+    expect(evalFlow(fm({ thirdPartySells: 0, buyCount: 80 }), true).level).toBe("DANGER");
+  });
+  it("composite wires mcapUsd → mature tier", () => {
+    const mature = composite(input({ mcapUsd: 250_000_000, flow: fm({ top5MakerShare: 0.8, netBuyRatio: -0.35 }) }));
+    expect(mature.subs.find((s) => s.dim === "FLOW")?.level).toBe("WARN");
+    const early = composite(input({ mcapUsd: 5_000_000, flow: fm({ top5MakerShare: 0.8, netBuyRatio: -0.35 }) }));
+    expect(early.subs.find((s) => s.dim === "FLOW")?.level).toBe("DANGER");
   });
 });
 
@@ -151,5 +180,11 @@ describe("composite", () => {
   it("falsifier names concrete flip conditions", () => {
     const r = composite(input({ flow: fm({ thirdPartySells: 0 }) }));
     expect(r.falsifier).toMatch(/third.?party.?sell/i);
+  });
+  it("falsifier lists every failing row, not just the worst one", () => {
+    // AAVE-shaped input: two FLOW rows fail — both must appear.
+    const r = composite(input({ flow: fm({ top5MakerShare: 0.8, netBuyRatio: -0.35, thirdPartySells: 8 }) }));
+    expect(r.falsifier).toContain("top5MakerShare");
+    expect(r.falsifier).toContain("netBuyRatio");
   });
 });

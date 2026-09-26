@@ -1,0 +1,293 @@
+{
+  "kind": "verdict",
+  "id": "87dc88ef653f",
+  "ts": "2026-09-26T05:25:17.638Z",
+  "token": {
+    "platform": "Arbitrum",
+    "address": "0x912ce59144191c1204e64559fe8253a0e49e6548",
+    "name": "Arbitrum",
+    "symbol": "ARB",
+    "mcapUsd": 2237847491.7218614,
+    "vol24hUsd": 13291542.580261141,
+    "priceChange24h": 0.032,
+    "liqUsd": 3564566.1754141278
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 71,
+      "sellCount": 29,
+      "buyUsd": 10678.360650138005,
+      "sellUsd": 4774.301275433848,
+      "netBuyUsd": 5904.059374704158,
+      "netBuyRatio": 0.3820739367198488,
+      "uniqueMakers": 43,
+      "top5MakerShare": 0.7826151272258614,
+      "thirdPartySells": 15
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 5424424.014464577,
+      "netLpDeltaUsd": 711952.6597725817,
+      "maxSinglePullPct": 0,
+      "addCount": 12,
+      "removeCount": 8
+    },
+    "pump": {
+      "volMcapRatio": 0.00593943181089354,
+      "makersPer100kVol": 278.26920828987664,
+      "priceChange24h": 0.032
+    },
+    "safety": {
+      "level": "caution",
+      "hits": [
+        "mintable",
+        "upgradeable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 70,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "mintable,upgradeable",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "WARN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "caution",
+            "threshold": "safe",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "≥$100M mature",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 15,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 43,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.78,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": 0.38,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.13,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 5424424,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0.01,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 278.27,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (RAWAN) flips if centralizationFlags moves back inside no mintable/pausable/upgradeable powers — currently mintable,upgradeable. Failing rows: centralizationFlags (mintable,upgradeable vs no mintable/pausable/upgradeable powers), securityLevel (caution vs safe), top5MakerShare (0.78 vs <0.50)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.39,
+    "dims": {
+      "SAFETY": 0.95,
+      "FLOW": 0.28,
+      "LIQUIDITY": 0.12,
+      "PUMP": 0.21
+    },
+    "tokensUsed": 921
+  },
+  "agreement": "lean",
+  "narration": {
+    "source": "template",
+    "headline": "ARB on Arbitrum shows warning signs — size accordingly",
+    "bullets": [
+      "centralizationFlags = mintable,upgradeable (threshold: no mintable/pausable/upgradeable powers)",
+      "securityLevel = caution (threshold: safe)",
+      "top5MakerShare = 0.78 (threshold: <0.50)",
+      "Confidence: high. Falsifier: This verdict (RAWAN) flips if centralizationFlags moves back inside no mintable/pausable/upgradeable powers — currently mintable,upgradeable. Failing rows: centralizationFlags (mintable,upgradeable vs no mintable/pausable/upgradeable powers), securityLevel (caution vs safe), top5MakerShare (0.78 vs <0.50)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0x912ce59144191c1204e64559fe8253a0e49e6548"
+      },
+      "ts": "2026-09-26T05:25:16.712Z",
+      "credits": 1,
+      "sha256": "951c755d652b7a1e6ed563840008cf1f9dbecf832f78b3af1cd66e6a110fb09f",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0x912ce59144191c1204e64559fe8253a0e49e6548",
+        "limit": 100,
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T05:25:17.291Z",
+      "credits": 1,
+      "sha256": "a284a956545e926416163a6ea64bc61b00d7973011f7b5ad3f93a78ba617632e",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0x912ce59144191c1204e64559fe8253a0e49e6548",
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T05:25:17.249Z",
+      "credits": 1,
+      "sha256": "c98de4384282fdbf01d21395460b16d700975e219dac2c58dee4bd7d08a2440f",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0x912ce59144191c1204e64559fe8253a0e49e6548",
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T05:25:17.264Z",
+      "credits": 1,
+      "sha256": "a5b0e459bab6a5e356045661d0fa99f85dfcd8a0695259c5b5396bd3c3dae8d0",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0x912ce59144191c1204e64559fe8253a0e49e6548",
+        "platformName": "Arbitrum"
+      },
+      "ts": "2026-09-26T05:25:17.007Z",
+      "credits": 1,
+      "sha256": "a77807e125aa0ef7416af7790a68771a5a95cb9799485717bd07ab65a1f5f83c",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0x912ce59144191c1204e64559fe8253a0e49e6548",
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T05:25:17.172Z",
+      "credits": 1,
+      "sha256": "24764db111af0d36fe841fd2101b4ee835c022f024a76ac66faf78ebe9f55a6d",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:16.987Z",
+      "credits": 0,
+      "sha256": "3e49ee4f206cd16c08a2dc5657ed356051c9f9585de34b92fd42c4e642a50cb3",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:25:16.996Z",
+      "credits": 0,
+      "sha256": "6840ff33157b5992268d0124fb8983212f3a5438119be39aae392e2d033aa828",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:17.484Z",
+      "credits": 0,
+      "sha256": "a65a98ee1b2da30a5239c133325f2f8d3ea3399c3bd8e9a1cc3e7689fc10938b",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

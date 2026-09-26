@@ -1,0 +1,291 @@
+{
+  "kind": "verdict",
+  "id": "5071c7a844a8",
+  "ts": "2026-09-26T05:24:50.716Z",
+  "token": {
+    "platform": "Ethereum",
+    "address": "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2",
+    "name": "SushiToken",
+    "symbol": "SUSHI",
+    "mcapUsd": 76840051.80839238,
+    "vol24hUsd": 118219.97066899652,
+    "priceChange24h": 0.0319,
+    "liqUsd": 1624260.4559485759
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 45,
+      "sellCount": 55,
+      "buyUsd": 4949.503710325644,
+      "sellUsd": 5246.854230669238,
+      "netBuyUsd": -297.3505203435943,
+      "netBuyRatio": -0.029162424668134117,
+      "uniqueMakers": 34,
+      "top5MakerShare": 0.7314176762063379,
+      "thirdPartySells": 22
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 1712565.9756842093,
+      "netLpDeltaUsd": 6653.597603506359,
+      "maxSinglePullPct": 0,
+      "addCount": 6,
+      "removeCount": 14
+    },
+    "pump": {
+      "volMcapRatio": 0.0015385201842886406,
+      "makersPer100kVol": 333.45239738300666,
+      "priceChange24h": 0.0319
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "mintable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "JANGAN",
+    "score": 45,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "mintable",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "WARN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "DANGER",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "<$100M early",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 22,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 34,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.73,
+            "threshold": "<0.50",
+            "level": "DANGER"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": -0.03,
+            "threshold": ">0",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 1712566,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 333.45,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.73. Failing rows: centralizationFlags (mintable vs no mintable/pausable/upgradeable powers), top5MakerShare (0.73 vs <0.50), netBuyRatio (-0.03 vs >0)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.31249999999999994,
+    "dims": {
+      "SAFETY": 0.72,
+      "FLOW": 0.18,
+      "LIQUIDITY": 0.19,
+      "PUMP": 0.16
+    },
+    "tokensUsed": 920
+  },
+  "agreement": "contested",
+  "narration": {
+    "source": "template",
+    "headline": "Avoid SUSHI on Ethereum — the evidence is bad",
+    "bullets": [
+      "centralizationFlags = mintable (threshold: no mintable/pausable/upgradeable powers)",
+      "top5MakerShare = 0.73 (threshold: <0.50)",
+      "Confidence: high. Falsifier: This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.73. Failing rows: centralizationFlags (mintable vs no mintable/pausable/upgradeable powers), top5MakerShare (0.73 vs <0.50), netBuyRatio (-0.03 vs >0)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2"
+      },
+      "ts": "2026-09-26T05:24:49.972Z",
+      "credits": 1,
+      "sha256": "b4472c084019d43abc23bb122969ea621cbebe781126c944dda1cbe76ae8d712",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2",
+        "limit": 100,
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:24:50.553Z",
+      "credits": 1,
+      "sha256": "2714898d05eb08082b2e47fe654599bcd365c825f903a28781d2607229131a42",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:24:50.546Z",
+      "credits": 1,
+      "sha256": "766ebfda49afa9cb87beba0b1567704d6d54b836b6b656b9fae3446fb45305a2",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:24:50.502Z",
+      "credits": 1,
+      "sha256": "8e77e79e3ae72eb7ef4cf396a492503917295cc28afce37f667ae9736bc99373",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2",
+        "platformName": "Ethereum"
+      },
+      "ts": "2026-09-26T05:24:50.260Z",
+      "credits": 1,
+      "sha256": "dfe676118de2359d96e2811dc9ac19969aa86e8090066e2ffb4b30369a983aa7",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:24:50.426Z",
+      "credits": 1,
+      "sha256": "6098445ba9248a1da102ef9e8312e7d569a9342be9b650d3a28e0dd7ee2fab8d",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:24:50.242Z",
+      "credits": 0,
+      "sha256": "f2dd18f95d2a2958a726f11d94cad17c834f3927ff66b5ac1b589abb8c89f347",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:24:50.242Z",
+      "credits": 0,
+      "sha256": "37ef436aad76d4af75f26fb77941bf210f02213f83656b2871e7387ecdd5b74a",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:24:50.499Z",
+      "credits": 0,
+      "sha256": "6d8b3b52b14743b98b5fd0e04ef991003e807048354f6afd9882d28cf326e5a5",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

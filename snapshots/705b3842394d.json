@@ -1,0 +1,291 @@
+{
+  "kind": "verdict",
+  "id": "705b3842394d",
+  "ts": "2026-09-26T05:25:10.827Z",
+  "token": {
+    "platform": "Ethereum",
+    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+    "name": "Maker",
+    "symbol": "MKR",
+    "mcapUsd": 152245626.4713303,
+    "vol24hUsd": 115751.774806954,
+    "priceChange24h": 0.0841,
+    "liqUsd": 2364943.7795274886
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 87,
+      "sellCount": 13,
+      "buyUsd": 27665.950439261982,
+      "sellUsd": 2849.4512731626755,
+      "netBuyUsd": 24816.499166099307,
+      "netBuyRatio": 0.8132450426171194,
+      "uniqueMakers": 24,
+      "top5MakerShare": 0.7673217512183995,
+      "thirdPartySells": 9
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 2696534.385388866,
+      "netLpDeltaUsd": 549715.7113518502,
+      "maxSinglePullPct": 0,
+      "addCount": 8,
+      "removeCount": 12
+    },
+    "pump": {
+      "volMcapRatio": 0.0007602962232136859,
+      "makersPer100kVol": 78.64880897251358,
+      "priceChange24h": 0.0841
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "mintable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 70,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "mintable",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "WARN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "≥$100M mature",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 9,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 24,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.77,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": 0.81,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.2,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 2696534,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 78.65,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (RAWAN) flips if centralizationFlags moves back inside no mintable/pausable/upgradeable powers — currently mintable. Failing rows: centralizationFlags (mintable vs no mintable/pausable/upgradeable powers), top5MakerShare (0.77 vs <0.50)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.37,
+    "dims": {
+      "SAFETY": 0.63,
+      "FLOW": 0.47,
+      "LIQUIDITY": 0.16,
+      "PUMP": 0.22
+    },
+    "tokensUsed": 916
+  },
+  "agreement": "lean",
+  "narration": {
+    "source": "template",
+    "headline": "MKR on Ethereum shows warning signs — size accordingly",
+    "bullets": [
+      "centralizationFlags = mintable (threshold: no mintable/pausable/upgradeable powers)",
+      "top5MakerShare = 0.77 (threshold: <0.50)",
+      "Confidence: high. Falsifier: This verdict (RAWAN) flips if centralizationFlags moves back inside no mintable/pausable/upgradeable powers — currently mintable. Failing rows: centralizationFlags (mintable vs no mintable/pausable/upgradeable powers), top5MakerShare (0.77 vs <0.50)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2"
+      },
+      "ts": "2026-09-26T05:25:09.726Z",
+      "credits": 1,
+      "sha256": "5d6fe365dd006da50a5342043cc596971ac86ba307b8836985b62315cdeb85ef",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+        "limit": 100,
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:10.417Z",
+      "credits": 1,
+      "sha256": "0afcb8ab5c4611f778c86b8099c54c3883ef9f6ffbd965a683926a53463d8963",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:10.660Z",
+      "credits": 1,
+      "sha256": "812008fcfa92d121e140908b6afd2f8b1054b634d9a2d6f3c6f8e1f5bb9f3738",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:10.498Z",
+      "credits": 1,
+      "sha256": "f88d9442544566d401f583f6d50425fe6cbdd5e3d7fa9348046b03372cda0edc",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+        "platformName": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:10.155Z",
+      "credits": 1,
+      "sha256": "78bd51bf10c1b4644101c3dad98e72c3a79adc4b31e21e1b20e072e33e7360ff",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:10.170Z",
+      "credits": 1,
+      "sha256": "6d85ab8215b630f424fc43c5dd4a20ce772688639574e5700eabbc09b103f255",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:09.997Z",
+      "credits": 0,
+      "sha256": "5301fc199f15bdfe3658a8de3085ecd1037f831ff356204d2ee4447c58e9ac78",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:25:09.992Z",
+      "credits": 0,
+      "sha256": "17f0850b4f1c9a7b6f09fb86b9407623cd36b028d0e2c95f1749b94514dfb5c3",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:09.989Z",
+      "credits": 0,
+      "sha256": "2bb47fe521f9059f1da04701a1d68d47a6fa00177c8909ef462c8ba39bcd80a2",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

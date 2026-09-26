@@ -31,23 +31,31 @@ function persist(record: unknown & { id?: string }) {
   }
 }
 
-// Live-scan abuse cap: max N live analyses per IP per UTC day. In-memory =
-// per-instance on serverless (a floor, not a hard global limit) — documented.
+// Live-scan abuse caps: per-IP AND a global daily ceiling across all IPs —
+// the global cap is the one that actually protects the monthly CMC quota
+// (30/IP × N distinct IPs alone could burn 2,700+ credits/day).
+// In-memory = per-serverless-instance; a floor, not a hard limit — documented.
 const LIVE_DAILY_CAP = 30;
+const LIVE_GLOBAL_DAILY_CAP = 200;
 const liveHits = new Map<string, { day: string; n: number }>();
+let liveGlobal = { day: "", n: 0 };
 function allowLive(ip: string): boolean {
   const day = new Date().toISOString().slice(0, 10);
+  if (liveGlobal.day !== day) liveGlobal = { day, n: 0 };
   // Bound the map: on day rollover, flush stale-day entries once they pile up.
   if (liveHits.size > 10_000) {
     for (const [k, v] of liveHits) if (v.day !== day) liveHits.delete(k);
   }
+  if (liveGlobal.n >= LIVE_GLOBAL_DAILY_CAP) return false;
   const e = liveHits.get(ip);
   if (!e || e.day !== day) {
     liveHits.set(ip, { day, n: 1 });
+    liveGlobal.n++;
     return true;
   }
   if (e.n >= LIVE_DAILY_CAP) return false;
   e.n++;
+  liveGlobal.n++;
   return true;
 }
 
@@ -99,7 +107,7 @@ export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",").pop()?.trim() ?? "anon";
   if (!allowLive(ip)) {
     return NextResponse.json(
-      { error: `live-scan cap reached (${LIVE_DAILY_CAP}/day/IP). Committed snapshots on the homepage cover the demo.` },
+      { error: `live-scan cap reached (${LIVE_DAILY_CAP}/day/IP, ${LIVE_GLOBAL_DAILY_CAP}/day global). Committed snapshots on the homepage cover the demo.` },
       { status: 429 },
     );
   }

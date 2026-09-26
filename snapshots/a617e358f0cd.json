@@ -1,0 +1,264 @@
+{
+  "kind": "verdict",
+  "id": "a617e358f0cd",
+  "ts": "2026-09-26T05:25:06.326Z",
+  "token": {
+    "platform": "BSC",
+    "address": "0x4e3cabd3ad77420ff9031d19899594041c420aee",
+    "name": "Titano",
+    "symbol": "TITANO",
+    "mcapUsd": null,
+    "vol24hUsd": null,
+    "priceChange24h": null,
+    "liqUsd": null
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 0,
+      "buyCount": 0,
+      "sellCount": 0,
+      "buyUsd": 0,
+      "sellUsd": 0,
+      "netBuyUsd": 0,
+      "netBuyRatio": 0,
+      "uniqueMakers": 0,
+      "top5MakerShare": 1,
+      "thirdPartySells": 0
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 0,
+      "netLpDeltaUsd": 0,
+      "maxSinglePullPct": 0,
+      "addCount": 0,
+      "removeCount": 0
+    },
+    "pump": {
+      "volMcapRatio": null,
+      "makersPer100kVol": null,
+      "priceChange24h": null
+    },
+    "safety": {
+      "level": "highRisk",
+      "hits": [
+        "On-Chain Token Trading May Be Paused",
+        "contract_not_renounced",
+        "tax_modifiable"
+      ],
+      "buyTax": null,
+      "sellTax": null,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 20,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "none",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "On-Chain Token Trading May Be Paused,contract_not_renounced,tax_modifiable",
+            "threshold": "no unclassified isHit codes",
+            "level": "WARN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "highRisk",
+            "threshold": "safe",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "INSUFFICIENT",
+        "metrics": [
+          {
+            "name": "swapCount",
+            "value": 0,
+            "threshold": "≥50",
+            "level": "INSUFFICIENT"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 0,
+            "threshold": "≥$10k",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "INSUFFICIENT",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": "n/a",
+            "threshold": "mcap+vol available",
+            "level": "INSUFFICIENT"
+          }
+        ]
+      }
+    ],
+    "confidence": "low",
+    "falsifier": "This verdict (RAWAN) flips if unclassifiedFlags moves back inside no unclassified isHit codes — currently On-Chain Token Trading May Be Paused,contract_not_renounced,tax_modifiable. Failing rows: unclassifiedFlags (On-Chain Token Trading May Be Paused,contract_not_renounced,tax_modifiable vs no unclassified isHit codes), securityLevel (highRisk vs safe), totalLiqUsd (0 vs ≥$10k)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.64,
+    "dims": {
+      "SAFETY": 0.98,
+      "FLOW": 0.52,
+      "LIQUIDITY": 0.81,
+      "PUMP": 0.25
+    },
+    "tokensUsed": 777
+  },
+  "agreement": "lean",
+  "narration": {
+    "source": "template",
+    "headline": "TITANO on BSC shows warning signs — size accordingly",
+    "bullets": [
+      "unclassifiedFlags = On-Chain Token Trading May Be Paused,contract_not_renounced,tax_modifiable (threshold: no unclassified isHit codes)",
+      "securityLevel = highRisk (threshold: safe)",
+      "totalLiqUsd = 0 (threshold: ≥$10k)",
+      "Confidence: low. Falsifier: This verdict (RAWAN) flips if unclassifiedFlags moves back inside no unclassified isHit codes — currently On-Chain Token Trading May Be Paused,contract_not_renounced,tax_modifiable. Failing rows: unclassifiedFlags (On-Chain Token Trading May Be Paused,contract_not_renounced,tax_modifiable vs no unclassified isHit codes), securityLevel (highRisk vs safe), totalLiqUsd (0 vs ≥$10k)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0x4e3cabd3ad77420ff9031d19899594041c420aee"
+      },
+      "ts": "2026-09-26T05:24:58.977Z",
+      "credits": 1,
+      "sha256": "b21616b261b7ff82721d167ddcf20b78230ae26b6b0a0bc6dd89121ea27fbec9",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0x4e3cabd3ad77420ff9031d19899594041c420aee",
+        "limit": 100,
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T05:24:59.565Z",
+      "credits": 1,
+      "sha256": "9e9bc3442b7c8718ac521a2fed0ef47d24b235b2e36e0f5501aff75cff53dfbe",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0x4e3cabd3ad77420ff9031d19899594041c420aee",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T05:24:59.533Z",
+      "credits": 1,
+      "sha256": "3b77cd6402ece661091478baf4b3bc1b90d473c417915f89e4869bc1fae67534",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0x4e3cabd3ad77420ff9031d19899594041c420aee",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T05:24:59.504Z",
+      "credits": 1,
+      "sha256": "2ebd169e0c661a3bdca4a10af212d101d58a9596fcd291118095a82ada1de899",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0x4e3cabd3ad77420ff9031d19899594041c420aee",
+        "platformName": "BSC"
+      },
+      "ts": "2026-09-26T05:24:59.423Z",
+      "credits": 1,
+      "sha256": "3fd55339a25b533a826ec91d41fd30f3dc3aedc65e4ab95982dd99f4e0854d7e",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0x4e3cabd3ad77420ff9031d19899594041c420aee",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T05:24:59.432Z",
+      "credits": 1,
+      "sha256": "8545c04a201cd3bcb65b3a0c8d99890105299ab692e356a6a0d80d6df4eecbca",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:24:59.249Z",
+      "credits": 0,
+      "sha256": "3052175b25e1243240b1e46971a107ecce9e415b68eeead7835abbbd55c8e99d",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:24:59.247Z",
+      "credits": 1,
+      "sha256": "e190a7c2e61e649748701a6a3bd3a62c539e031244cec17ca64c6c1eb785ddcb",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:24:59.759Z",
+      "credits": 0,
+      "sha256": "a0b210f0b1615233caaf4697f2d41f92a0a09d97fb0df1d7a0656780aae113d6",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

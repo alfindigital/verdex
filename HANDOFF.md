@@ -50,8 +50,17 @@ Demo mode works without keys (`VERDEX_LIVE` unset). Live needs `CMC_API_KEY` (+ 
 ## Deploy
 Push to `main` → Vercel auto-deploys. Vercel CLI `--token` does NOT accept the OIDC token — use the GitHub integration path only.
 
+## 2026-09-26 — S7 calibration sprint (post-roast)
+- **Mature-asset tier (published):** `mcapUsd ≥ $100M` → `top5MakerShare`/`netBuyRatio` cap at WARN; insider-exit rows (`thirdPartySells`, `uniqueMakers`) keep full severity. `mcapTier` row shown in FLOW. AAVE/UNI/LINK now CAUTION, not AVOID.
+- **Safety taxonomy:** `mintable|pausable|blacklist|upgradeable|owner_change_balance|hidden_owner` → named `centralizationFlags` WARN row (was generic `unclassifiedFlags`).
+- **Jev agreement:** contested-wins — dim-level consensus AND aggregate band must both agree; AAVE-style cases now show `contested` honestly.
+- **Falsifier** lists every failing row.
+- **Global live cap:** 200 scans/day across all IPs + 30/IP/day — protects the ~15k/month CMC quota (in-memory, documented floor).
+- Re-harvested all 34 snapshots: **30 CAUTION / 3 AVOID / 1 ENTRY-WORTHY (GMX 100, consensus)**. SUSHI (<$100M) and COMP/Gnosis (dead market) correctly stay AVOID.
+- 93 tests · tsc clean · build clean.
+
 ## Next actions (user-side)
-1. Record ~90s demo video — script updated 2026-09-25 in SUBMISSION.md (FLOKI consensus / ORCA contested arc).
+1. Record ~90s demo video — script updated 2026-09-26 in SUBMISSION.md (GMX yes → SUSHI avoid → AAVE contested arc).
 2. Submit DoraHacks (SUBMISSION.md has copy + exact form fields).
 3. Post X draft (SUBMISSION.md §X post draft), replace BUIDL link.
 

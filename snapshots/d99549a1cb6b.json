@@ -1,0 +1,295 @@
+{
+  "kind": "verdict",
+  "id": "d99549a1cb6b",
+  "ts": "2026-09-26T05:25:39.735Z",
+  "token": {
+    "platform": "Ethereum",
+    "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+    "name": "Synthetix Network Token",
+    "symbol": "SNX",
+    "mcapUsd": 150645185.34542146,
+    "vol24hUsd": 12765.301977731457,
+    "priceChange24h": 0.0054,
+    "liqUsd": 154530.4459155786
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 51,
+      "sellCount": 49,
+      "buyUsd": 8527.729117438672,
+      "sellUsd": 7251.015364185256,
+      "netBuyUsd": 1276.7137532534161,
+      "netBuyRatio": 0.08091351975059162,
+      "uniqueMakers": 32,
+      "top5MakerShare": 0.9000393143876617,
+      "thirdPartySells": 20
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 1448306.6864481887,
+      "netLpDeltaUsd": 142836.75737672654,
+      "maxSinglePullPct": 0,
+      "addCount": 9,
+      "removeCount": 11
+    },
+    "pump": {
+      "volMcapRatio": 0.00008473753707070885,
+      "makersPer100kVol": 202.804475585922,
+      "priceChange24h": 0.0054
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "blacklist_function",
+        "On-Chain Token Trading May Be Paused",
+        "mintable",
+        "upgradeable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 70,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "blacklist_function,mintable,upgradeable",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "WARN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "On-Chain Token Trading May Be Paused",
+            "threshold": "no unclassified isHit codes",
+            "level": "WARN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "≥$100M mature",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 20,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 32,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.9,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": 0.08,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.1,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 1448307,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 202.8,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (RAWAN) flips if centralizationFlags moves back inside no mintable/pausable/upgradeable powers — currently blacklist_function,mintable,upgradeable. Failing rows: centralizationFlags (blacklist_function,mintable,upgradeable vs no mintable/pausable/upgradeable powers), unclassifiedFlags (On-Chain Token Trading May Be Paused vs no unclassified isHit codes), top5MakerShare (0.9 vs <0.50)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.4075,
+    "dims": {
+      "SAFETY": 0.85,
+      "FLOW": 0.3,
+      "LIQUIDITY": 0.19,
+      "PUMP": 0.29
+    },
+    "tokensUsed": 942
+  },
+  "agreement": "lean",
+  "narration": {
+    "source": "template",
+    "headline": "SNX on Ethereum shows warning signs — size accordingly",
+    "bullets": [
+      "centralizationFlags = blacklist_function,mintable,upgradeable (threshold: no mintable/pausable/upgradeable powers)",
+      "unclassifiedFlags = On-Chain Token Trading May Be Paused (threshold: no unclassified isHit codes)",
+      "top5MakerShare = 0.9 (threshold: <0.50)",
+      "Confidence: high. Falsifier: This verdict (RAWAN) flips if centralizationFlags moves back inside no mintable/pausable/upgradeable powers — currently blacklist_function,mintable,upgradeable. Failing rows: centralizationFlags (blacklist_function,mintable,upgradeable vs no mintable/pausable/upgradeable powers), unclassifiedFlags (On-Chain Token Trading May Be Paused vs no unclassified isHit codes), top5MakerShare (0.9 vs <0.50)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f"
+      },
+      "ts": "2026-09-26T05:25:38.778Z",
+      "credits": 1,
+      "sha256": "1699e02dc823e4dd5f69ace7a9929955d72b34c6ce89ac2e34f4bb4e8ebc449b",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+        "limit": 100,
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:39.544Z",
+      "credits": 1,
+      "sha256": "d265085e0b3e8ee7b32891ce6ede7d35599bb3668c028cd65fe0bdd8b672a9e3",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:39.282Z",
+      "credits": 1,
+      "sha256": "1cbd6bb4df225f66497d177b76c15860b31a4cc23d787ee8d9f7b7e5398b1af0",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:39.276Z",
+      "credits": 1,
+      "sha256": "ee8ae07ce1b677cb72a0d3d9aa0a88744ad23adf626d8b7d674685b05f21345c",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+        "platformName": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:39.212Z",
+      "credits": 1,
+      "sha256": "8bb533a648d10431953814737eb8cbc9ba46c3ae66d688f0dd9f835d966c09f4",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T05:25:39.230Z",
+      "credits": 1,
+      "sha256": "f707cfe43be53d8deede0a803959666443f54d486e212c964266c2ebbcbaa555",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:39.032Z",
+      "credits": 0,
+      "sha256": "4dc53cd75073b815d7027aefe4b21b1e93c503cdee6d7312f02914a553933ddd",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:39.043Z",
+      "credits": 1,
+      "sha256": "efc6e8f9228b5f7548ec422dde45ec4926922b0633c7abb50982637df72c11db",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:25:39.550Z",
+      "credits": 0,
+      "sha256": "19b0909a54cbb9056b187705567196fe66f54cddae8016d5798779903f3183b9",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

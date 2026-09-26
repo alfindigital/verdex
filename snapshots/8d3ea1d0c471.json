@@ -1,0 +1,291 @@
+{
+  "kind": "verdict",
+  "id": "8d3ea1d0c471",
+  "ts": "2026-09-26T05:25:21.086Z",
+  "token": {
+    "platform": "Arbitrum",
+    "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+    "name": "GMX",
+    "symbol": "GMX",
+    "mcapUsd": 89933678.53201406,
+    "vol24hUsd": 294168.8947847661,
+    "priceChange24h": 0.0161,
+    "liqUsd": 1437139.1825625119
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 79,
+      "sellCount": 21,
+      "buyUsd": 7959.629440147864,
+      "sellUsd": 2785.1559748088857,
+      "netBuyUsd": 5174.473465338979,
+      "netBuyRatio": 0.48157997256381757,
+      "uniqueMakers": 36,
+      "top5MakerShare": 0.47053183141948834,
+      "thirdPartySells": 6
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 4441749.458305322,
+      "netLpDeltaUsd": 41415.797945743514,
+      "maxSinglePullPct": 0,
+      "addCount": 11,
+      "removeCount": 9
+    },
+    "pump": {
+      "volMcapRatio": 0.0032709536581454254,
+      "makersPer100kVol": 335.0462443846294,
+      "priceChange24h": 0.0161
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "LAYAK",
+    "score": 100,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "none",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "<$100M early",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 6,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 36,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.47,
+            "threshold": "<0.50",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": 0.48,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.01,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 4441749,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 335.05,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict flips to RAWAN if two dimensions degrade to WARN (e.g. top-5 maker share rises above 0.50 or a liquidity pull exceeds 15% of pool depth)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.095,
+    "dims": {
+      "SAFETY": 0.04,
+      "FLOW": 0.15,
+      "LIQUIDITY": 0.08,
+      "PUMP": 0.11
+    },
+    "tokensUsed": 913
+  },
+  "agreement": "consensus",
+  "narration": {
+    "source": "template",
+    "headline": "GMX on Arbitrum looks entry-worthy on the evidence",
+    "bullets": [
+      "SAFETY: CLEAN",
+      "FLOW: CLEAN",
+      "LIQUIDITY: CLEAN",
+      "PUMP: CLEAN",
+      "Confidence: high. Falsifier: This verdict flips to RAWAN if two dimensions degrade to WARN (e.g. top-5 maker share rises above 0.50 or a liquidity pull exceeds 15% of pool depth)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a"
+      },
+      "ts": "2026-09-26T05:25:19.876Z",
+      "credits": 1,
+      "sha256": "e8517296bfcbc660540266c8359785bf752e62f2bc0d957af8b0fecc2b14cf9d",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "limit": 100,
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T05:25:20.491Z",
+      "credits": 1,
+      "sha256": "8a6b0f55efa9cd53f7e1ff6e3ae3ca46a80df16866592ffa90014d86b8865dc7",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T05:25:20.871Z",
+      "credits": 1,
+      "sha256": "cabe41d1f3b60ad8220281a137141d1bf31ac306aa1369057f5cff11a750fd18",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T05:25:20.915Z",
+      "credits": 1,
+      "sha256": "4b1b7fa47af2bc558219b892589cdb0b05aaa7ef81a902e5ad4b537257ed5416",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "platformName": "Arbitrum"
+      },
+      "ts": "2026-09-26T05:25:20.167Z",
+      "credits": 1,
+      "sha256": "e9a5b0b1d8a88f6b9b850aa56dd627bb6e228b7d977a85e1c25834e5dbf33aea",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T05:25:20.821Z",
+      "credits": 1,
+      "sha256": "4708ce141c6a6ed713210c2d07ec939789ba14ad3596a2e3633425faf4320778",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:25:20.158Z",
+      "credits": 1,
+      "sha256": "9b36442828dcb0a1c2a600545f9033e21457ebd4021123205404e397b96fb6d7",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:20.153Z",
+      "credits": 0,
+      "sha256": "acb39ab9ddcdca6c7334fb485b0461c2c9181ff40ebdf538e7c63d11bfd88860",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:20.159Z",
+      "credits": 1,
+      "sha256": "8bd80c85fed4574c623a3772462e92bf9ab4059e13c4e24f0be92945a5eee351",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

@@ -148,6 +148,19 @@ describe("agreement (per-dimension)", () => {
     ).toBe("consensus");
   });
 
+  it("aggregate contradiction beats dim-consensus — contested, never hidden", () => {
+    // AAVE case: dims match 3/4 → dim-level consensus, but riskyProb 0.24
+    // vs JANGAN verdict is a real fight — badge must show contested.
+    const jev = {
+      available: true,
+      riskyProb: 0.2425,
+      dims: { SAFETY: 0.58, FLOW: 0.16, LIQUIDITY: 0.09, PUMP: 0.14 },
+    };
+    expect(
+      agreement("JANGAN", jev, subs({ SAFETY: "WARN", FLOW: "DANGER", LIQUIDITY: "CLEAN", PUMP: "CLEAN" })),
+    ).toBe("contested");
+  });
+
   it("legacy band still works without dims/subs", () => {
     expect(agreement("JANGAN", { available: true, riskyProb: 0.91 })).toBe("consensus");
     expect(agreement("LAYAK", { available: true, riskyProb: 0.1 })).toBe("consensus");

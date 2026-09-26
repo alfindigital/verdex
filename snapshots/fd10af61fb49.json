@@ -1,0 +1,293 @@
+{
+  "kind": "verdict",
+  "id": "fd10af61fb49",
+  "ts": "2026-09-26T05:25:16.133Z",
+  "token": {
+    "platform": "Gnosis",
+    "address": "0xdf6ff92bfdc1e8be45177dc1f4845d391d3ad8fd",
+    "name": "Compound on xDai",
+    "symbol": "COMP",
+    "mcapUsd": 672.4563514978782,
+    "vol24hUsd": 0,
+    "priceChange24h": 0,
+    "liqUsd": 0.04598159478152584
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 54,
+      "sellCount": 46,
+      "buyUsd": 0.005571870706742772,
+      "sellUsd": 0.0033296843898495527,
+      "netBuyUsd": 0.0022421863168932197,
+      "netBuyRatio": 0.2518870346319116,
+      "uniqueMakers": 3,
+      "top5MakerShare": 0.9999999999999998,
+      "thirdPartySells": 3
+    },
+    "liq": {
+      "poolCount": 11,
+      "totalLiqUsd": 17.244468765635787,
+      "netLpDeltaUsd": 0,
+      "maxSinglePullPct": 0,
+      "addCount": 0,
+      "removeCount": 0
+    },
+    "pump": {
+      "volMcapRatio": 0,
+      "makersPer100kVol": 33701976.4237426,
+      "priceChange24h": 0
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "upgradeable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "JANGAN",
+    "score": 30,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "upgradeable",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "WARN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "DANGER",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "<$100M early",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 3,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 3,
+            "threshold": "≥20",
+            "level": "DANGER"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 1,
+            "threshold": "<0.50",
+            "level": "DANGER"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": 0.25,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 17,
+            "threshold": "≥$10k",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 33701976.42,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (JANGAN) flips if uniqueMakers moves back inside ≥20 — currently 3. Failing rows: centralizationFlags (upgradeable vs no mintable/pausable/upgradeable powers), uniqueMakers (3 vs ≥20), top5MakerShare (1 vs <0.50), totalLiqUsd (17 vs ≥$10k)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.5525,
+    "dims": {
+      "SAFETY": 0.59,
+      "FLOW": 0.77,
+      "LIQUIDITY": 0.51,
+      "PUMP": 0.34
+    },
+    "tokensUsed": 882
+  },
+  "agreement": "lean",
+  "narration": {
+    "source": "template",
+    "headline": "Avoid COMP on Gnosis — the evidence is bad",
+    "bullets": [
+      "centralizationFlags = upgradeable (threshold: no mintable/pausable/upgradeable powers)",
+      "uniqueMakers = 3 (threshold: ≥20)",
+      "top5MakerShare = 1 (threshold: <0.50)",
+      "totalLiqUsd = 17 (threshold: ≥$10k)",
+      "Confidence: high. Falsifier: This verdict (JANGAN) flips if uniqueMakers moves back inside ≥20 — currently 3. Failing rows: centralizationFlags (upgradeable vs no mintable/pausable/upgradeable powers), uniqueMakers (3 vs ≥20), top5MakerShare (1 vs <0.50), totalLiqUsd (17 vs ≥$10k)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0xdf6ff92bfdc1e8be45177dc1f4845d391d3ad8fd"
+      },
+      "ts": "2026-09-26T05:25:15.046Z",
+      "credits": 1,
+      "sha256": "591a67f1a63d344ed063de27313a101639d687e7ca4e20c03df8ff31e966a550",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0xdf6ff92bfdc1e8be45177dc1f4845d391d3ad8fd",
+        "limit": 100,
+        "platform": "Gnosis"
+      },
+      "ts": "2026-09-26T05:25:15.969Z",
+      "credits": 1,
+      "sha256": "f450780b176ce7f505d9198f772e9373de89d2c015248a437e177cacc2027bed",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0xdf6ff92bfdc1e8be45177dc1f4845d391d3ad8fd",
+        "platform": "Gnosis"
+      },
+      "ts": "2026-09-26T05:25:15.547Z",
+      "credits": 1,
+      "sha256": "be2d9c3845824729a44075e48ceb38c5f11915acda11c0aac79659e0147af829",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0xdf6ff92bfdc1e8be45177dc1f4845d391d3ad8fd",
+        "platform": "Gnosis"
+      },
+      "ts": "2026-09-26T05:25:15.585Z",
+      "credits": 1,
+      "sha256": "818d08b215d23743776c48ba2fe4fa1fd2ac70c886d6098800aa33ed5f4a94d6",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0xdf6ff92bfdc1e8be45177dc1f4845d391d3ad8fd",
+        "platformName": "Gnosis"
+      },
+      "ts": "2026-09-26T05:25:15.482Z",
+      "credits": 1,
+      "sha256": "d6a9b99ee96654fb9a97886c4e54d124b2a2a233ba4ae9b71e1aa21e17dfc772",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0xdf6ff92bfdc1e8be45177dc1f4845d391d3ad8fd",
+        "platform": "Gnosis"
+      },
+      "ts": "2026-09-26T05:25:15.496Z",
+      "credits": 1,
+      "sha256": "adced1d957e40c2a4890ec2d536ba64325791d6deeb9a37ca55d30903db5903f",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:15.308Z",
+      "credits": 0,
+      "sha256": "6a538e04064a983effd9d6b8066ba6e58f925f004c5fc4e1e8df895adbc20358",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:25:15.777Z",
+      "credits": 0,
+      "sha256": "386178ed45f35b77d2bfce101ca07704205f864552c6ac6c92c654d29088e67c",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:15.799Z",
+      "credits": 0,
+      "sha256": "adf6523da4e53a6827bfd49c1653e337adc2a917489a27b9cd3779b483524dc2",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

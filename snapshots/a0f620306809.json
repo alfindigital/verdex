@@ -1,0 +1,292 @@
+{
+  "kind": "verdict",
+  "id": "a0f620306809",
+  "ts": "2026-09-26T05:25:14.461Z",
+  "token": {
+    "platform": "BSC",
+    "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+    "name": "PancakeSwap Token",
+    "symbol": "Cake",
+    "mcapUsd": 14959178863.128296,
+    "vol24hUsd": 9775487.1505286,
+    "priceChange24h": 0.0129,
+    "liqUsd": 19666145.827675585
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 35,
+      "sellCount": 65,
+      "buyUsd": 1811.8172064219132,
+      "sellUsd": 3527.828520765285,
+      "netBuyUsd": -1716.0113143433716,
+      "netBuyRatio": -0.32137175423571157,
+      "uniqueMakers": 63,
+      "top5MakerShare": 0.5685549825452393,
+      "thirdPartySells": 60
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 58962209.12063179,
+      "netLpDeltaUsd": 4883.623586353809,
+      "maxSinglePullPct": 0,
+      "addCount": 18,
+      "removeCount": 2
+    },
+    "pump": {
+      "volMcapRatio": 0.000653477523062675,
+      "makersPer100kVol": 1179.8535561868998,
+      "priceChange24h": 0.0129
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "mintable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 70,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "mintable",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "WARN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "≥$100M mature",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 60,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 63,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.57,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": -0.32,
+            "threshold": ">0",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 58962209,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 1179.85,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (RAWAN) flips if centralizationFlags moves back inside no mintable/pausable/upgradeable powers — currently mintable. Failing rows: centralizationFlags (mintable vs no mintable/pausable/upgradeable powers), top5MakerShare (0.57 vs <0.50), netBuyRatio (-0.32 vs >0)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.25,
+    "dims": {
+      "SAFETY": 0.66,
+      "FLOW": 0.12,
+      "LIQUIDITY": 0.09,
+      "PUMP": 0.13
+    },
+    "tokensUsed": 919
+  },
+  "agreement": "contested",
+  "narration": {
+    "source": "template",
+    "headline": "Cake on BSC shows warning signs — size accordingly",
+    "bullets": [
+      "centralizationFlags = mintable (threshold: no mintable/pausable/upgradeable powers)",
+      "top5MakerShare = 0.57 (threshold: <0.50)",
+      "netBuyRatio = -0.32 (threshold: >0)",
+      "Confidence: high. Falsifier: This verdict (RAWAN) flips if centralizationFlags moves back inside no mintable/pausable/upgradeable powers — currently mintable. Failing rows: centralizationFlags (mintable vs no mintable/pausable/upgradeable powers), top5MakerShare (0.57 vs <0.50), netBuyRatio (-0.32 vs >0)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82"
+      },
+      "ts": "2026-09-26T05:25:13.162Z",
+      "credits": 1,
+      "sha256": "8a0d1c31ae6c1f26c7ef41bd6d21955dac23d957c87fe6e7f5b166c2b68d479d",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "limit": 100,
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T05:25:14.025Z",
+      "credits": 1,
+      "sha256": "d2640f97b67d2aba4482eeb8cc378eb364ffdbb795045d979331b33e9d43533c",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T05:25:13.681Z",
+      "credits": 1,
+      "sha256": "f599e13a03cbe1ff5e58b85fed03df13e470e706a7e4a71481c802d4859ecb13",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T05:25:13.662Z",
+      "credits": 1,
+      "sha256": "3917a541847c9ae86205cdd705fc1a0699cf37025f560dff1f8194049a8ea5dc",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "platformName": "BSC"
+      },
+      "ts": "2026-09-26T05:25:13.610Z",
+      "credits": 1,
+      "sha256": "d2f3437a04cedfbe6300bad565cce4841f748f26a08e8f35e61a6ae54a05a09f",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T05:25:13.603Z",
+      "credits": 1,
+      "sha256": "901a95037eb41a54150e5421ffde9d7c4c2d7293b62389889af318758b69de53",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:13.425Z",
+      "credits": 1,
+      "sha256": "d5f64f5cae04183c464890949f881a04e3e73c6e9787709a1e6fd87c8f25e3f7",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:25:13.917Z",
+      "credits": 1,
+      "sha256": "a80fa8a3b8068f350c587b9d40643f122e7c86c11c92efdedd80f30b6439c30d",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:25:13.922Z",
+      "credits": 1,
+      "sha256": "7dabcdb1c60007ce9b6008d900c6a2bf4096753362d3731ee1dba997210e0e2a",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

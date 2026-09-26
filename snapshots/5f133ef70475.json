@@ -1,0 +1,289 @@
+{
+  "kind": "verdict",
+  "id": "5f133ef70475",
+  "ts": "2026-09-26T05:24:49.398Z",
+  "token": {
+    "platform": "Solana",
+    "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+    "name": "dogwifhat",
+    "symbol": "$WIF",
+    "mcapUsd": 245615765.61277068,
+    "vol24hUsd": 1562007.3214854856,
+    "priceChange24h": 0.0432,
+    "liqUsd": 7043620.940145573
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 36,
+      "sellCount": 64,
+      "buyUsd": 1827.0996167426656,
+      "sellUsd": 5426.863922602264,
+      "netBuyUsd": -3599.7643058595986,
+      "netBuyRatio": -0.4962479183049045,
+      "uniqueMakers": 24,
+      "top5MakerShare": 0.9739532001798182,
+      "thirdPartySells": 22
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 8382834.78004147,
+      "netLpDeltaUsd": 12069.883950591895,
+      "maxSinglePullPct": 0,
+      "addCount": 4,
+      "removeCount": 16
+    },
+    "pump": {
+      "volMcapRatio": 0.00635955642989177,
+      "makersPer100kVol": 330.8536067189459,
+      "priceChange24h": 0.0432
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 85,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "centralizationFlags",
+            "value": "none",
+            "threshold": "no mintable/pausable/upgradeable powers",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "mcapTier",
+            "value": "≥$100M mature",
+            "threshold": "mature flow signals WARN-capped",
+            "level": "CLEAN"
+          },
+          {
+            "name": "thirdPartySells",
+            "value": 22,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 24,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.97,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": -0.5,
+            "threshold": ">0",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 8382835,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0.01,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 330.85,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (RAWAN) flips if top5MakerShare moves back inside <0.50 — currently 0.97. Failing rows: top5MakerShare (0.97 vs <0.50), netBuyRatio (-0.5 vs >0)."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.1775,
+    "dims": {
+      "SAFETY": 0.05,
+      "FLOW": 0.26,
+      "LIQUIDITY": 0.22,
+      "PUMP": 0.18
+    },
+    "tokensUsed": 912
+  },
+  "agreement": "contested",
+  "narration": {
+    "source": "template",
+    "headline": "$WIF on Solana shows warning signs — size accordingly",
+    "bullets": [
+      "top5MakerShare = 0.97 (threshold: <0.50)",
+      "netBuyRatio = -0.5 (threshold: >0)",
+      "Confidence: high. Falsifier: This verdict (RAWAN) flips if top5MakerShare moves back inside <0.50 — currently 0.97. Failing rows: top5MakerShare (0.97 vs <0.50), netBuyRatio (-0.5 vs >0)."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm"
+      },
+      "ts": "2026-09-26T05:24:48.346Z",
+      "credits": 1,
+      "sha256": "2e13ddf4e32dbe0fddb5f6c377adf9fd2e68a7117a550b94afc0d82495d1f7d9",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "limit": 100,
+        "platform": "Solana"
+      },
+      "ts": "2026-09-26T05:24:49.005Z",
+      "credits": 1,
+      "sha256": "199a11385de16ed8fec9281666b7831e4d8d1d905fde1501f3d71e278c84f8fd",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "platform": "Solana"
+      },
+      "ts": "2026-09-26T05:24:48.820Z",
+      "credits": 1,
+      "sha256": "21bed37d8d593e51716b1723148bed9a0c69d7f8a6da3d0abdf9bb1f9ea08f66",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "platform": "Solana"
+      },
+      "ts": "2026-09-26T05:24:48.824Z",
+      "credits": 1,
+      "sha256": "9b0b6cee49f7f80863daebf0cc65f3d4ef7d1488d65cef19964f0384cb02d1c9",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "platformName": "Solana"
+      },
+      "ts": "2026-09-26T05:24:48.779Z",
+      "credits": 1,
+      "sha256": "3709dc26db76dd053e870b397b6780b9170b924a335f58755ef1aefbf4338bb5",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "platform": "Solana"
+      },
+      "ts": "2026-09-26T05:24:48.786Z",
+      "credits": 1,
+      "sha256": "fcd05bc8e873ccb761c9d26687355fb94e8709247d93ab75274c2b75ffea7062",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T05:24:48.616Z",
+      "credits": 0,
+      "sha256": "12d2cd8a8eceda69e487ba960750cddd6d91efe716e198104d010748deb4ac74",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T05:24:48.613Z",
+      "credits": 0,
+      "sha256": "6c5f694c4e27dd44b74aac9dc6bebc49c78704c6c201fbb3b54e9c0601bf5c37",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T05:24:48.616Z",
+      "credits": 0,
+      "sha256": "40a976deac55c0d76d55cac59699097af51d5176b84798d91852357aec04a397",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

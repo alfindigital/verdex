@@ -146,6 +146,12 @@ export function agreement(
 ): Agreement {
   if (!jev.available) return "unavailable";
 
+  // Per-dimension agreement: 3+ comparable dims and every-pair agreement →
+  // consensus; a contested pair → contested. But the headline check also
+  // runs: if Jev's aggregate riskyProb contradicts the verdict polarity,
+  // the fight is real and must show — "consensus" on a 0.24 vs JANGAN is
+  // misleading. Contested always wins over consensus/lean.
+  let dimResult: "consensus" | "contested" | null = null;
   if (jev.dims && subs) {
     let match = 0;
     let comparable = 0;
@@ -157,13 +163,18 @@ export function agreement(
       const jevRisky = p > 0.5;
       if (rulesRisky === jevRisky) match++;
     }
-    if (comparable >= 3) return match >= 3 ? "consensus" : "contested";
+    if (comparable >= 3) dimResult = match >= 3 ? "consensus" : "contested";
   }
 
-  if (jev.riskyProb === null) return "unavailable";
+  if (jev.riskyProb === null) return dimResult ?? "unavailable";
   const rulesSayRisky = verdict === "JANGAN" || verdict === "RAWAN";
   const rulesSaySafe = verdict === "LAYAK";
-  if (jev.riskyProb >= 0.65) return rulesSayRisky ? "consensus" : "contested";
-  if (jev.riskyProb <= 0.35) return rulesSaySafe ? "consensus" : "contested";
-  return "lean";
+  let band: Agreement;
+  if (jev.riskyProb >= 0.65) band = rulesSayRisky ? "consensus" : "contested";
+  else if (jev.riskyProb <= 0.35) band = rulesSaySafe ? "consensus" : "contested";
+  else band = "lean";
+
+  if (dimResult === "contested" || band === "contested") return "contested";
+  if (dimResult === "consensus" && band === "consensus") return "consensus";
+  return band === "lean" ? "lean" : (dimResult ?? band);
 }
