@@ -157,4 +157,36 @@ describe("analyze", () => {
     const r = await analyze(client, { query: "PEPE", pick: 99 }, deps());
     expect(r.kind).toBe("notFound");
   });
+
+  it("token.mcapUsd is wired into composite — mature tier caps flow at WARN", async () => {
+    // 70 small buys ×70 makers + 30 big sells ×4 makers → top5Share≈0.81,
+    // netBuy≈−0.62 (both DANGER rows). Deleting analyze.ts's mcapUsd line
+    // makes this test fail — it proves the wiring, not just the rule.
+    const concentrated = {
+      ...healthyHandlers,
+      "/v1/dex/tokens/transactions": () => ({
+        swaps: [
+          ...Array.from({ length: 70 }, (_, i) => ({
+            ts: 1700000000 + i, tp: "buy", ma: `buyer${i}`, v: 10, tx: `b${i}`, f: "pool1", en: "raydium",
+          })),
+          ...Array.from({ length: 30 }, (_, i) => ({
+            ts: 1700000100 + i, tp: "sell", ma: `seller${i % 4}`, v: 100, tx: `s${i}`, f: "pool1", en: "raydium",
+          })),
+        ],
+      }),
+    };
+    const run = (mc: number) =>
+      analyze(
+        mkClient({ ...concentrated, "/v1/dex/search": () => fakeSearch([{ ...SOL_TOKEN, mc }]).data }),
+        { query: "PEPE", platform: "Solana" },
+        deps(),
+      );
+    const early = await run(5_000_000);
+    const mature = await run(250_000_000);
+    if (early.kind !== "verdict" || mature.kind !== "verdict") throw new Error("expected verdicts");
+    expect(early.result.subs.find((s) => s.dim === "FLOW")?.level).toBe("DANGER");
+    expect(early.result.verdict).toBe("JANGAN");
+    expect(mature.result.subs.find((s) => s.dim === "FLOW")?.level).toBe("WARN");
+    expect(mature.result.verdict).toBe("RAWAN");
+  });
 });

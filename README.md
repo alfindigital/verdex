@@ -33,6 +33,13 @@ trade can be whitelist-gamed; ~100 real swaps from distinct wallets can't.
   credits, SHA-256 of response) and shown in the UI. The data is auditable
   down to the response body hash.
 
+**Why this is a product, not a toy:** the verdict + falsifier + receipt
+bundle is built to be embedded — a pre-trade risk gate for wallets, DEX
+aggregators, and sniper bots that need an auditable "why" per flag (B2B
+API-as-a-service), not a black-box score. Canonical demo URLs are stable
+slugs (`/verdict/gmx-arbitrum`) backed by `snapshots/index.json`, so shared
+links survive every re-harvest.
+
 ## CMC endpoints used
 
 | Endpoint | Purpose |
@@ -94,15 +101,17 @@ showcased address. Screenshots in `demo-shots/`.
 
 **Live mode:** `VERDEX_LIVE=1 pnpm dev` — real calls, receipts, and
 persisted verdicts under `data/`, capped at 30 analyses per IP **and**
-200 total per UTC day (in-memory, per serverless instance — a floor against
-casual hammering and a global ceiling protecting the monthly CMC quota, but
-not a hard cross-instance limit; rightmost XFF entry is used since leftmost
-is spoofable). Set `VERDEX_LIVE=0` for snapshot-only public deployments.
+200 total per UTC day, **plus a quota circuit-breaker**: every ~15 min the
+server probes `/v1/key/info` and hard-pauses live mode when the monthly
+credit balance drops below 1,000 — snapshots always survive. In-memory caps
+are per serverless instance (a floor, not a hard cross-instance limit;
+rightmost XFF entry is used since leftmost is spoofable). Set
+`VERDEX_LIVE=0` for snapshot-only public deployments.
 
 ## Testing
 
 ```bash
-pnpm vitest run   # 93 tests: client, normalizers, metrics, rules, jev, orchestrator
+pnpm vitest run   # 97 tests: client, normalizers, metrics, rules, jev, orchestrator, live-guard
 pnpm typecheck
 pnpm build
 ```

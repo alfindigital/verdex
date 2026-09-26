@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Checker } from "@/components/checker";
-import { listSnapshotIds, loadVerdict } from "@/lib/verdict-store";
+import { listSnapshotIds, loadVerdict, slugFor } from "@/lib/verdict-store";
 import { VERDICT_STYLE } from "@/components/verdict-card";
 import { fmtNum, fmtUsd, num, Stat } from "@/components/viz";
 
@@ -140,7 +140,7 @@ export default function Home() {
                         <span className={`stamp text-[9px] ${tone}`}>{st.label}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <Link href={`/verdict/${v.id}`} className="font-semibold hover:text-safe">
+                        <Link href={`/verdict/${slugFor(v.token.symbol, v.token.platform)}`} className="font-semibold hover:text-safe">
                           {v.token.symbol.replace(/^\$/, "")}
                         </Link>
                         <span className="ml-1.5 hidden font-data text-[10px] text-faint xl:inline">
@@ -166,7 +166,7 @@ export default function Home() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <Link href={`/verdict/${v.id}`} className="font-data text-xs text-faint transition-colors group-hover:text-safe">
+                        <Link href={`/verdict/${slugFor(v.token.symbol, v.token.platform)}`} className="font-data text-xs text-faint transition-colors group-hover:text-safe">
                           open →
                         </Link>
                       </td>

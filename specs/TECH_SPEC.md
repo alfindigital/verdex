@@ -29,25 +29,38 @@ type SubVerdictLevel = 'CLEAN' | 'WARN' | 'DANGER' | 'INSUFFICIENT';
 type VerdictLevel = 'LAYAK' | 'RAWAN' | 'JANGAN' | 'BELUM_CUKUP_BUKTI';
 
 interface Swap { ts: number; side: 'buy'|'sell'; maker: string; usd: number; tx: string; pool: string; dex: string; }
-interface Receipt { endpoint: string; params: Record<string,unknown>; ts: string; credits: number; sha256: string; }
+interface Receipt { endpoint: string; params: Record<string,unknown>; ts: string; credits: number; sha256: string; cached: boolean; }
 interface MetricRow { name: string; value: number|string; threshold: string; level: SubVerdictLevel; }
 interface SubVerdict { dim: SubDim; level: SubVerdictLevel; metrics: MetricRow[]; }
 interface JevOpinion { available: boolean; riskyProb: number | null; dims?: Partial<Record<SubDim, number|null>>; }
-// agreement dihitung terpisah: 'consensus'|'contested'|'lean'|'unavailable'
+// agreement dihitung terpisah: 'consensus'|'contested'|'lean'|'unavailable' — see §4
 interface VerdictCard {
-  id: string;                 // sha256(`${address}:${ts}`).slice(0,12)
-  token: { platform: Platform; address: string; name: string; symbol: string };
+  id: string;                 // sha256(`${address}:${ts}:${uuid}`).slice(0,12)
+  token: { platform: Platform; address: string; name: string; symbol: string; mcapUsd?: number|null };
   verdict: VerdictLevel;
   score: number;              // 0-100 composite
   subs: SubVerdict[];
   context: { btcDomDelta7d: number|null; fearGreed: number|null };
   jev: JevOpinion;
+  agreement: 'consensus'|'contested'|'lean'|'unavailable';
   narrative: string;          // AI narration or deterministic template
-  falsifier: string;
+  falsifier: string;          // names EVERY failing row, not just the worst
   receipts: Receipt[];
   computedAt: string;         // ISO
 }
 ```
+
+Row names diterbitkan: `centralizationFlags` (mintable/pausable/blacklist/
+upgradeable/proxy/owner_change_balance/hidden_owner → WARN, lihat CLAIMS),
+`unclassifiedFlags` (flag tak dikenal — fail-closed WARN), `mcapTier`
+('mature'|'early', informational CLEAN row di FLOW). EngineInput menerima
+`mcapUsd`; `mcapUsd ≥ $100M` → tier mature: `top5MakerShare` & `netBuyRatio`
+maksimal WARN, sinyal insider-exit tetap bisa DANGER. `mcapUsd` null → early
+tier (fail-strict by design).
+
+**Stable demo URLs:** `snapshots/index.json` memetakan slug
+`symbol-platform` → id snapshot; `loadVerdict` dan `/verdict/[id]` me-resolve
+slug maupun hex id. Link publik kebal re-harvest (id baru, slug tetap).
 
 ## 3. CMC API — quirk terdokumentasi (hasil probe 24-25 Sep)
 
@@ -79,8 +92,11 @@ interface VerdictCard {
   disertakan di state (independensi). `riskyProb` = mean prob dims.
 - Timeout 10s, rotasi semua key di pool `TYPESAFE_API_KEY(S)` pada error,
   fallback `available:false` — TIDAK PERNAH memblokir verdict.
-- `agreement(verdict, jev, subs)`: consensus jika sign match ≥3/4 dimensi
-  comparable; <3 comparable → band agregat (≥0.65 / ≤0.35 / lean).
+- `agreement(verdict, jev, subs)` — **contested-wins, dua jalur**: (a) sign
+  match ≥3/4 dimensi comparable → dim-consensus; (b) band agregat pada
+  riskyProb (≥0.65 risky / ≤0.35 aman) bertentangan dengan polaritas verdict
+  → contested. Salah satu contested → contested; consensus hanya jika kedua
+  jalur sepakat. <3 comparable → band saja.
 
 ## 5. Narrator (opsional)
 
@@ -99,6 +115,7 @@ interface VerdictCard {
 
 ## 7. Testing
 
-Vitest `tests/` (85 tests): fixtures JSON dari response riil di-inline di
+Vitest `tests/` (97 tests): fixtures JSON dari response riil di-inline di
 test files (tidak ada tests/fixtures/ dir), unit tests per metrics/rules
-function, boundary tests, orchestrator tests dengan DexClient mocked.
+function, boundary tests, orchestrator tests dengan DexClient mocked
+(termasuk wiring `mcapUsd` → mature tier), live-guard caps+quota probe.

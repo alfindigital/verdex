@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync, copyFileSync } fro
 import path from "path";
 import { createCmcClient } from "../src/lib/cmc-client";
 import { analyze } from "../src/engine/analyze";
+import { slugFor } from "../src/lib/verdict-store";
 
 async function main() {
   for (const line of readFileSync(path.join(process.cwd(), ".env.local"), "utf8").split(/\r?\n/)) {
@@ -49,6 +50,21 @@ async function main() {
   for (const f of readdirSync(verdictDir)) {
     if (!before.has(f)) copyFileSync(path.join(verdictDir, f), path.join(snapDir, f));
   }
+
+  // Rebuild stable slug index — public demo links (/verdict/gmx-arbitrum)
+  // survive re-harvests that mint new snapshot ids.
+  const index: Record<string, string> = {};
+  for (const f of readdirSync(snapDir)) {
+    if (!/^[a-f0-9]{12}\.json$/.test(f)) continue;
+    try {
+      const r = JSON.parse(readFileSync(path.join(snapDir, f), "utf8"));
+      if (r.kind === "verdict") index[slugFor(r.token.symbol, r.token.platform)] = r.id;
+    } catch {
+      // skip corrupt file
+    }
+  }
+  writeFileSync(path.join(snapDir, "index.json"), JSON.stringify(index, null, 2) + "\n");
+  console.log(`index.json: ${Object.keys(index).length} slugs`);
 }
 
 main().catch((e) => {

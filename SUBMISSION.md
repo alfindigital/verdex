@@ -4,17 +4,17 @@
 
 - **Live demo**: https://verdex-alpha.vercel.app
 - **Repo (public)**: https://github.com/alfindigital/verdex
-- **Shareable verdicts** (34 committed snapshots, real CMC data, recomputed 2026-09-26):
-  - **GMX (Arbitrum) → ENTRY-WORTHY: https://verdex-alpha.vercel.app/verdict/8d3ea1d0c471 — score 100**, all four dims CLEAN, Jev **consensus** (0.10) — proof the engine can say yes when evidence is clean
-  - **AAVE (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/581465f26b3d — score 70**, Jev **contested**: SAFETY WARN on the named `upgradeable` centralization flag, FLOW WARN on arb-dominated DEX flow (mature-tier rule, mcap $2.4B — published in CLAIMS)
-  - UNI (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/ad9bed9c75d8 — score 70; `mintable` centralization flag surfaced by name, Jev contested
-  - LINK (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/a90b221cf121 — score 85; concentrated DEX maker flow read as WARN for a $14B asset, Jev contested
-  - SUSHI (Ethereum) → AVOID: https://verdex-alpha.vercel.app/verdict/5071c7a844a8 — score 45; sub-$100M mcap → strict tier: top-5 makers 0.73 + `mintable` flag → falsifier names all three failing rows
-  - COMP (Gnosis) → AVOID: https://verdex-alpha.vercel.app/verdict/fd10af61fb49 — score 30; dead-market signature: 3 unique makers, top-5 = 100% of flow, $17 pool liquidity
-  - FLOKI (BSC) → CAUTION: https://verdex-alpha.vercel.app/verdict/8ee1fe7e3850 — score 85, Jev contested
-  - TITANO (BSC) → CAUTION: https://verdex-alpha.vercel.app/verdict/a617e358f0cd — score 20, confidence **low** (thin swap window), Jev lean
-  - PEPE (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/36d17f41056d — Jev contested
-  - WIF (Solana) → CAUTION: https://verdex-alpha.vercel.app/verdict/5f133ef70475
+- **Shareable verdicts** (34 committed snapshots, real CMC data, recomputed 2026-09-26; links are **stable slugs** — they survive re-harvests):
+  - **GMX (Arbitrum) → ENTRY-WORTHY: https://verdex-alpha.vercel.app/verdict/gmx-arbitrum — score 100**, all four dims CLEAN, Jev **consensus** (0.10) — proof the engine can say yes when evidence is clean
+  - **AAVE (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/aave-ethereum — score 70**, Jev **contested**: SAFETY WARN on the named `upgradeable` centralization flag, FLOW WARN on arb-dominated DEX flow (mature-tier rule, mcap $2.4B — published in CLAIMS)
+  - UNI (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/uni-ethereum — score 70; `mintable` centralization flag surfaced by name, Jev contested
+  - LINK (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/link-ethereum — score 85; concentrated DEX maker flow read as WARN for a $14B asset, Jev contested
+  - SUSHI (Ethereum) → AVOID: https://verdex-alpha.vercel.app/verdict/sushi-ethereum — score 45; sub-$100M mcap → strict tier: top-5 makers 0.73 + `mintable` flag → falsifier names all three failing rows
+  - COMP (Gnosis) → AVOID: https://verdex-alpha.vercel.app/verdict/comp-gnosis — score 30; dead-market signature: 3 unique makers, top-5 = 100% of flow, $17 pool liquidity
+  - FLOKI (BSC) → CAUTION: https://verdex-alpha.vercel.app/verdict/floki-bsc — score 85, Jev contested
+  - TITANO (BSC) → CAUTION: https://verdex-alpha.vercel.app/verdict/titano-bsc — score 20, confidence **low** (thin swap window), Jev lean
+  - PEPE (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/pepe-ethereum — Jev contested
+  - WIF (Solana) → CAUTION: https://verdex-alpha.vercel.app/verdict/wif-solana
   - …plus 24 more majors across Ethereum, Solana, BSC, Arbitrum, Optimism, Polygon, Gnosis on the homepage `case_files/` table
 
 ## Track

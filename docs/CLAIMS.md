@@ -41,7 +41,9 @@ lintas CEX+DEX — window on-chain mereka didominasi infrastruktur arbitrase,
 jadi `top5MakerShare` dan `netBuyRatio` hanya boleh WARN (tidak bisa DANGER).
 Sinyal insider-exit (`thirdPartySells=0`, `uniqueMakers<5`) tetap bisa DANGER
 karena venue-independent. Row `mcapTier` ditampilkan di panel FLOW agar
-tier-nya terlihat.
+tier-nya terlihat. `mcapUsd` tidak tersedia → early tier (fail-strict by
+design); boundary $100M adalah cliff yang disengaja dan dipublikasi — bukan
+continuum.
 
 ## LIQUIDITY (sumber: `dex/liquidity-change/list` + `dex/token/pools`)
 

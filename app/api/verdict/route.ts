@@ -5,6 +5,7 @@ import { createCmcClient } from "@/lib/cmc-client";
 import { analyze } from "@/engine/analyze";
 import { CmcError } from "@/lib/cmc-client";
 import { listSnapshotIds, loadVerdict } from "@/lib/verdict-store";
+import { createLiveGuard } from "@/lib/live-guard";
 
 export const runtime = "nodejs";
 
@@ -33,31 +34,11 @@ function persist(record: unknown & { id?: string }) {
 
 // Live-scan abuse caps: per-IP AND a global daily ceiling across all IPs —
 // the global cap is the one that actually protects the monthly CMC quota
-// (30/IP × N distinct IPs alone could burn 2,700+ credits/day).
+// (30/IP × N distinct IPs alone could burn 2,700+ credits/day). On top of
+// that, quotaOk() probes /v1/key/info and hard-stops live mode when the
+// monthly balance drops below 1,000 credits — snapshots always survive.
 // In-memory = per-serverless-instance; a floor, not a hard limit — documented.
-const LIVE_DAILY_CAP = 30;
-const LIVE_GLOBAL_DAILY_CAP = 200;
-const liveHits = new Map<string, { day: string; n: number }>();
-let liveGlobal = { day: "", n: 0 };
-function allowLive(ip: string): boolean {
-  const day = new Date().toISOString().slice(0, 10);
-  if (liveGlobal.day !== day) liveGlobal = { day, n: 0 };
-  // Bound the map: on day rollover, flush stale-day entries once they pile up.
-  if (liveHits.size > 10_000) {
-    for (const [k, v] of liveHits) if (v.day !== day) liveHits.delete(k);
-  }
-  if (liveGlobal.n >= LIVE_GLOBAL_DAILY_CAP) return false;
-  const e = liveHits.get(ip);
-  if (!e || e.day !== day) {
-    liveHits.set(ip, { day, n: 1 });
-    liveGlobal.n++;
-    return true;
-  }
-  if (e.n >= LIVE_DAILY_CAP) return false;
-  e.n++;
-  liveGlobal.n++;
-  return true;
-}
+const guard = createLiveGuard();
 
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => null)) as { query?: unknown; platform?: unknown; pick?: unknown } | null;
@@ -105,15 +86,22 @@ export async function POST(req: NextRequest) {
   // Rightmost XFF entry is the IP Vercel's edge actually saw — the leftmost
   // is client-supplied and spoofable, so trusting it would bypass the cap.
   const ip = req.headers.get("x-forwarded-for")?.split(",").pop()?.trim() ?? "anon";
-  if (!allowLive(ip)) {
+  if (!guard.allowIp(ip)) {
     return NextResponse.json(
-      { error: `live-scan cap reached (${LIVE_DAILY_CAP}/day/IP, ${LIVE_GLOBAL_DAILY_CAP}/day global). Committed snapshots on the homepage cover the demo.` },
+      { error: `live-scan cap reached (${guard.PER_IP}/day/IP, ${guard.GLOBAL}/day global). Committed snapshots on the homepage cover the demo.` },
       { status: 429 },
     );
   }
 
   try {
-    const r = await analyze(client(), { query: body.query, platform, pick });
+    const cmc = client();
+    if (!(await guard.quotaOk(cmc))) {
+      return NextResponse.json(
+        { error: `live-scan paused — CMC monthly credit balance under ${guard.QUOTA_FLOOR}. Committed snapshots on the homepage cover the demo.` },
+        { status: 429 },
+      );
+    }
+    const r = await analyze(cmc, { query: body.query, platform, pick });
     if (r.kind === "verdict") persist(r);
     return NextResponse.json(r, { status: r.kind === "notFound" ? 404 : 200 });
   } catch (e) {
@@ -124,7 +112,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
-  if (!id || !/^[a-f0-9]{12}$/.test(id)) return NextResponse.json({ error: "id required" }, { status: 400 });
+  if (!id || !/^[a-z0-9-]{1,64}$/.test(id)) return NextResponse.json({ error: "id required" }, { status: 400 });
   const v = loadVerdict(id); // committed snapshots + runtime verdicts, same as the page
   if (!v) return NextResponse.json({ error: "verdict not found" }, { status: 404 });
   return NextResponse.json(v);

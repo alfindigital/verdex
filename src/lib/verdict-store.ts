@@ -10,8 +10,34 @@ const runtimeDir = process.env.VERCEL
   : path.join(process.cwd(), "data", "verdicts");
 const snapshotDir = path.join(process.cwd(), "snapshots");
 
+// Stable demo aliases: snapshots/index.json maps "symbol-platform" slugs to
+// snapshot ids, so public links survive re-harvests that mint new ids.
+export function slugFor(symbol: string, platform: string): string {
+  return `${symbol}-${platform}`
+    .toLowerCase()
+    .replace(/^\$/, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function slugToId(slug: string): string | null {
+  const file = path.join(snapshotDir, "index.json");
+  if (!existsSync(file)) return null;
+  try {
+    const idx = JSON.parse(readFileSync(file, "utf8")) as Record<string, string>;
+    const id = idx[slug];
+    return typeof id === "string" && /^[a-f0-9]{12}$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
 export function loadVerdict(id: string): VerdictRecord | null {
-  if (!/^[a-f0-9]{12}$/.test(id)) return null;
+  if (!/^[a-f0-9]{12}$/.test(id)) {
+    const resolved = slugToId(id.toLowerCase());
+    if (!resolved) return null;
+    id = resolved;
+  }
   for (const dir of [snapshotDir, runtimeDir]) {
     const file = path.join(dir, `${id}.json`);
     if (existsSync(file)) {
