@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import { VerdictCard, type VerdictRecord } from "../src/components/verdict-card";
 
 const floki = JSON.parse(
-  readFileSync(join(process.cwd(), "snapshots", "298cca788e24.json"), "utf8"),
+  readFileSync(join(process.cwd(), "snapshots", "e49cf505ca70.json"), "utf8"),
 ) as VerdictRecord;
 
 const render = (v: VerdictRecord) => renderToStaticMarkup(h(VerdictCard, { v }));

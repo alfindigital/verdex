@@ -44,6 +44,18 @@ describe("flowMetrics", () => {
     expect(m.uniqueMakers).toBe(2);
     expect(m.top5MakerShare).toBe(1);
   });
+
+  it("maker keys are case-insensitive; pools excluded from maker stats", () => {
+    const swaps = [
+      swap("buy", "0xAbC", 100, "0xPOOL"),
+      swap("sell", "0xabc", 60, "0xPOOL"),
+      swap("buy", "0xPOOL", 999, "0xPOOL"),
+    ];
+    const m = flowMetrics(swaps, ["0xPOOL"]);
+    // "0xAbC" and "0xabc" are one maker; the pool itself is not a maker.
+    expect(m.uniqueMakers).toBe(1);
+    expect(m.thirdPartySells).toBe(1);
+  });
 });
 
 describe("liquidityMetrics", () => {
@@ -57,6 +69,18 @@ describe("liquidityMetrics", () => {
     expect(m.poolCount).toBe(1);
     expect(m.totalLiqUsd).toBe(10000);
   });
+  it("max pull is measured against the pool being pulled, not total liquidity", () => {
+    const twoPools: Pool[] = [
+      { address: "P1", dex: "d", liqUsd: 10000, vol24h: 0, t0sym: "T", t1sym: "S" },
+      { address: "P2", dex: "d", liqUsd: 100000, vol24h: 0, t0sym: "T", t1sym: "S" },
+    ];
+    // $3k pulled from the $10k pool = 30% (vs 2.7% if diluted by total).
+    const m = liquidityMetrics([{ ts: 1, kind: "remove", usd: 3000, pool: "P1", maker: "m" }], twoPools);
+    expect(m.maxSinglePullPct).toBeCloseTo(0.3);
+    // Unknown pool falls back to total liquidity.
+    const m2 = liquidityMetrics([{ ts: 1, kind: "remove", usd: 3000, pool: "P9", maker: "m" }], twoPools);
+    expect(m2.maxSinglePullPct).toBeCloseTo(3000 / 110000);
+  });
   it("no pools → insufficient-ish zeros", () => {
     const m = liquidityMetrics([], []);
     expect(m.poolCount).toBe(0);
@@ -65,12 +89,25 @@ describe("liquidityMetrics", () => {
 });
 
 describe("pumpMetrics", () => {
-  it("vol/mcap + makers per 100k vol", () => {
+  it("vol/mcap + makers per 100k of WINDOW usd (not 24h vol)", () => {
     const swaps = Array.from({ length: 40 }, (_, i) => swap("buy", `m${i}`, 250));
     const m = pumpMetrics(swaps, { mcapUsd: 1_000_000, vol24hUsd: 10_000, priceChange24h: 15 });
     expect(m.volMcapRatio).toBeCloseTo(0.01);
-    expect(m.makersPer100kVol).toBeCloseTo(40 / (10_000 / 100_000));
+    // 40 makers × $250 = $10k window → 40 / (10k/100k) = 400
+    expect(m.makersPer100kVol).toBeCloseTo(400);
     expect(m.priceChange24h).toBe(15);
+  });
+  it("high-volume liquid token is not flagged wash — denominator is the window", () => {
+    // 55 makers, $80k observed window, but $9.2M 24h volume (CAKE-shaped).
+    // Old formula: 55/(9.2M/100k)=0.6 → DANGER. Same-window: 55/(80k/100k)=68.75.
+    const swaps = Array.from({ length: 55 }, (_, i) => swap(i % 2 ? "sell" : "buy", `m${i}`, 1454));
+    const m = pumpMetrics(swaps, { mcapUsd: 300_000_000, vol24hUsd: 9_200_000 });
+    expect(m.makersPer100kVol).toBeGreaterThan(5);
+  });
+  it("actual wash window still flagged: few makers, big window usd", () => {
+    const swaps = [swap("buy", "w1", 200_000), swap("sell", "w1", 190_000), swap("buy", "w2", 150_000)];
+    const m = pumpMetrics(swaps, { mcapUsd: 1_000_000, vol24hUsd: 500_000 });
+    expect(m.makersPer100kVol).toBeLessThan(1); // 2 makers / $540k
   });
   it("extreme vol/mcap flags wash", () => {
     const m = pumpMetrics([], { mcapUsd: 50_000, vol24hUsd: 80_000, priceChange24h: 400 });

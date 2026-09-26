@@ -1,6 +1,31 @@
 # HANDOFF — Verdex (CMC API Hackathon)
 
-**Status: PRODUCTION READY** — live https://verdex-alpha.vercel.app · repo `alfindigital/verdex` · updated 2026-09-25.
+**Status: PRODUCTION READY** — live https://verdex-alpha.vercel.app · repo `alfindigital/verdex` · updated 2026-09-26.
+
+## Post-audit remediation (2026-09-26)
+
+P0+P1 roast findings remediated in isolated sprints (see `.goal/out/S*.md`):
+
+- `makersPer100kVol` now same-window (makers per $100k of OBSERVED window USD)
+  — liquid tokens no longer auto-flagged wash.
+- Composite: LAYAK requires all CLEAN (was: allowed 1 WARN — diverged from
+  CLAIMS). Unknown `securityLevel` → WARN (fail-closed). Unclassified `isHit`
+  codes surface as `unclassifiedFlags` WARN row.
+- `maxSinglePullPct` per-pool denominator (was: total liquidity).
+- `dex/token` meta call wired — `creator`/`own` excluded from third-party sells.
+- Market-context calls (gm/latest, gm/historical, fng) now in `receipts[]` +
+  `failures[]` — 9 receipts per verdict.
+- `cmc-client`: 15s timeout + retry ×2 on 5xx/429 only (permanent codes
+  fail fast). Route: `pick` bounds validated; per-IP live cap 30/day;
+  `GET /api/verdict?id=` serves snapshots via `loadVerdict`.
+- Maker keys lowercased; pools excluded from maker stats.
+- Docs synced: CLAIMS (precedence order, $10k warn, per-pool pull, window
+  disclosure, unclassified/unknown-level rules), README (85 tests, ~9 calls,
+  6→9 snapshots, live policy), TECH_SPEC (paths/contracts), PRODUCT_SPEC F7.
+- Snapshots re-harvested post-fix: 9 committed (FLOKI·BONK·CAKE·ORCA·WIF·
+  PEPE = JANGAN; UNI·HOGE = RAWAN-85; TITANO = RAWAN-20 low-conf).
+  10 coverage attempts toward LAYAK/BELUM — none landed; logged honestly
+  (window-calibrated strictness is documented in CLAIMS).
 
 ## What this is
 DEX-native token forensic tool: deterministic rules verdict (LAYAK/RAWAN/JANGAN/BELUM_CUKUP_BUKTI) over 4 evidence dimensions (SAFETY, FLOW, LIQUIDITY, PUMP) + Jev (TypeSafe) per-dimension second opinion + auditable API receipts + shareable verdict pages.

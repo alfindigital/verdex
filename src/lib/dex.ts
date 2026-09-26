@@ -185,7 +185,11 @@ export class TokenNotFoundError extends Error {
 
 export async function getTokenMeta(client: DexClient, ref: TokenRef) {
   const r = await client.get<Record<string, unknown>>("/v1/dex/token", { platform: ref.platform, address: ref.address });
-  return r;
+  const d = (r.data ?? {}) as Record<string, unknown>;
+  // `crt` = creator, `own` = owner (per CMC dex/token payload, probed).
+  // Type-guard: a non-string field must degrade to null, not crash toLowerCase.
+  const creator = typeof d.crt === "string" ? d.crt : typeof d.own === "string" ? d.own : null;
+  return { creator, receipt: r.receipt };
 }
 
 export async function getSwaps(client: DexClient, ref: TokenRef, limit = 100) {
@@ -220,26 +224,46 @@ export async function getSecurity(client: DexClient, ref: TokenRef) {
   return { security: first ? normSecurity(first) : null, receipt: r.receipt };
 }
 
-export async function getMarketContext(client: DexClient): Promise<MarketContext> {
+export interface MarketContextResult {
+  context: MarketContext;
+  receipts: import("./cmc-client").Receipt[];
+  failures: { endpoint: string; error: string }[];
+}
+
+export async function getMarketContext(client: DexClient): Promise<MarketContextResult> {
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 86400_000).toISOString().slice(0, 10);
   const today = now.toISOString().slice(0, 10);
+  const receipts: MarketContextResult["receipts"] = [];
+  const failures: MarketContextResult["failures"] = [];
+  const call = async <T>(endpoint: string, params?: Record<string, unknown>): Promise<T | null> => {
+    try {
+      const r = await client.get<T>(endpoint, params);
+      receipts.push(r.receipt);
+      return r.data;
+    } catch (e) {
+      failures.push({ endpoint, error: e instanceof Error ? e.message : String(e) });
+      return null;
+    }
+  };
   const [latest, hist, fg] = await Promise.all([
-    client.get<{ btc_dominance?: number }>("/v1/global-metrics/quotes/latest").catch(() => null),
-    client
-      .get<{ quotes?: { btc_dominance?: number }[] }>("/v1/global-metrics/quotes/historical", {
-        time_start: weekAgo,
-        time_end: today,
-        interval: "daily",
-      })
-      .catch(() => null),
-    client.get<{ value?: number }>("/v3/fear-and-greed/latest").catch(() => null),
+    call<{ btc_dominance?: number }>("/v1/global-metrics/quotes/latest"),
+    call<{ quotes?: { btc_dominance?: number }[] }>("/v1/global-metrics/quotes/historical", {
+      time_start: weekAgo,
+      time_end: today,
+      interval: "daily",
+    }),
+    call<{ value?: number }>("/v3/fear-and-greed/latest"),
   ]);
-  const btcDom = latest?.data?.btc_dominance ?? null;
-  const histFirst = hist?.data?.quotes?.[0]?.btc_dominance ?? null;
+  const btcDom = latest?.btc_dominance ?? null;
+  const histFirst = hist?.quotes?.[0]?.btc_dominance ?? null;
   return {
-    btcDom,
-    btcDomDelta7d: btcDom !== null && histFirst !== null ? btcDom - histFirst : null,
-    fearGreed: fg?.data?.value ?? null,
+    context: {
+      btcDom,
+      btcDomDelta7d: btcDom !== null && histFirst !== null ? btcDom - histFirst : null,
+      fearGreed: fg?.value ?? null,
+    },
+    receipts,
+    failures,
   };
 }

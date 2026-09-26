@@ -31,8 +31,31 @@ describe("evalSafety", () => {
   it("clean when safe & no hits", () => {
     expect(evalSafety(sm({})).level).toBe("CLEAN");
   });
-  it("insufficient when level unknown", () => {
-    expect(evalSafety(sm({ level: "unknown" })).level).toBe("INSUFFICIENT");
+  it("insufficient when no report exists at all", () => {
+    expect(evalSafety(sm({ level: "unknown", buyTax: null, sellTax: null })).level).toBe("INSUFFICIENT");
+  });
+  it("level-less report carrying isHit flags is still scored (no silent BELUM)", () => {
+    // BUG-1 regression: "unknown" level + real hits → evaluate, don't drop.
+    expect(evalSafety(sm({ level: "unknown", hits: ["honeypot"] })).level).toBe("DANGER");
+    expect(evalSafety(sm({ level: "unknown", hits: ["wash_trading"] })).level).toBe("WARN");
+    expect(evalSafety(sm({ level: "unknown", sellTax: 0.15 })).level).toBe("DANGER");
+  });
+  it("fails closed: unrecognized non-safe level → WARN, not CLEAN", () => {
+    expect(evalSafety(sm({ level: "malicious" })).level).toBe("WARN");
+    expect(evalSafety(sm({ level: "danger" })).level).toBe("WARN");
+  });
+  it("unclassified isHit codes surface as WARN (no silent dead signals)", () => {
+    const v = evalSafety(sm({ hits: ["proxy_admin_upgradeable"] }));
+    expect(v.level).toBe("WARN");
+    const row = v.metrics.find((m) => m.name === "unclassifiedFlags");
+    expect(row?.value).toContain("proxy_admin_upgradeable");
+    expect(row?.level).toBe("WARN");
+  });
+  it("sell-tax-triggered danger names the tax, not 'none'", () => {
+    const v = evalSafety(sm({ sellTax: 0.15 }));
+    const row = v.metrics.find((m) => m.name === "dangerFlags");
+    expect(row?.level).toBe("DANGER");
+    expect(row?.value).toContain("sellTax");
   });
 });
 
@@ -84,6 +107,13 @@ describe("evalPump", () => {
   it("clean baseline", () => {
     expect(evalPump(pm({}), null).level).toBe("CLEAN");
   });
+  it("makersPer100kVol null → INSUFFICIENT row, never silent CLEAN (BUG-2)", () => {
+    // Empty/all-zero-usd window: wash-trading signal un-evaluated → honest
+    // INSUFFICIENT rather than fabricated clean.
+    const v = evalPump(pm({ makersPer100kVol: null }), null);
+    expect(v.level).toBe("INSUFFICIENT");
+    expect(v.metrics.find((m) => m.name === "makersPer100kVol")?.level).toBe("INSUFFICIENT");
+  });
 });
 
 describe("composite", () => {
@@ -98,10 +128,16 @@ describe("composite", () => {
     ).toBe("RAWAN");
   });
   it("BELUM_CUKUP_BUKTI when a dim is INSUFFICIENT and no danger", () => {
-    expect(composite(input({ safety: sm({ level: "unknown" }) })).verdict).toBe("BELUM_CUKUP_BUKTI");
+    expect(composite(input({ safety: sm({ level: "unknown", buyTax: null, sellTax: null }) })).verdict).toBe("BELUM_CUKUP_BUKTI");
   });
   it("LAYAK when all clean and score ≥70", () => {
     expect(composite(input({})).verdict).toBe("LAYAK");
+  });
+  it("a single WARN dim is RAWAN, not LAYAK (CLAIMS: all CLEAN)", () => {
+    expect(composite(input({ flow: fm({ uniqueMakers: 10 }) })).verdict).toBe("RAWAN");
+    const r = composite(input({ liq: lm({ totalLiqUsd: 5000 }) }));
+    expect(r.verdict).toBe("RAWAN");
+    expect(r.score).toBe(85);
   });
   it("score penalizes danger/warn", () => {
     const r = composite(input({ safety: sm({ hits: ["honeypot"] }), flow: fm({ uniqueMakers: 10 }) }));

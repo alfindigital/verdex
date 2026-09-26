@@ -60,15 +60,24 @@ const worst = (rows: MetricRow[]): SubLevel => {
 };
 
 export function evalSafety(s: SafetyMetrics): SubVerdict {
-  if (s.level === "unknown") {
+  // INSUFFICIENT only when there is genuinely nothing to evaluate — a report
+  // missing its level field but carrying isHit flags must still be scored
+  // (honeypot isHit + absent level → JANGAN, never silent BELUM).
+  if (s.level === "unknown" && s.hits.length === 0 && s.sellTax === null && s.buyTax === null) {
     return { dim: "SAFETY", level: "INSUFFICIENT", metrics: [lvl("securityLevel", "unknown", "available data", "INSUFFICIENT")] };
   }
   const rows: MetricRow[] = [];
   const dangerHits = s.hits.filter((h) => DANGER_SAFETY.has(h));
   const warnHits = s.hits.filter((h) => WARN_SAFETY.has(h));
-  rows.push(lvl("dangerFlags", dangerHits.join(",") || "none", "no honeypot/rug_pull/sell-tax>10%", dangerHits.length || (s.sellTax ?? 0) > THRESHOLDS.sellTaxDanger ? "DANGER" : "CLEAN"));
+  const unclassified = s.hits.filter((h) => !DANGER_SAFETY.has(h) && !WARN_SAFETY.has(h));
+  const sellTaxDanger = (s.sellTax ?? 0) > THRESHOLDS.sellTaxDanger;
+  const dangerDesc = [...dangerHits, ...(sellTaxDanger ? [`sellTax ${((s.sellTax ?? 0) * 100).toFixed(1)}%`] : [])];
+  rows.push(lvl("dangerFlags", dangerDesc.join(",") || "none", "no honeypot/rug_pull/sell-tax>10%", dangerHits.length || sellTaxDanger ? "DANGER" : "CLEAN"));
   rows.push(lvl("warnFlags", warnHits.join(",") || "none", "no wash_trading/whitelist/low_liquidity", warnHits.length ? "WARN" : "CLEAN"));
-  rows.push(lvl("securityLevel", s.level, "safe", s.level === "safe" ? "CLEAN" : s.level === "caution" || s.level === "risky" ? "WARN" : "CLEAN"));
+  rows.push(lvl("unclassifiedFlags", unclassified.join(",") || "none", "no unclassified isHit codes", unclassified.length ? "WARN" : "CLEAN"));
+  // Fail-closed: any securityLevel that isn't "safe" (incl. levels we don't
+  // recognize) is a warning — never silently treat the unknown as clean.
+  rows.push(lvl("securityLevel", s.level, "safe", s.level === "safe" ? "CLEAN" : "WARN"));
   return { dim: "SAFETY", level: worst(rows), metrics: rows };
 }
 
@@ -93,7 +102,7 @@ export function evalLiquidity(l: LiquidityMetrics): SubVerdict {
   const lpDeltaPct = l.totalLiqUsd > 0 ? l.netLpDeltaUsd / l.totalLiqUsd : 0;
   const rows: MetricRow[] = [
     lvl("maxSinglePullPct", round2(l.maxSinglePullPct), "<15%", l.maxSinglePullPct > THRESHOLDS.maxSinglePullPct.danger ? "DANGER" : l.maxSinglePullPct >= THRESHOLDS.maxSinglePullPct.warn ? "WARN" : "CLEAN"),
-    lvl("netLpDeltaPct", round2(lpDeltaPct), "≥0", lpDeltaPct < -0.1 ? "DANGER" : lpDeltaPct < 0 ? "WARN" : "CLEAN"),
+    lvl("netLpDeltaPct", round2(lpDeltaPct), "≥0", lpDeltaPct < THRESHOLDS.netLpDeltaPct.danger ? "DANGER" : lpDeltaPct < THRESHOLDS.netLpDeltaPct.warn ? "WARN" : "CLEAN"),
     lvl("totalLiqUsd", Math.round(l.totalLiqUsd), "≥$10k", l.totalLiqUsd < 10_000 ? "WARN" : "CLEAN"),
   ];
   return { dim: "LIQUIDITY", level: worst(rows), metrics: rows };
@@ -106,7 +115,7 @@ export function evalPump(p: PumpMetrics, ctx: Context | null): SubVerdict {
   const rows: MetricRow[] = [
     lvl("volMcapRatio", round2(p.volMcapRatio), "<0.5", p.volMcapRatio > THRESHOLDS.volMcapRatio.danger ? "DANGER" : p.volMcapRatio >= THRESHOLDS.volMcapRatio.warn ? "WARN" : "CLEAN"),
     lvl("makersPer100kVol", p.makersPer100kVol === null ? "n/a" : round2(p.makersPer100kVol), "≥1",
-      p.makersPer100kVol !== null && p.makersPer100kVol < THRESHOLDS.makersPer100k.danger ? "DANGER" : p.makersPer100kVol !== null && p.makersPer100kVol < THRESHOLDS.makersPer100k.warn ? "WARN" : "CLEAN"),
+      p.makersPer100kVol === null ? "INSUFFICIENT" : p.makersPer100kVol < THRESHOLDS.makersPer100k.danger ? "DANGER" : p.makersPer100kVol < THRESHOLDS.makersPer100k.warn ? "WARN" : "CLEAN"),
   ];
   if (ctx && p.priceChange24h !== null && p.priceChange24h > 0.3 && (ctx.btcDomDelta7d ?? 0) > 0 && (ctx.fearGreed ?? 100) < 30) {
     rows.push(lvl("counterMarketPump", `+${(p.priceChange24h * 100).toFixed(0)}% while BTC.D rising & fear`, "pump with market", "WARN"));
@@ -129,8 +138,8 @@ export function composite(i: EngineInput): CompositeResult {
   if (safetyOrFlowDanger > 0) verdict = "JANGAN";
   else if (dangers > 0 || warns >= 2) verdict = "RAWAN";
   else if (insuf > 0) verdict = "BELUM_CUKUP_BUKTI";
-  else if (score >= 70) verdict = "LAYAK";
-  else verdict = "RAWAN";
+  else if (warns === 0 && score >= 70) verdict = "LAYAK"; // CLAIMS: all CLEAN
+  else verdict = "RAWAN"; // single WARN dim stays CAUTION, not entry-worthy
 
   // CMC caps swap history at 100 — "high" means we saw the full window with no gaps.
   const confidence: CompositeResult["confidence"] =

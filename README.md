@@ -38,13 +38,15 @@ check while 4 wallets manufacture a pump and zero independent sellers exist.
 | `/v1/dex/search` | Resolve address *or* name/ticker → token candidates |
 | `/v1/dex/tokens/transactions` | Swap-level flow: side, USD value, maker address |
 | `/v1/dex/token/pools` | Pool depth, 24h volume |
+| `/v1/dex/token` | Token meta — creator/owner excluded from "third-party sells" |
 | `/v1/dex/liquidity-change/list` | LP adds vs pulls (rug-drain detection) |
 | `/v1/dex/security/detail` | Honeypot/tax/rug_pull/wash_trading flags |
 | `/v1/global-metrics/quotes/latest` + `/historical` | BTC-dominance delta (counter-market pump context) |
 | `/v3/fear-and-greed/latest` | Market sentiment context |
 
-One verdict costs **~6 CMC calls** (well inside Basic tier's 15k credits/mo,
-50 req/min — validated live).
+One verdict costs **~9 CMC calls** (well inside Basic tier's 15k credits/mo,
+50 req/min — validated live). Live mode is capped at **30 scans/IP/day**
+(per-instance floor) so a public demo can't drain the credit pool.
 
 ## Where the API shaped the product (honest limitations)
 
@@ -82,17 +84,20 @@ pnpm dev
 ```
 
 **Demo mode (default, `VERDEX_LIVE` unset):** serves the committed
-`snapshots/` verdicts — BONK, WIF, CAKE, FLOKI — real CMC data harvested
-live, replayable forever, zero credits. Try `FLOKI` or paste a showcased
-address.
+`snapshots/` verdicts — FLOKI, ORCA, PEPE, WIF, BONK, CAKE, UNI, HOGE,
+TITANO — real CMC data harvested live, replayable forever, zero credits.
+Try `FLOKI` or paste a showcased address. Screenshots in `demo-shots/`.
 
 **Live mode:** `VERDEX_LIVE=1 pnpm dev` — real calls, receipts, and
-persisted verdicts under `data/`.
+persisted verdicts under `data/`, capped at 30 analyses per IP per UTC day
+(in-memory, per serverless instance — a floor against casual hammering, not
+a hard global limit; rightmost XFF entry is used since leftmost is
+spoofable). Set `VERDEX_LIVE=0` for snapshot-only public deployments.
 
 ## Testing
 
 ```bash
-pnpm vitest run   # 67 tests: client, normalizers, metrics, rules, jev, orchestrator
+pnpm vitest run   # 87 tests: client, normalizers, metrics, rules, jev, orchestrator
 pnpm typecheck
 pnpm build
 ```

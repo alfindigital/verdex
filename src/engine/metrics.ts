@@ -47,16 +47,18 @@ export function flowMetrics(swaps: Swap[], poolAddrs: string[] = [], creator?: s
   const sellers = new Set<string>();
 
   for (const s of swaps) {
+    const m = s.maker.toLowerCase();
     if (s.side === "buy") {
       buyUsd += s.usd;
       buyCount++;
     } else {
       sellUsd += s.usd;
       sellCount++;
-      const m = s.maker.toLowerCase();
-      if (m !== creatorLc && !poolSet.has(m)) sellers.add(s.maker);
+      if (m !== creatorLc && !poolSet.has(m)) sellers.add(m);
     }
-    makerUsd.set(s.maker, (makerUsd.get(s.maker) ?? 0) + s.usd);
+    // Pools are infrastructure, not traders — excluded from maker stats so a
+    // pool address in `ma` can't inflate breadth or concentration.
+    if (!poolSet.has(m)) makerUsd.set(m, (makerUsd.get(m) ?? 0) + s.usd);
   }
 
   const totalUsd = buyUsd + sellUsd;
@@ -78,6 +80,7 @@ export function flowMetrics(swaps: Swap[], poolAddrs: string[] = [], creator?: s
 
 export function liquidityMetrics(events: LiqEvent[], pools: Pool[]): LiquidityMetrics {
   const totalLiqUsd = pools.reduce((a, p) => a + p.liqUsd, 0);
+  const liqByPool = new Map(pools.map((p) => [p.address.toLowerCase(), p.liqUsd]));
   let addUsd = 0;
   let removeUsd = 0;
   let addCount = 0;
@@ -90,7 +93,11 @@ export function liquidityMetrics(events: LiqEvent[], pools: Pool[]): LiquidityMe
     } else {
       removeUsd += e.usd;
       removeCount++;
-      if (totalLiqUsd > 0) maxPull = Math.max(maxPull, e.usd / totalLiqUsd);
+      // CLAIMS: "remove terbesar vs pool size" — the pool being pulled, not
+      // total liquidity (a big pull on a small pool would otherwise dilute).
+      // Unknown pools fall back to total rather than hiding the pull.
+      const denom = liqByPool.get(e.pool.toLowerCase()) ?? totalLiqUsd;
+      if (denom > 0) maxPull = Math.max(maxPull, e.usd / denom);
     }
   }
   return {
@@ -106,12 +113,18 @@ export function liquidityMetrics(events: LiqEvent[], pools: Pool[]): LiquidityMe
 export function pumpMetrics(
   swaps: Swap[],
   stats: { mcapUsd?: number | null; vol24hUsd?: number | null; priceChange24h?: number | null },
+  poolAddrs: string[] = [],
 ): PumpMetrics {
   const { mcapUsd, vol24hUsd, priceChange24h } = stats;
-  const makers = new Set(swaps.map((s) => s.maker)).size;
+  const poolSet = new Set(poolAddrs.map((a) => a.toLowerCase()));
+  const makers = new Set(swaps.map((s) => s.maker.toLowerCase()).filter((m) => !poolSet.has(m))).size;
+  // Same-window maker density: unique makers per $100k of OBSERVED swap USD.
+  // (Dividing windowed makers by full 24h volume would flag every liquid
+  // token — numerator capped at ~100 while denominator scales with volume.)
+  const windowUsd = swaps.reduce((a, s) => a + s.usd, 0);
   return {
     volMcapRatio: mcapUsd && mcapUsd > 0 && vol24hUsd != null ? vol24hUsd / mcapUsd : null,
-    makersPer100kVol: vol24hUsd && vol24hUsd > 0 ? makers / (vol24hUsd / 100_000) : null,
+    makersPer100kVol: windowUsd > 0 ? makers / (windowUsd / 100_000) : null,
     priceChange24h: priceChange24h ?? null,
   };
 }

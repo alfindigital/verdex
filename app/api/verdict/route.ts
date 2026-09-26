@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from "fs";
+import { mkdirSync, writeFileSync } from "fs";
 import { createCmcClient } from "@/lib/cmc-client";
 import { analyze } from "@/engine/analyze";
 import { CmcError } from "@/lib/cmc-client";
@@ -31,17 +31,45 @@ function persist(record: unknown & { id?: string }) {
   }
 }
 
+// Live-scan abuse cap: max N live analyses per IP per UTC day. In-memory =
+// per-instance on serverless (a floor, not a hard global limit) — documented.
+const LIVE_DAILY_CAP = 30;
+const liveHits = new Map<string, { day: string; n: number }>();
+function allowLive(ip: string): boolean {
+  const day = new Date().toISOString().slice(0, 10);
+  // Bound the map: on day rollover, flush stale-day entries once they pile up.
+  if (liveHits.size > 10_000) {
+    for (const [k, v] of liveHits) if (v.day !== day) liveHits.delete(k);
+  }
+  const e = liveHits.get(ip);
+  if (!e || e.day !== day) {
+    liveHits.set(ip, { day, n: 1 });
+    return true;
+  }
+  if (e.n >= LIVE_DAILY_CAP) return false;
+  e.n++;
+  return true;
+}
+
 export async function POST(req: NextRequest) {
-  const body = (await req.json().catch(() => null)) as { query?: string; platform?: string; pick?: number } | null;
-  if (!body?.query?.trim()) {
+  const body = (await req.json().catch(() => null)) as { query?: unknown; platform?: unknown; pick?: unknown } | null;
+  if (typeof body?.query !== "string" || !body.query.trim()) {
     return NextResponse.json({ error: "query required (token address or name/ticker)" }, { status: 400 });
   }
+  if (body.platform !== undefined && typeof body.platform !== "string") {
+    return NextResponse.json({ error: "platform must be a string" }, { status: 400 });
+  }
+  if (body.pick !== undefined && (typeof body.pick !== "number" || !Number.isInteger(body.pick) || body.pick < 0 || body.pick > 49)) {
+    return NextResponse.json({ error: "pick must be an integer 0..49" }, { status: 400 });
+  }
+  const platform = body.platform as string | undefined;
+  const pick = body.pick as number | undefined;
 
   // Demo mode (VERDEX_LIVE unset): serve committed snapshots only — the demo
   // can never fail on a judge's machine or burn API credits.
   if (process.env.VERDEX_LIVE !== "1") {
     const q = body.query.trim().toLowerCase();
-    const plat = body.platform?.trim().toLowerCase();
+    const plat = platform?.trim().toLowerCase();
     const match = listSnapshotIds()
       .map((id) => loadVerdict(id))
       .find(
@@ -66,8 +94,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Rightmost XFF entry is the IP Vercel's edge actually saw — the leftmost
+  // is client-supplied and spoofable, so trusting it would bypass the cap.
+  const ip = req.headers.get("x-forwarded-for")?.split(",").pop()?.trim() ?? "anon";
+  if (!allowLive(ip)) {
+    return NextResponse.json(
+      { error: `live-scan cap reached (${LIVE_DAILY_CAP}/day/IP). Committed snapshots on the homepage cover the demo.` },
+      { status: 429 },
+    );
+  }
+
   try {
-    const r = await analyze(client(), { query: body.query, platform: body.platform, pick: body.pick });
+    const r = await analyze(client(), { query: body.query, platform, pick });
     if (r.kind === "verdict") persist(r);
     return NextResponse.json(r, { status: r.kind === "notFound" ? 404 : 200 });
   } catch (e) {
@@ -79,7 +117,7 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
   if (!id || !/^[a-f0-9]{12}$/.test(id)) return NextResponse.json({ error: "id required" }, { status: 400 });
-  const file = path.join(dataDir, "verdicts", `${id}.json`);
-  if (!existsSync(file)) return NextResponse.json({ error: "verdict not found" }, { status: 404 });
-  return NextResponse.json(JSON.parse(readFileSync(file, "utf8")));
+  const v = loadVerdict(id); // committed snapshots + runtime verdicts, same as the page
+  if (!v) return NextResponse.json({ error: "verdict not found" }, { status: 404 });
+  return NextResponse.json(v);
 }

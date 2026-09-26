@@ -1,42 +1,42 @@
 {
   "kind": "verdict",
-  "id": "6bcb959abc38",
-  "ts": "2026-09-25T10:25:44.606Z",
+  "id": "c5ed0ebbf386",
+  "ts": "2026-09-25T23:50:10.187Z",
   "token": {
     "platform": "Solana",
     "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
     "name": "Bonk",
     "symbol": "Bonk",
-    "mcapUsd": 326383806.6409859,
-    "vol24hUsd": 3012592.8121788483,
-    "priceChange24h": 0.0566,
-    "liqUsd": 4883058.14229649
+    "mcapUsd": 326411896.3600546,
+    "vol24hUsd": 2481064.4668894606,
+    "priceChange24h": -0.0068,
+    "liqUsd": 4938652.994373112
   },
   "metrics": {
     "flow": {
       "swapCount": 100,
-      "buyCount": 57,
-      "sellCount": 43,
-      "buyUsd": 946.0895937966421,
-      "sellUsd": 1235.7872785010918,
-      "netBuyUsd": -289.69768470444967,
-      "netBuyRatio": -0.13277453388071764,
-      "uniqueMakers": 58,
-      "top5MakerShare": 0.8952789787211607,
-      "thirdPartySells": 40
+      "buyCount": 29,
+      "sellCount": 71,
+      "buyUsd": 1711.8150025215455,
+      "sellUsd": 1457.2065100720429,
+      "netBuyUsd": 254.6084924495026,
+      "netBuyRatio": 0.08034293596231415,
+      "uniqueMakers": 62,
+      "top5MakerShare": 0.7598688092277649,
+      "thirdPartySells": 57
     },
     "liq": {
       "poolCount": 20,
-      "totalLiqUsd": 6179418.142685624,
-      "netLpDeltaUsd": 393398.3131111504,
+      "totalLiqUsd": 6555680.865570026,
+      "netLpDeltaUsd": 573879.3173467828,
       "maxSinglePullPct": 0,
-      "addCount": 12,
-      "removeCount": 8
+      "addCount": 14,
+      "removeCount": 6
     },
     "pump": {
-      "volMcapRatio": 0.00923021531975888,
-      "makersPer100kVol": 1.9252518881916765,
-      "priceChange24h": 0.0566
+      "volMcapRatio": 0.007601023414148721,
+      "makersPer100kVol": 1956.439858600329,
+      "priceChange24h": -0.0068
     },
     "safety": {
       "level": "safe",
@@ -48,7 +48,7 @@
   },
   "result": {
     "verdict": "JANGAN",
-    "score": 45,
+    "score": 60,
     "subs": [
       {
         "dim": "SAFETY",
@@ -67,6 +67,12 @@
             "level": "CLEAN"
           },
           {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
             "name": "securityLevel",
             "value": "safe",
             "threshold": "safe",
@@ -80,27 +86,27 @@
         "metrics": [
           {
             "name": "thirdPartySells",
-            "value": 40,
+            "value": 57,
             "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
             "level": "CLEAN"
           },
           {
             "name": "uniqueMakers",
-            "value": 58,
+            "value": 62,
             "threshold": "≥20",
             "level": "CLEAN"
           },
           {
             "name": "top5MakerShare",
-            "value": 0.9,
+            "value": 0.76,
             "threshold": "<0.50",
             "level": "DANGER"
           },
           {
             "name": "netBuyRatio",
-            "value": -0.13,
+            "value": 0.08,
             "threshold": ">0",
-            "level": "WARN"
+            "level": "CLEAN"
           }
         ]
       },
@@ -116,13 +122,13 @@
           },
           {
             "name": "netLpDeltaPct",
-            "value": 0.06,
+            "value": 0.09,
             "threshold": "≥0",
             "level": "CLEAN"
           },
           {
             "name": "totalLiqUsd",
-            "value": 6179418,
+            "value": 6555681,
             "threshold": "≥$10k",
             "level": "CLEAN"
           }
@@ -130,7 +136,7 @@
       },
       {
         "dim": "PUMP",
-        "level": "WARN",
+        "level": "CLEAN",
         "metrics": [
           {
             "name": "volMcapRatio",
@@ -140,35 +146,34 @@
           },
           {
             "name": "makersPer100kVol",
-            "value": 1.93,
+            "value": 1956.44,
             "threshold": "≥1",
-            "level": "WARN"
+            "level": "CLEAN"
           }
         ]
       }
     ],
     "confidence": "high",
-    "falsifier": "This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.9."
+    "falsifier": "This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.76."
   },
   "jev": {
     "available": true,
-    "riskyProb": 0.12250000000000001,
+    "riskyProb": 0.1,
     "dims": {
       "SAFETY": 0.05,
-      "FLOW": 0.17,
+      "FLOW": 0.14,
       "LIQUIDITY": 0.09,
-      "PUMP": 0.18
+      "PUMP": 0.12
     },
-    "tokensUsed": 914
+    "tokensUsed": 913
   },
-  "agreement": "contested",
+  "agreement": "consensus",
   "narration": {
     "source": "template",
     "headline": "Avoid Bonk on Solana — the evidence is bad",
     "bullets": [
-      "top5MakerShare = 0.9 (threshold: <0.50)",
-      "makersPer100kVol = 1.93 (threshold: ≥1)",
-      "Confidence: high. Falsifier: This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.9."
+      "top5MakerShare = 0.76 (threshold: <0.50)",
+      "Confidence: high. Falsifier: This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.76."
     ]
   },
   "receipts": [
@@ -177,9 +182,9 @@
       "params": {
         "q": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"
       },
-      "ts": "2026-09-25T10:25:42.411Z",
+      "ts": "2026-09-25T23:50:08.081Z",
       "credits": 1,
-      "sha256": "2a1302b5874da0509d658cf40a44ede58dcaf211aff315bd9fa33c9993d9b5e7",
+      "sha256": "14f60b24cde4e2590b30ec29a5530950e64273cd34b6398ebce1e959f23ca56e",
       "cached": false
     },
     {
@@ -189,9 +194,9 @@
         "limit": 100,
         "platform": "Solana"
       },
-      "ts": "2026-09-25T10:25:43.387Z",
+      "ts": "2026-09-25T23:50:09.303Z",
       "credits": 1,
-      "sha256": "413555173e7c23b53ab128641a7bbcb92f72a3ffa3b1906d6406522032d8338b",
+      "sha256": "4537c36cdbbaf1319cf54ee46dc6da2ffae64c3ecdb852a6a13735686642643d",
       "cached": false
     },
     {
@@ -200,9 +205,9 @@
         "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
         "platform": "Solana"
       },
-      "ts": "2026-09-25T10:25:43.693Z",
+      "ts": "2026-09-25T23:50:08.546Z",
       "credits": 1,
-      "sha256": "29fe54070088fb6d6fb9345075518e396fe52b286320b0d234d4cbe61e84e593",
+      "sha256": "a3fe35049211f9fba3c14f20b8d9f92ec6d71c614d8390544269ce1d31389c3e",
       "cached": false
     },
     {
@@ -211,9 +216,9 @@
         "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
         "platform": "Solana"
       },
-      "ts": "2026-09-25T10:25:43.194Z",
+      "ts": "2026-09-25T23:50:08.587Z",
       "credits": 1,
-      "sha256": "f50cd59e76fc393de7817d8315aaff9ab6385170879000b50a5de9cede42b79f",
+      "sha256": "528220b65b09c6727bd235aa7b796984355d9ebd7d69ce49edad7ffc489843a1",
       "cached": false
     },
     {
@@ -222,9 +227,48 @@
         "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
         "platformName": "Solana"
       },
-      "ts": "2026-09-25T10:25:43.607Z",
+      "ts": "2026-09-25T23:50:08.809Z",
       "credits": 1,
-      "sha256": "49ef8841447e1fda7e64a3fde25a325daf74f00a70665f0426dde171ef9b9ead",
+      "sha256": "08079c85b9d14d54e69c06da36dddc9bb42aac99ffc4c178c471c13488fddffd",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "platform": "Solana"
+      },
+      "ts": "2026-09-25T23:50:08.531Z",
+      "credits": 1,
+      "sha256": "c1dc522dd784d1f0aabaa456f997e5b8fd5e631815ef4e2f01a9e339d26331a8",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-25T23:50:08.349Z",
+      "credits": 0,
+      "sha256": "5535e9bf92dbebb1ca4c23b3f4a8e48657d4c22ddd0bc5bd60d59cf8a50a6b5b",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-25T23:50:08.351Z",
+      "credits": 0,
+      "sha256": "1506a5afc354c0f2e05582a53fe5ecb8b1da37ba8974d9bcfbe41ecd2d7bff8d",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-25",
+        "time_start": "2026-09-18"
+      },
+      "ts": "2026-09-25T23:50:08.361Z",
+      "credits": 0,
+      "sha256": "ea316aa32ea27e6d45c3f125ac1aec9edcff6af28b83459e9aaf30ed4de667b1",
       "cached": false
     }
   ],

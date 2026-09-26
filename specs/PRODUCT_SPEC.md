@@ -34,7 +34,8 @@ Tagline: **"Don't be the exit liquidity."**
 - F5: Narasi AI (opsional) — meringkas verdict dalam bahasa manusia, hanya
   boleh menyebut angka dari JSON hasil hitung.
 - F6: Halaman shareable `/verdict/[id]` + OG image.
-- F7: `/receipts` — audit trail publik.
+- F7: ~~`/receipts` audit page~~ → DROPPED; audit trail tampil inline di
+  verdict card (receipts table per endpoint + sha256).
 - F8: Demo mode tanpa key — render dari snapshot/verdict ter-commit.
 - F9: Konteks market (BTC dominance trend, Fear&Greed) sebagai input interpretasi
   ("pump saat BTC dumping = red flag").

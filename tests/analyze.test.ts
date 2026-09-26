@@ -101,4 +101,60 @@ describe("analyze", () => {
     expect(r.kind).toBe("verdict");
     if (r.kind === "verdict") expect(r.result.verdict).toBe("BELUM_CUKUP_BUKTI");
   });
+
+  it("market-context calls surface receipts when up and failures when down", async () => {
+    // healthyHandlers has no global-metrics/fng handlers → they throw → failures
+    const r = await analyze(mkClient(healthyHandlers), { query: "PEPE" }, deps());
+    if (r.kind !== "verdict") throw new Error("expected verdict");
+    expect(r.failures.map((f) => f.endpoint)).toContain("/v1/global-metrics/quotes/latest");
+
+    const client2 = mkClient({
+      ...healthyHandlers,
+      "/v1/dex/token": () => ({ crt: "deployerX" }),
+      "/v1/global-metrics/quotes/latest": () => ({ btc_dominance: 58 }),
+      "/v1/global-metrics/quotes/historical": () => ({ quotes: [{ btc_dominance: 57 }] }),
+      "/v3/fear-and-greed/latest": () => ({ value: 50 }),
+    });
+    const r2 = await analyze(client2, { query: "PEPE" }, deps());
+    if (r2.kind !== "verdict") throw new Error("expected verdict");
+    expect(r2.receipts.map((x) => x.endpoint)).toEqual(
+      expect.arrayContaining([
+        "/v1/dex/token",
+        "/v1/global-metrics/quotes/latest",
+        "/v1/global-metrics/quotes/historical",
+        "/v3/fear-and-greed/latest",
+      ]),
+    );
+  });
+
+  it("creator from dex/token meta is excluded from third-party sells", async () => {
+    const client = mkClient({
+      ...healthyHandlers,
+      "/v1/dex/token": () => ({ crt: "DEPLOYER1" }),
+      "/v1/dex/tokens/transactions": () => ({
+        swaps: Array.from({ length: 60 }, (_, i) => ({
+          ts: 1700000000 + i,
+          tp: i % 4 === 0 ? "sell" : "buy",
+          ma: i % 10 === 0 ? "deployer1" : `m${i}`,
+          v: 10,
+          tx: `t${i}`,
+          f: "pool1",
+          en: "d",
+        })),
+      }),
+    });
+    const r = await analyze(client, { query: "PEPE" }, deps());
+    if (r.kind !== "verdict") throw new Error("expected verdict");
+    // 15 sells; sellers i=0,20,40 are the (case-insensitive) creator → excluded.
+    expect(r.metrics.flow.thirdPartySells).toBe(12);
+  });
+
+  it("pick out of range → notFound, not a crash", async () => {
+    const client = mkClient({
+      ...healthyHandlers,
+      "/v1/dex/search": () => fakeSearch([SOL_TOKEN, BSC_TOKEN]).data,
+    });
+    const r = await analyze(client, { query: "PEPE", pick: 99 }, deps());
+    expect(r.kind).toBe("notFound");
+  });
 });

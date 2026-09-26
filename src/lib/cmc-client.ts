@@ -67,32 +67,67 @@ export function createCmcClient(opts: CmcClientOpts) {
 
     const url = new URL(baseUrl + endpoint);
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
-    const res = await fetchImpl(url.toString(), {
-      headers: { "X-CMC_PRO_API_KEY": opts.apiKey, Accept: "application/json" },
-    });
-    const rawText = await res.text();
-    if (!res.ok) throw new CmcError(res.status, `HTTP ${res.status} on ${endpoint}`, endpoint);
 
-    const env = JSON.parse(rawText) as CmcEnvelope<T>;
-    const code = Number(env.status?.error_code ?? 0);
-    if (code !== 0) throw new CmcError(code, env.status?.error_message ?? "CMC error", endpoint);
+    // TECH_SPEC §6: 5xx/429 + transport errors retry ×2 with backoff.
+    // 4xx and CMC envelope errors fail fast (they're caller's problem, not flaky).
+    const MAX_ATTEMPTS = 3;
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    let lastErr: unknown;
+    let receipt: Receipt | undefined;
+    let data: T | undefined;
 
-    const receipt: Receipt = {
-      endpoint,
-      params: sortObj(params),
-      ts: env.status?.timestamp ?? new Date().toISOString(),
-      credits: env.status?.credit_count ?? 0,
-      sha256: createHash("sha256").update(rawText).digest("hex"),
-      cached: false,
-    };
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      try {
+        const res = await fetchImpl(url.toString(), {
+          headers: { "X-CMC_PRO_API_KEY": opts.apiKey, Accept: "application/json" },
+          signal: AbortSignal.timeout(15_000),
+        });
+        const rawText = await res.text();
+        if (!res.ok) {
+          if ((res.status >= 500 || res.status === 429) && attempt < MAX_ATTEMPTS - 1) {
+            await sleep(400 * Math.pow(2, attempt));
+            continue;
+          }
+          throw new CmcError(res.status, `HTTP ${res.status} on ${endpoint}`, endpoint);
+        }
+
+        const env = JSON.parse(rawText) as CmcEnvelope<T>;
+        const code = Number(env.status?.error_code ?? 0);
+        if (code !== 0) {
+          // Only HTTP-style 5xx is transient — custom codes like 1001/1006
+          // (bad key, plan restricted) are permanent, don't waste retries.
+          if (code >= 500 && code < 600 && attempt < MAX_ATTEMPTS - 1) {
+            await sleep(400 * Math.pow(2, attempt));
+            continue;
+          }
+          throw new CmcError(code, env.status?.error_message ?? "CMC error", endpoint);
+        }
+
+        receipt = {
+          endpoint,
+          params: sortObj(params),
+          ts: env.status?.timestamp ?? new Date().toISOString(),
+          credits: env.status?.credit_count ?? 0,
+          sha256: createHash("sha256").update(rawText).digest("hex"),
+          cached: false,
+        };
+        data = env.data as T;
+        break;
+      } catch (e) {
+        if (e instanceof CmcError) throw e;
+        lastErr = e;
+        if (attempt < MAX_ATTEMPTS - 1) await sleep(400 * Math.pow(2, attempt));
+      }
+    }
+    if (!receipt) throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
 
     appendFileSync(opts.logPath, JSON.stringify(receipt) + "\n");
 
     if (o?.ttlMs) {
-      writeFileSync(cacheFile, JSON.stringify({ cachedAt: Date.now(), data: env.data, receipt }));
+      writeFileSync(cacheFile, JSON.stringify({ cachedAt: Date.now(), data, receipt }));
     }
 
-    return { data: env.data as T, receipt };
+    return { data: data as T, receipt };
   }
 
   return { get };

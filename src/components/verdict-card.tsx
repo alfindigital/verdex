@@ -157,7 +157,7 @@ function PumpViz({ m }: { m: MetricsBag }) {
         {chg != null && <NeedleGauge value={Math.max(-0.5, Math.min(0.5, chg))} min={-0.5} max={0.5} />}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Stat k="makers /$100k vol" v={mpv != null ? mpv.toFixed(1) : "—"} />
+        <Stat k="makers /$100k win" v={mpv != null ? mpv.toFixed(1) : "—"} />
         <Stat k="vol/mcap" v={vr != null ? vr.toFixed(4) : "—"} />
       </div>
     </div>

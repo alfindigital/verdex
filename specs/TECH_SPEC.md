@@ -8,15 +8,16 @@ demo mode.
 
 ```
 client → POST /api/verdict {input}
-       → engine/verdict.ts
-           → lib/cmc-client.ts  (fetch + receipt + cache)
-           → lib/dex.ts         (resolve + fetchers per platform)
+       → engine/analyze.ts
+           → lib/cmc-client.ts  (fetch + receipt + cache, 15s timeout, retry ×2 pada 5xx/429)
+           → lib/dex.ts         (resolve + fetchers + token meta creator + market ctx)
            → engine/metrics.ts  (4 dimensi)
            → engine/rules.ts    (sub-verdict + composite + falsifier)
            → lib/jev.ts         (second opinion, optional)
-           → lib/narrator.ts    (LLM narasi, optional)
-       → VerdictCard JSON → persist data/verdicts/<id>.json
-UI: / (input + context chips), /verdict/[id], /receipts, /methodology
+           → engine/narrator.ts (LLM narasi, optional)
+       → VerdictCard JSON → persist data/verdicts/<id>.json + snapshots/ (committed)
+UI: / (input + case-file ledger), /verdict/[id] (+OG image)
+    — /receipts & /methodology pages: DI-DROP (receipts tampil inline di verdict card)
 ```
 
 ## 2. Kontrak Data (semua field English)
@@ -29,12 +30,12 @@ type VerdictLevel = 'LAYAK' | 'RAWAN' | 'JANGAN' | 'BELUM_CUKUP_BUKTI';
 
 interface Swap { ts: number; side: 'buy'|'sell'; maker: string; usd: number; tx: string; pool: string; dex: string; }
 interface Receipt { endpoint: string; params: Record<string,unknown>; ts: string; credits: number; sha256: string; }
-interface Metric { name: string; value: number; threshold: number; level: SubVerdictLevel; note?: string; }
-interface SubVerdict { dim: SubDim; level: SubVerdictLevel; metrics: Metric[]; }
+interface MetricRow { name: string; value: number|string; threshold: string; level: SubVerdictLevel; }
+interface SubVerdict { dim: SubDim; level: SubVerdictLevel; metrics: MetricRow[]; }
 interface JevOpinion { available: boolean; riskyProb: number | null; dims?: Partial<Record<SubDim, number|null>>; }
 // agreement dihitung terpisah: 'consensus'|'contested'|'lean'|'unavailable'
 interface VerdictCard {
-  id: string;                 // `${platform}:${address}` sanitized
+  id: string;                 // sha256(`${address}:${ts}`).slice(0,12)
   token: { platform: Platform; address: string; name: string; symbol: string };
   verdict: VerdictLevel;
   score: number;              // 0-100 composite
@@ -98,6 +99,6 @@ interface VerdictCard {
 
 ## 7. Testing
 
-Vitest `tests/`: fixtures JSON dari response riil (diskimpan di
-`tests/fixtures/`), unit tests per metrics/rules function, boundary tests,
-integration test /api/verdict dengan fetch mocked.
+Vitest `tests/` (85 tests): fixtures JSON dari response riil di-inline di
+test files (tidak ada tests/fixtures/ dir), unit tests per metrics/rules
+function, boundary tests, orchestrator tests dengan DexClient mocked.

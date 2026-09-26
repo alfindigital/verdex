@@ -12,16 +12,23 @@ gray zone selalu menghasilkan `BELUM_CUKUP_BUKTI`, bukan tebakan.
 
 | Rule | Level |
 |---|---|
-| `isHit` pada `honeypot`, `rug_pull`, `unusual_sell_tax` (sell_tax > 10%) | DANGER |
-| `isHit` pada `wash_trading`, `whitelist_function`, `low_liquidity`, `unusual_buy_tax`, atau `securityLevel=caution`/`risky` | WARN |
+| `isHit` pada `honeypot`, `rug_pull`, `unusual_sell_tax`, atau `sellTax > 10%` | DANGER |
+| `isHit` pada `wash_trading`, `whitelist_function`, `low_liquidity`, `unusual_buy_tax` | WARN |
+| `isHit` pada riskCode LAIN yang tak terklasifikasi (fail-open dilarang) | WARN |
+| `securityLevel` apa pun selain `safe` (termasuk level tak dikenal) | WARN |
 | Semua flag bersih dan `securityLevel=safe` | CLEAN |
 | Endpoint error / token tidak ada data | INSUFFICIENT |
 
 ## FLOW (sumber: `dex/tokens/transactions`, window = swaps yang tersedia)
 
+Semua threshold di kalibrasi untuk window ~100 swap terakhir (cap CMC) —
+bukan 24 jam. Maker dihitung case-insensitive; address pool dan creator
+(meta `dex/token` `crt`/`own`) tidak dihitung sebagai seller pihak ketiga;
+address pool juga dikecualikan dari statistik maker.
+
 | Metric | CLEAN | WARN | DANGER |
 |---|---|---|---|
-| `thirdPartySellCount` (sell oleh ≥3 maker unik non-pool) | ≥3 sells | 1–2 | **0 sells dengan ≥20 buys** |
+| `thirdPartySellCount` (sell oleh ≥3 maker unik non-pool & non-creator) | ≥3 sells | 1–2 | **0 sells dengan ≥20 buys** |
 | `uniqueMakers` (distinct `ma`) | ≥20 | 5–19 | <5 |
 | `top5MakerShare` (share volume USD 5 maker terbesar) | <0.50 | 0.50–0.70 | >0.70 |
 | `netBuyRatio` = (buyUSD − sellUSD)/totalUSD | >0 | −0.2..0 | <−0.2 |
@@ -32,34 +39,41 @@ Dimensi = worst-of metrics; `swaps < 50` → INSUFFICIENT.
 
 | Metric | CLEAN | WARN | DANGER |
 |---|---|---|---|
-| `netLpDelta` (adds − removes, USD) | ≥0 | −10%..0 | <−10% pool |
-| `maxSinglePullPct` (remove terbesar vs pool size) | <15% | 15–50% | >50% |
+| `netLpDelta` (adds − removes, USD) | ≥0 | −10%..0 | <−10% total liq |
+| `maxSinglePullPct` (remove terbesar vs **pool yang ditarik**; pool tak dikenal → total liq) | <15% | 15–50% | >50% |
+| `totalLiqUsd` | ≥$10k | <$10k | — |
 | `poolCount` | ≥1 valid pool | — | 0 → INSUFFICIENT |
 
-## PUMP (sumber: `dex/token/price`, transactions, `quotes` mcap jika ada)
+## PUMP (sumber: `dex/search` stats + `dex/tokens/transactions` + market ctx)
 
 | Metric | CLEAN | WARN | DANGER |
 |---|---|---|---|
 | `volMcapRatio` (24h vol / mcap) | <0.5 | 0.5–1.0 | >1.0 |
-| `makersPer100kVol` | ≥5 | 1–5 | <1 (volume oleh <1 maker/100k = wash) |
+| `makersPer100kVol` — unique makers per $100k **USD dalam window yang sama** (bukan 24h; membandingkan window≠24h membuat token likuid selalu terlihat wash) | ≥5 | 1–5 | <1 |
 | Konteks: harga naik >30% 24h SAAT BTC.D naik & F&G <30 | — | WARN | — |
 
 ## Composite → verdict
 
+Dievaluasi **berurutan** (proven red flag mengalahkan data yang hilang —
+`DANGER` outranks `INSUFFICIENT`, by design):
+
 | Kondisi | Verdict |
 |---|---|
-| Salah satu dimensi `INSUFFICIENT` karena coverage | **BELUM_CUKUP_BUKTI** |
 | Ada `DANGER` di SAFETY atau FLOW | **JANGAN** |
 | Ada `DANGER` di LIQUIDITY/PUMP, atau ≥2 WARN | **RAWAN** |
-| Semua CLEAN, score ≥70 | **LAYAK** |
-| Lainnya | **RAWAN** |
+| Salah satu dimensi `INSUFFICIENT` (tanpa DANGER & <2 WARN) | **BELUM_CUKUP_BUKTI** |
+| Semua CLEAN (`warns=0`) dan score ≥70 | **LAYAK** |
+| Lainnya (mis. tepat 1 WARN) | **RAWAN** |
 
 Score = 100 − Σ penalties (DANGER −40, WARN −15 per dimensi, INSUFFICIENT −25),
 clamped 0–100. CMC membatasi swap history ke 100 transaksi terbaru
 (param `offset`/`page` diabaikan — diprobe), sehingga confidence:
-`high` jika swaps≥100 (window penuh) & semua endpoint sukses;
-`medium` swaps 50–99; `low` jika ada dimensi INSUFFICIENT tapi cukup bukti
-untuk verdict non-abu.
+`high` jika swaps≥100 (window penuh) **dan nol dimensi INSUFFICIENT**;
+`medium` jika swaps 50–99 (INSUFFICIENT tidak mengubah medium);
+selain itu `low` (window <50 swap). Kegagalan endpoint tidak menurunkan
+confidence langsung — ia muncul sebagai INSUFFICIENT pada dimensi terkait
+(yang memblokir `high`) atau hanya dicatat di `failures[]` untuk
+konteks/meta — semuanya terlihat di receipts/failures panel.
 
 ## Jev cross-examination
 

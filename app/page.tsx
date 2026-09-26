@@ -11,6 +11,7 @@ const ENDPOINTS = [
   "dex/search",
   "dex/tokens/transactions",
   "dex/token/pools",
+  "dex/token",
   "dex/liquidity-change/list",
   "dex/security/detail",
   "global-metrics/quotes",
@@ -97,9 +98,9 @@ export default function Home() {
             <div className="font-data text-[10px] uppercase tracking-widest text-faint">verdict logic</div>
             <div className="mt-2 space-y-1.5 font-data text-[10px] leading-relaxed text-dim">
               <div><span className="text-danger">AVOID</span> ← DANGER in SAFETY|FLOW</div>
-              <div><span className="text-warn">CAUTION</span> ← any DANGER, ≥2 WARN, or score&lt;70</div>
+              <div><span className="text-warn">CAUTION</span> ← DANGER elsewhere, or any WARN</div>
               <div><span className="text-safe">ENTRY</span> ← all CLEAN + score≥70</div>
-              <div><span className="text-unknown">INSUFFICIENT</span> ← data missing</div>
+              <div><span className="text-unknown">INSUFFICIENT</span> ← data missing, no DANGER/&lt;2 WARN</div>
             </div>
           </div>
         </aside>
