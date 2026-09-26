@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { VerdictCard, type VerdictRecord } from "../src/components/verdict-card";
 
-const floki = JSON.parse(
+const sushi = JSON.parse(
   readFileSync(join(process.cwd(), "snapshots", "5071c7a844a8.json"), "utf8"),
 ) as VerdictRecord;
 
@@ -15,7 +15,7 @@ const render = (v: VerdictRecord) => renderToStaticMarkup(h(VerdictCard, { v }))
 
 describe("VerdictCard render", () => {
   it("renders stamp, gauge, ledger, falsifier and receipts from a real snapshot", () => {
-    const html = render(floki);
+    const html = render(sushi);
     expect(html).toContain("AVOID");
     expect(html).toContain('aria-label="score 45/100"');
     expect(html).toContain("SAFETY");
@@ -26,8 +26,8 @@ describe("VerdictCard render", () => {
 
   it("renders vendor flag YES when flaggedByVendor is boolean true", () => {
     const v: VerdictRecord = {
-      ...floki,
-      metrics: { ...floki.metrics, safety: { ...floki.metrics.safety, flaggedByVendor: true } },
+      ...sushi,
+      metrics: { ...sushi.metrics, safety: { ...sushi.metrics.safety, flaggedByVendor: true } },
     };
     const html = render(v);
     expect(html).toContain("vendor flag");
@@ -36,9 +36,9 @@ describe("VerdictCard render", () => {
 
   it("renders em-dash, not fabricated zeros, when pump metrics are null", () => {
     const v: VerdictRecord = {
-      ...floki,
+      ...sushi,
       metrics: {
-        ...floki.metrics,
+        ...sushi.metrics,
         pump: { volMcapRatio: null, makersPer100kVol: null, priceChange24h: null },
       },
     };
@@ -50,10 +50,10 @@ describe("VerdictCard render", () => {
 
   it("renders empty SplitBar as neutral track when buy+sell = 0", () => {
     const v: VerdictRecord = {
-      ...floki,
+      ...sushi,
       metrics: {
-        ...floki.metrics,
-        flow: { ...floki.metrics.flow, buyUsd: 0, sellUsd: 0, buyCount: 0, sellCount: 0 },
+        ...sushi.metrics,
+        flow: { ...sushi.metrics.flow, buyUsd: 0, sellUsd: 0, buyCount: 0, sellCount: 0 },
       },
     };
     const html = render(v);

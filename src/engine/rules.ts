@@ -168,7 +168,6 @@ export function composite(i: EngineInput): CompositeResult {
 }
 
 function buildFalsifier(subs: SubVerdict[], verdict: VerdictLevel): string {
-  const bad = subs.filter((s) => s.level === "DANGER" || s.level === "WARN");
   if (verdict === "LAYAK") {
     return "This verdict flips to RAWAN if two dimensions degrade to WARN (e.g. top-5 maker share rises above 0.50 or a liquidity pull exceeds 15% of pool depth).";
   }
@@ -177,10 +176,7 @@ function buildFalsifier(subs: SubVerdict[], verdict: VerdictLevel): string {
     .flatMap((s) => s.metrics.filter((m) => m.level === "DANGER" || m.level === "WARN"));
   const worstMetric = failing.find((m) => m.level === "DANGER") ?? failing[0];
   if (!worstMetric) return `This verdict (${verdict}) requires all four dimensions to score CLEAN.`;
-  const all = failing
-    .slice(0, 4)
-    .map((m) => `${m.name} (${m.value} vs ${m.threshold})`)
-    .join(", ");
+  const all = failing.map((m) => `${m.name} (${m.value} vs ${m.threshold})`).join(", ");
   return `This verdict (${verdict}) flips if ${worstMetric.name} moves back inside ${worstMetric.threshold} — currently ${worstMetric.value}. Failing rows: ${all}.`;
 }
 
