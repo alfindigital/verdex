@@ -1,0 +1,276 @@
+{
+  "kind": "verdict",
+  "id": "7addd478823c",
+  "ts": "2026-09-26T03:10:29.296Z",
+  "token": {
+    "platform": "Arbitrum",
+    "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+    "name": "GMX",
+    "symbol": "GMX",
+    "mcapUsd": 89685603.81157972,
+    "vol24hUsd": 295012.60953305394,
+    "priceChange24h": 0.0185,
+    "liqUsd": 1430306.7536578367
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 72,
+      "sellCount": 28,
+      "buyUsd": 7643.8076281967415,
+      "sellUsd": 3698.5655400438054,
+      "netBuyUsd": 3945.242088152936,
+      "netBuyRatio": 0.3478321537859374,
+      "uniqueMakers": 39,
+      "top5MakerShare": 0.5367416748869143,
+      "thirdPartySells": 9
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 4441005.922762584,
+      "netLpDeltaUsd": 41415.797945743514,
+      "maxSinglePullPct": 0,
+      "addCount": 11,
+      "removeCount": 9
+    },
+    "pump": {
+      "volMcapRatio": 0.0032894087456092204,
+      "makersPer100kVol": 343.84338640173456,
+      "priceChange24h": 0.0185
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 85,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "none",
+            "threshold": "no unclassified isHit codes",
+            "level": "CLEAN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "thirdPartySells",
+            "value": 9,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 39,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.54,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": 0.35,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.01,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 4441006,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 343.84,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (RAWAN) flips if thirdPartySells moves back inside ≥3 (0 sells w/ buys = hidden honeypot) — currently 9."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.1,
+    "dims": {
+      "SAFETY": 0.04,
+      "FLOW": 0.16,
+      "LIQUIDITY": 0.08,
+      "PUMP": 0.12
+    },
+    "tokensUsed": 913
+  },
+  "agreement": "consensus",
+  "narration": {
+    "source": "template",
+    "headline": "GMX on Arbitrum shows warning signs — size accordingly",
+    "bullets": [
+      "top5MakerShare = 0.54 (threshold: <0.50)",
+      "Confidence: high. Falsifier: This verdict (RAWAN) flips if thirdPartySells moves back inside ≥3 (0 sells w/ buys = hidden honeypot) — currently 9."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a"
+      },
+      "ts": "2026-09-26T03:10:28.215Z",
+      "credits": 1,
+      "sha256": "595f9e6fafbcb32d836f6a4b2c241e347479a441c46dc0cb23b17c73143cd7b3",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "limit": 100,
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T03:10:28.999Z",
+      "credits": 1,
+      "sha256": "c2852efb9e86844e53c8246062b45474d9f5461bc1026f62d02bdd0d4cb29f0b",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T03:10:28.683Z",
+      "credits": 1,
+      "sha256": "8d363961b3f09ac142ab57f46d3301d9e9800d2ba47190de7f45097c4c65c3f6",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T03:10:28.746Z",
+      "credits": 1,
+      "sha256": "266443ef7d7591939211fecb0950056b477742c25377527d17aeffaabf83a776",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "platformName": "Arbitrum"
+      },
+      "ts": "2026-09-26T03:10:28.489Z",
+      "credits": 1,
+      "sha256": "de392b3d1f8346aac25fc1717eb03997875d5b04b5364b6e1d3d636ffcf33850",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "platform": "Arbitrum"
+      },
+      "ts": "2026-09-26T03:10:28.661Z",
+      "credits": 1,
+      "sha256": "f2b16d64adcbbb838c0238ef301e0bda8aa02c59d577da96534f5ee71f121487",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T03:10:28.479Z",
+      "credits": 0,
+      "sha256": "7959ca45f5fd3b6c46f76b62f6157736172ac65a1b2978fa8f64208fafc203d3",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T03:10:28.967Z",
+      "credits": 0,
+      "sha256": "766985c88b126c32defb01b7dc24ec0baa710ba299bff81833e9263255811d9b",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T03:10:28.968Z",
+      "credits": 0,
+      "sha256": "8f05b1d4a6ad3f4c45be54cd8cf9fc1ba8e45b36728c1f78344b8af67f7d25c6",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

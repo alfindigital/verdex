@@ -1,0 +1,279 @@
+{
+  "kind": "verdict",
+  "id": "27f09625fd53",
+  "ts": "2026-09-26T03:12:09.772Z",
+  "token": {
+    "platform": "Ethereum",
+    "address": "0x956f47f50a910163d8bf957cf5846d573e7f87ca",
+    "name": "Fei USD",
+    "symbol": "FEI",
+    "mcapUsd": 3960642.734693852,
+    "vol24hUsd": 3660.710038880456,
+    "priceChange24h": 0.005,
+    "liqUsd": 24498.714772623855
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 45,
+      "sellCount": 55,
+      "buyUsd": 12313.583438518026,
+      "sellUsd": 13491.841854359644,
+      "netBuyUsd": -1178.2584158416175,
+      "netBuyRatio": -0.045659329480875414,
+      "uniqueMakers": 69,
+      "top5MakerShare": 0.36094484694370427,
+      "thirdPartySells": 46
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 969654.6044210005,
+      "netLpDeltaUsd": 8492.956840731187,
+      "maxSinglePullPct": 0,
+      "addCount": 5,
+      "removeCount": 6
+    },
+    "pump": {
+      "volMcapRatio": 0.0009242717114608471,
+      "makersPer100kVol": 267.3856339001865,
+      "priceChange24h": 0.005
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "mintable"
+      ],
+      "buyTax": null,
+      "sellTax": null,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 70,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "mintable",
+            "threshold": "no unclassified isHit codes",
+            "level": "WARN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "thirdPartySells",
+            "value": 46,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 69,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.36,
+            "threshold": "<0.50",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": -0.05,
+            "threshold": ">0",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.01,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 969655,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 267.39,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (RAWAN) flips if dangerFlags moves back inside no honeypot/rug_pull/sell-tax>10% — currently none."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.23249999999999998,
+    "dims": {
+      "SAFETY": 0.61,
+      "FLOW": 0.09,
+      "LIQUIDITY": 0.13,
+      "PUMP": 0.1
+    },
+    "tokensUsed": 920
+  },
+  "agreement": "consensus",
+  "narration": {
+    "source": "template",
+    "headline": "FEI on Ethereum shows warning signs — size accordingly",
+    "bullets": [
+      "unclassifiedFlags = mintable (threshold: no unclassified isHit codes)",
+      "netBuyRatio = -0.05 (threshold: >0)",
+      "Confidence: high. Falsifier: This verdict (RAWAN) flips if dangerFlags moves back inside no honeypot/rug_pull/sell-tax>10% — currently none."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0x956F47F50A910163D8BF957Cf5846D573E7f87CA"
+      },
+      "ts": "2026-09-26T03:12:08.534Z",
+      "credits": 1,
+      "sha256": "7aa3b3be0fa7de94d2f47a400683241860a53feb2d6f565c810539e5e1fe30b4",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0x956f47f50a910163d8bf957cf5846d573e7f87ca",
+        "limit": 100,
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:12:09.239Z",
+      "credits": 1,
+      "sha256": "9aa3cc1227c987f493cf505a167e7fe4e78a72357317936bffc40eb5d6fb6b69",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0x956f47f50a910163d8bf957cf5846d573e7f87ca",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:12:09.007Z",
+      "credits": 1,
+      "sha256": "62e07e1aa90776066cd241e1ba44206897f745ec46642b359fcd9f9e8a0257fe",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0x956f47f50a910163d8bf957cf5846d573e7f87ca",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:12:09.078Z",
+      "credits": 1,
+      "sha256": "32464505c890d99aec4a72b2e84d87acfe3574dcfd7fc604ee3bbc5c2a82e844",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0x956f47f50a910163d8bf957cf5846d573e7f87ca",
+        "platformName": "Ethereum"
+      },
+      "ts": "2026-09-26T03:12:08.815Z",
+      "credits": 1,
+      "sha256": "9397e66bdaadff80e2b656a04b89a441bce3e5d48d4a108b9642d34ceb34dd37",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0x956f47f50a910163d8bf957cf5846d573e7f87ca",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:12:08.979Z",
+      "credits": 1,
+      "sha256": "1e243b133607312cd39ad03a7ba5bb3f72abb782eb0c5e8f15b0122fe2089eb4",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T03:12:08.803Z",
+      "credits": 1,
+      "sha256": "0344b95bea381c77b88278be88336074936bca8870182527094967b20758accd",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T03:12:08.801Z",
+      "credits": 1,
+      "sha256": "694d9a98cd2d921d551e7c0179bca45df431283775c406f21a7f48e9b92fbefa",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T03:12:09.313Z",
+      "credits": 1,
+      "sha256": "2de9c4fbf2f8efbf4c6f6f3306e155550c6a7345fb3fe9b6ab06a6482b98c804",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

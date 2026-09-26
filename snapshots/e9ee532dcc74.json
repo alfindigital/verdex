@@ -1,0 +1,261 @@
+{
+  "kind": "verdict",
+  "id": "e9ee532dcc74",
+  "ts": "2026-09-26T03:12:05.925Z",
+  "token": {
+    "platform": "Ethereum",
+    "address": "0x5af2be193a6abca9c8817001f45744777db30756",
+    "name": "Voyager",
+    "symbol": "VGX",
+    "mcapUsd": 3489168.975831259,
+    "vol24hUsd": 0,
+    "priceChange24h": 0,
+    "liqUsd": 2.241966501382973
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 2,
+      "buyCount": 1,
+      "sellCount": 1,
+      "buyUsd": 0.000277798796998899,
+      "sellUsd": 0.001774786979785392,
+      "netBuyUsd": -0.0014969881827864929,
+      "netBuyRatio": -0.7293182091185334,
+      "uniqueMakers": 2,
+      "top5MakerShare": 1,
+      "thirdPartySells": 1
+    },
+    "liq": {
+      "poolCount": 2,
+      "totalLiqUsd": 2.2425223785072976,
+      "netLpDeltaUsd": 0,
+      "maxSinglePullPct": 0,
+      "addCount": 0,
+      "removeCount": 0
+    },
+    "pump": {
+      "volMcapRatio": 0,
+      "makersPer100kVol": 97438071.65678234,
+      "priceChange24h": 0
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "mintable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "RAWAN",
+    "score": 45,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "mintable",
+            "threshold": "no unclassified isHit codes",
+            "level": "WARN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "INSUFFICIENT",
+        "metrics": [
+          {
+            "name": "swapCount",
+            "value": 2,
+            "threshold": "≥50",
+            "level": "INSUFFICIENT"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 2,
+            "threshold": "≥$10k",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 97438071.66,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "low",
+    "falsifier": "This verdict (RAWAN) flips if dangerFlags moves back inside no honeypot/rug_pull/sell-tax>10% — currently none."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.5275,
+    "dims": {
+      "SAFETY": 0.75,
+      "FLOW": 0.5,
+      "LIQUIDITY": 0.7,
+      "PUMP": 0.16
+    },
+    "tokensUsed": 861
+  },
+  "agreement": "consensus",
+  "narration": {
+    "source": "template",
+    "headline": "VGX on Ethereum shows warning signs — size accordingly",
+    "bullets": [
+      "unclassifiedFlags = mintable (threshold: no unclassified isHit codes)",
+      "totalLiqUsd = 2 (threshold: ≥$10k)",
+      "Confidence: low. Falsifier: This verdict (RAWAN) flips if dangerFlags moves back inside no honeypot/rug_pull/sell-tax>10% — currently none."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0x5Af2Be193a6ABCa9c8817001F45744777Db30756"
+      },
+      "ts": "2026-09-26T03:12:05.064Z",
+      "credits": 1,
+      "sha256": "f06d25a351020da890e6a01dd4c72034b29d425d731f24b36eef325972171b15",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0x5af2be193a6abca9c8817001f45744777db30756",
+        "limit": 100,
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:12:05.635Z",
+      "credits": 1,
+      "sha256": "7e1585cf269d87aa805b940dcc43fdfb5cf52826c876e8979939067973429afc",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0x5af2be193a6abca9c8817001f45744777db30756",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:12:05.534Z",
+      "credits": 1,
+      "sha256": "1a2e96f041f0f27390ac43b10d06f0afe8910fc0b645a4fa999d13dd9e17ab94",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0x5af2be193a6abca9c8817001f45744777db30756",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:12:05.548Z",
+      "credits": 1,
+      "sha256": "de260edd7a2ec490a64d5c2ace902449ef48fb2a4b7da37da60346fe5c475eca",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0x5af2be193a6abca9c8817001f45744777db30756",
+        "platformName": "Ethereum"
+      },
+      "ts": "2026-09-26T03:12:05.505Z",
+      "credits": 1,
+      "sha256": "e2706da2f5116906da084fc10a1356a49555e8152bb67c9f06953be739916565",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0x5af2be193a6abca9c8817001f45744777db30756",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:12:05.507Z",
+      "credits": 1,
+      "sha256": "df1ba92b7ca38f552775f897bd6d0db188323a1591ab218774e0891fce3ace61",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T03:12:05.333Z",
+      "credits": 0,
+      "sha256": "0764c495cc99e635301d614852d8f64db90109b6a06410e9ac8acd83fc838d0c",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T03:12:05.330Z",
+      "credits": 0,
+      "sha256": "b9651134c34026790da20b485bb4923a3747fc79179f6ab0fac53730d229b1dc",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T03:12:05.335Z",
+      "credits": 0,
+      "sha256": "b8c67650b86c01a6a263f721c1695524b311897ff353f77d2dca38828dc76094",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

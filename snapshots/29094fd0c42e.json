@@ -1,0 +1,279 @@
+{
+  "kind": "verdict",
+  "id": "29094fd0c42e",
+  "ts": "2026-09-26T03:10:31.046Z",
+  "token": {
+    "platform": "BSC",
+    "address": "0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63",
+    "name": "Venus",
+    "symbol": "XVS",
+    "mcapUsd": 100075353.98706919,
+    "vol24hUsd": 20999.8191149549,
+    "priceChange24h": 0.0141,
+    "liqUsd": 424993.02465441474
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 37,
+      "sellCount": 63,
+      "buyUsd": 774.4273407959465,
+      "sellUsd": 1647.1712161351343,
+      "netBuyUsd": -872.7438753391878,
+      "netBuyRatio": -0.3603998990011069,
+      "uniqueMakers": 45,
+      "top5MakerShare": 0.5118568510659394,
+      "thirdPartySells": 35
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 1041213.4859585741,
+      "netLpDeltaUsd": 118925.94305483064,
+      "maxSinglePullPct": 0,
+      "addCount": 13,
+      "removeCount": 7
+    },
+    "pump": {
+      "volMcapRatio": 0.00020984006829162253,
+      "makersPer100kVol": 1858.2766276929492,
+      "priceChange24h": 0.0141
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "On-Chain Token Trading May Be Paused"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "JANGAN",
+    "score": 45,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "On-Chain Token Trading May Be Paused",
+            "threshold": "no unclassified isHit codes",
+            "level": "WARN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "DANGER",
+        "metrics": [
+          {
+            "name": "thirdPartySells",
+            "value": 35,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 45,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.51,
+            "threshold": "<0.50",
+            "level": "WARN"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": -0.36,
+            "threshold": ">0",
+            "level": "DANGER"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.11,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 1041213,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 1858.28,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (JANGAN) flips if netBuyRatio moves back inside >0 — currently -0.36."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.255,
+    "dims": {
+      "SAFETY": 0.61,
+      "FLOW": 0.16,
+      "LIQUIDITY": 0.11,
+      "PUMP": 0.14
+    },
+    "tokensUsed": 928
+  },
+  "agreement": "consensus",
+  "narration": {
+    "source": "template",
+    "headline": "Avoid XVS on BSC — the evidence is bad",
+    "bullets": [
+      "unclassifiedFlags = On-Chain Token Trading May Be Paused (threshold: no unclassified isHit codes)",
+      "netBuyRatio = -0.36 (threshold: >0)",
+      "Confidence: high. Falsifier: This verdict (JANGAN) flips if netBuyRatio moves back inside >0 — currently -0.36."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63"
+      },
+      "ts": "2026-09-26T03:10:29.731Z",
+      "credits": 1,
+      "sha256": "559a4771c4cd50b533c3fa40f1d6e208961ae9772192966984e823b64baa4cd3",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63",
+        "limit": 100,
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T03:10:30.461Z",
+      "credits": 1,
+      "sha256": "b8554317ecc4ceedd3b26b903730049a98fcf63b6692b799f6ef7d4af0cba437",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T03:10:30.195Z",
+      "credits": 1,
+      "sha256": "a0c0bcc0da49776c00f8b37826fc5f3df108c28efaa7d7d8509f88237f281da5",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T03:10:30.218Z",
+      "credits": 1,
+      "sha256": "5f9d70e894cff0012c70186ecf2afb40453086278faa10467ff33bbaaeac9224",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63",
+        "platformName": "BSC"
+      },
+      "ts": "2026-09-26T03:10:30.165Z",
+      "credits": 1,
+      "sha256": "bbe8df39cfc9393f0e96816849556ed1758e0b1f26d1d21f6d6b91609a0ea799",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63",
+        "platform": "BSC"
+      },
+      "ts": "2026-09-26T03:10:30.179Z",
+      "credits": 1,
+      "sha256": "50f37a7df389077dd6ce82350064fad6398692d1ee672956e3543536f571fd47",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T03:10:29.993Z",
+      "credits": 0,
+      "sha256": "0f8772add7647f61309e9c6225cb6fdef69844730436ecd46952d4824a005b21",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T03:10:29.999Z",
+      "credits": 0,
+      "sha256": "0723d3ff010748abef62263fdb04f79e698c1011d639a313c00e8d6441d7d1bf",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T03:10:30.442Z",
+      "credits": 1,
+      "sha256": "9adb2d1d838b50e4056b02a3b69c73f49641dd09c9ec56ddd06e91255cd52009",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

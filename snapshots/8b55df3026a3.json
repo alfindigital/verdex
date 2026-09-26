@@ -1,0 +1,280 @@
+{
+  "kind": "verdict",
+  "id": "8b55df3026a3",
+  "ts": "2026-09-26T03:10:18.268Z",
+  "token": {
+    "platform": "Ethereum",
+    "address": "0xc944e90c64b2c07662a292be6244bdf05cda44a7",
+    "name": "Graph Token",
+    "symbol": "GRT",
+    "mcapUsd": 303565685.5257246,
+    "vol24hUsd": 109150.66372336297,
+    "priceChange24h": 0.0984,
+    "liqUsd": 222371.49154836027
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 49,
+      "sellCount": 51,
+      "buyUsd": 5076.179982438169,
+      "sellUsd": 2601.175679355003,
+      "netBuyUsd": 2475.0043030831657,
+      "netBuyRatio": 0.322377184555898,
+      "uniqueMakers": 24,
+      "top5MakerShare": 0.9083077055408646,
+      "thirdPartySells": 17
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 246470.20050726266,
+      "netLpDeltaUsd": 17033.52385677227,
+      "maxSinglePullPct": 0,
+      "addCount": 10,
+      "removeCount": 10
+    },
+    "pump": {
+      "volMcapRatio": 0.0003595619298483372,
+      "makersPer100kVol": 312.6076354575764,
+      "priceChange24h": 0.0984
+    },
+    "safety": {
+      "level": "caution",
+      "hits": [
+        "mintable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "JANGAN",
+    "score": 45,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "mintable",
+            "threshold": "no unclassified isHit codes",
+            "level": "WARN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "caution",
+            "threshold": "safe",
+            "level": "WARN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "DANGER",
+        "metrics": [
+          {
+            "name": "thirdPartySells",
+            "value": 17,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 24,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.91,
+            "threshold": "<0.50",
+            "level": "DANGER"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": 0.32,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.07,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 246470,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 312.61,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.91."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.415,
+    "dims": {
+      "SAFETY": 0.94,
+      "FLOW": 0.29,
+      "LIQUIDITY": 0.18,
+      "PUMP": 0.25
+    },
+    "tokensUsed": 918
+  },
+  "agreement": "consensus",
+  "narration": {
+    "source": "template",
+    "headline": "Avoid GRT on Ethereum — the evidence is bad",
+    "bullets": [
+      "unclassifiedFlags = mintable (threshold: no unclassified isHit codes)",
+      "securityLevel = caution (threshold: safe)",
+      "top5MakerShare = 0.91 (threshold: <0.50)",
+      "Confidence: high. Falsifier: This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.91."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0xc944e90c64b2c07662a292be6244bdf05cda44a7"
+      },
+      "ts": "2026-09-26T03:10:17.420Z",
+      "credits": 1,
+      "sha256": "3f2045f44f1d4947d7bae39392e412089661f45f4e7a8f9b99f27d18e96e966e",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0xc944e90c64b2c07662a292be6244bdf05cda44a7",
+        "limit": 100,
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:10:17.986Z",
+      "credits": 1,
+      "sha256": "db1bca32f7d27d5912bb9e195d6f2eb2dd742a618a3f3bc88f0134191c92bcdb",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0xc944e90c64b2c07662a292be6244bdf05cda44a7",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:10:17.888Z",
+      "credits": 1,
+      "sha256": "da4fa4c9b503f7a04beaf9e42f1db0d4c5c4348e636f6e63ca61eef4f59cbccf",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0xc944e90c64b2c07662a292be6244bdf05cda44a7",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:10:17.977Z",
+      "credits": 1,
+      "sha256": "26287df0e742d403d4318a40290f15a3e1884d80ba599656ea74e28aeb4095bc",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0xc944e90c64b2c07662a292be6244bdf05cda44a7",
+        "platformName": "Ethereum"
+      },
+      "ts": "2026-09-26T03:10:17.707Z",
+      "credits": 1,
+      "sha256": "c6800970d5086b27e040670fb80aeef6cf0dc4052505a5f1f3dfabdf4adae46f",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0xc944e90c64b2c07662a292be6244bdf05cda44a7",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:10:17.877Z",
+      "credits": 1,
+      "sha256": "b5dd23f9a319190a57baa8a2336a2e54c9409f0e191a20f1357ae98e5fcf3ace",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T03:10:17.696Z",
+      "credits": 0,
+      "sha256": "585c43a0b5171ff2aa63c527605e68e45388e41da672e69f7febb1cee1d6a04e",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T03:10:17.700Z",
+      "credits": 0,
+      "sha256": "53c36fab85ca8f51ccec56831c52f9d46cfe5c3b95751372245e7aebca9071f0",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T03:10:17.694Z",
+      "credits": 0,
+      "sha256": "53c3f081d8dc4e1b7cbe820d08f1d629c1cc0d7b2f890902d241734e7d8af63d",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

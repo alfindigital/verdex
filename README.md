@@ -84,9 +84,11 @@ pnpm dev
 ```
 
 **Demo mode (default, `VERDEX_LIVE` unset):** serves the committed
-`snapshots/` verdicts — FLOKI, ORCA, PEPE, WIF, BONK, CAKE, UNI, HOGE,
-TITANO — real CMC data harvested live, replayable forever, zero credits.
-Try `FLOKI` or paste a showcased address. Screenshots in `demo-shots/`.
+`snapshots/` verdicts — 34 real CMC records across 7 chains (Ethereum,
+Solana, BSC, Polygon, Arbitrum, Optimism, Gnosis): 1 ENTRY-WORTHY (LDO),
+11 CAUTION (UNI, HOGE, TITANO, CRV, …), 22 AVOID. Real data harvested
+live, replayable forever, zero credits. Try `FLOKI` or `LDO`, or paste a
+showcased address. Screenshots in `demo-shots/`.
 
 **Live mode:** `VERDEX_LIVE=1 pnpm dev` — real calls, receipts, and
 persisted verdicts under `data/`, capped at 30 analyses per IP per UTC day

@@ -1,0 +1,282 @@
+{
+  "kind": "verdict",
+  "id": "cec4f31f6a2d",
+  "ts": "2026-09-26T03:10:15.329Z",
+  "token": {
+    "platform": "Ethereum",
+    "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+    "name": "Synthetix Network Token",
+    "symbol": "SNX",
+    "mcapUsd": 150417043.7873342,
+    "vol24hUsd": 25765.878658770704,
+    "priceChange24h": -0.0089,
+    "liqUsd": 116446.95195182922
+  },
+  "metrics": {
+    "flow": {
+      "swapCount": 100,
+      "buyCount": 51,
+      "sellCount": 49,
+      "buyUsd": 8845.732124068467,
+      "sellUsd": 7796.284219301567,
+      "netBuyUsd": 1049.4479047669001,
+      "netBuyRatio": 0.06306014145845895,
+      "uniqueMakers": 34,
+      "top5MakerShare": 0.8785218285780871,
+      "thirdPartySells": 22
+    },
+    "liq": {
+      "poolCount": 20,
+      "totalLiqUsd": 1448257.6228236537,
+      "netLpDeltaUsd": 142836.75737672654,
+      "maxSinglePullPct": 0,
+      "addCount": 9,
+      "removeCount": 11
+    },
+    "pump": {
+      "volMcapRatio": 0.0001712962707550586,
+      "makersPer100kVol": 204.30216686780972,
+      "priceChange24h": -0.0089
+    },
+    "safety": {
+      "level": "safe",
+      "hits": [
+        "blacklist_function",
+        "On-Chain Token Trading May Be Paused",
+        "mintable",
+        "upgradeable"
+      ],
+      "buyTax": 0,
+      "sellTax": 0,
+      "flaggedByVendor": false
+    }
+  },
+  "result": {
+    "verdict": "JANGAN",
+    "score": 45,
+    "subs": [
+      {
+        "dim": "SAFETY",
+        "level": "WARN",
+        "metrics": [
+          {
+            "name": "dangerFlags",
+            "value": "none",
+            "threshold": "no honeypot/rug_pull/sell-tax>10%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "warnFlags",
+            "value": "none",
+            "threshold": "no wash_trading/whitelist/low_liquidity",
+            "level": "CLEAN"
+          },
+          {
+            "name": "unclassifiedFlags",
+            "value": "blacklist_function,On-Chain Token Trading May Be Paused,mintable,upgradeable",
+            "threshold": "no unclassified isHit codes",
+            "level": "WARN"
+          },
+          {
+            "name": "securityLevel",
+            "value": "safe",
+            "threshold": "safe",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "FLOW",
+        "level": "DANGER",
+        "metrics": [
+          {
+            "name": "thirdPartySells",
+            "value": 22,
+            "threshold": "≥3 (0 sells w/ buys = hidden honeypot)",
+            "level": "CLEAN"
+          },
+          {
+            "name": "uniqueMakers",
+            "value": 34,
+            "threshold": "≥20",
+            "level": "CLEAN"
+          },
+          {
+            "name": "top5MakerShare",
+            "value": 0.88,
+            "threshold": "<0.50",
+            "level": "DANGER"
+          },
+          {
+            "name": "netBuyRatio",
+            "value": 0.06,
+            "threshold": ">0",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "LIQUIDITY",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "maxSinglePullPct",
+            "value": 0,
+            "threshold": "<15%",
+            "level": "CLEAN"
+          },
+          {
+            "name": "netLpDeltaPct",
+            "value": 0.1,
+            "threshold": "≥0",
+            "level": "CLEAN"
+          },
+          {
+            "name": "totalLiqUsd",
+            "value": 1448258,
+            "threshold": "≥$10k",
+            "level": "CLEAN"
+          }
+        ]
+      },
+      {
+        "dim": "PUMP",
+        "level": "CLEAN",
+        "metrics": [
+          {
+            "name": "volMcapRatio",
+            "value": 0,
+            "threshold": "<0.5",
+            "level": "CLEAN"
+          },
+          {
+            "name": "makersPer100kVol",
+            "value": 204.3,
+            "threshold": "≥1",
+            "level": "CLEAN"
+          }
+        ]
+      }
+    ],
+    "confidence": "high",
+    "falsifier": "This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.88."
+  },
+  "jev": {
+    "available": true,
+    "riskyProb": 0.37999999999999995,
+    "dims": {
+      "SAFETY": 0.85,
+      "FLOW": 0.28,
+      "LIQUIDITY": 0.18,
+      "PUMP": 0.21
+    },
+    "tokensUsed": 945
+  },
+  "agreement": "consensus",
+  "narration": {
+    "source": "template",
+    "headline": "Avoid SNX on Ethereum — the evidence is bad",
+    "bullets": [
+      "unclassifiedFlags = blacklist_function,On-Chain Token Trading May Be Paused,mintable,upgradeable (threshold: no unclassified isHit codes)",
+      "top5MakerShare = 0.88 (threshold: <0.50)",
+      "Confidence: high. Falsifier: This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.88."
+    ]
+  },
+  "receipts": [
+    {
+      "endpoint": "/v1/dex/search",
+      "params": {
+        "q": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f"
+      },
+      "ts": "2026-09-26T03:10:13.924Z",
+      "credits": 1,
+      "sha256": "ecafba46295e5367f93fad683eb6bef732aa207bcb729332fcd37c3712520c79",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/tokens/transactions",
+      "params": {
+        "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+        "limit": 100,
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:10:14.791Z",
+      "credits": 1,
+      "sha256": "50379dd98d2a3dfcfa6a8cdba7fd2a0b5524bd57d0cdaadebc1c33ba74b29b5a",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token/pools",
+      "params": {
+        "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:10:14.383Z",
+      "credits": 1,
+      "sha256": "b7cf663d019ef562de5518402ffeb84290897d4582a8ccdb96ecf96753a53715",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/liquidity-change/list",
+      "params": {
+        "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:10:14.501Z",
+      "credits": 1,
+      "sha256": "97124f3bede4461578e25bbeb0db2bcd7432902c131ec50858b1284c621ba08a",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/security/detail",
+      "params": {
+        "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+        "platformName": "Ethereum"
+      },
+      "ts": "2026-09-26T03:10:14.368Z",
+      "credits": 1,
+      "sha256": "d64d1444adef2badd178ec65cbffe9633e911b1bb40104a7a7985e18677ad700",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/dex/token",
+      "params": {
+        "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+        "platform": "Ethereum"
+      },
+      "ts": "2026-09-26T03:10:14.385Z",
+      "credits": 1,
+      "sha256": "d1c26a59fb70f6dddb9cd0264e34999fbba181f3af8d7e836a469b5e70ba5f04",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/historical",
+      "params": {
+        "interval": "daily",
+        "time_end": "2026-09-26",
+        "time_start": "2026-09-19"
+      },
+      "ts": "2026-09-26T03:10:14.204Z",
+      "credits": 1,
+      "sha256": "959ab946990d757638527c0f331e37fd37a1386c87c12eed78ec328bcbf794e6",
+      "cached": false
+    },
+    {
+      "endpoint": "/v1/global-metrics/quotes/latest",
+      "params": {},
+      "ts": "2026-09-26T03:10:14.211Z",
+      "credits": 0,
+      "sha256": "a34f453b19a43a76aec89e68edc1026c7a11c67ba25237a26a4393be6046b957",
+      "cached": false
+    },
+    {
+      "endpoint": "/v3/fear-and-greed/latest",
+      "params": {},
+      "ts": "2026-09-26T03:10:14.691Z",
+      "credits": 0,
+      "sha256": "3538d219cdd29fedf73e597b385783cd44188cc56c9df065791baa20312568b3",
+      "cached": false
+    }
+  ],
+  "failures": []
+}

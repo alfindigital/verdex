@@ -4,16 +4,18 @@
 
 - **Live demo**: https://verdex-alpha.vercel.app
 - **Repo (public)**: https://github.com/alfindigital/verdex
-- **Shareable verdicts** (committed snapshots, real CMC data, recomputed 2026-09-26):
-  - FLOKI (BSC) → AVOID: https://verdex-alpha.vercel.app/verdict/e49cf505ca70 — Jev **consensus**
+- **Shareable verdicts** (34 committed snapshots, real CMC data, recomputed 2026-09-26):
+  - **LDO (Ethereum) → ENTRY-WORTHY: https://verdex-alpha.vercel.app/verdict/7a4b2e35aeae — score 100**, all four dims CLEAN (21 third-party sells, top-5 share 0.40, net buys +0.28), Jev **consensus** (0.09) — proof the engine can say yes when evidence is clean
   - PEPE (Ethereum) → AVOID: https://verdex-alpha.vercel.app/verdict/d98a1e3d881f — Jev **contested** (Jev rates every dim <0.5 while rules flag FLOW danger)
   - UNI (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/97126871d688 — score 85; SAFETY WARN via unclassified `mintable` flag (surfaced, not hidden)
-  - HOGE (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/982418183c78 — score 85 on a single WARN (top-5 maker share 0.68)
   - TITANO (BSC) → CAUTION: https://verdex-alpha.vercel.app/verdict/2a1b06f38cff — score 20, confidence **low** (thin swap window), Jev lean
+  - FLOKI (BSC) → AVOID: https://verdex-alpha.vercel.app/verdict/e49cf505ca70
   - WIF (Solana) → AVOID: https://verdex-alpha.vercel.app/verdict/0a244cd6bc1d
+  - LINK (Ethereum) → AVOID: https://verdex-alpha.vercel.app/verdict/b9303860dd49 — top-5 makers 0.96
   - BONK (Solana) → AVOID: https://verdex-alpha.vercel.app/verdict/c5ed0ebbf386
   - ORCA (Solana) → AVOID: https://verdex-alpha.vercel.app/verdict/2c2c3cd60e17
   - CAKE (BSC) → AVOID: https://verdex-alpha.vercel.app/verdict/52a8c61dd1c7
+  - …plus 24 more majors across Ethereum, Solana, BSC, Arbitrum, Optimism, Polygon, Gnosis on the homepage `case_files/` table
 
 ## Track
 
@@ -42,11 +44,11 @@ Honest limits documented in README: no OHLCV on Basic tier → PUMP uses vol/mca
 ## Demo video script (~90s)
 
 1. (0–10s) Home: "Every day, traders lose money to tokens that pass every contract check but behave like rugs. Verdex answers the real question."
-2. (10–25s) Paste FLOKI BSC address → Check → verdict card: AVOID 60/100 — FLOW DANGER stamp. "Not a crash warning — a structure warning."
-3. (25–45s) Scroll FLOW: 50 unique makers but top-5 = 72% of USD flow; net outflow −0.61; 30 real third-party sells. "Breadth looks fine. Concentration and direction don't. That's what scanners miss."
+2. (10–25s) Open LDO → **ENTRY-WORTHY 100/100**, all four dims CLEAN — "the engine says yes when the data is clean." Then FLOKI BSC → AVOID 60/100 — FLOW DANGER stamp. "Same deterministic rules. Opposite verdicts. The difference is the evidence."
+3. (25–45s) Scroll FLOKI FLOW: 50 unique makers but top-5 = 72% of USD flow; net outflow −0.61; 30 real third-party sells. "Breadth looks fine. Concentration and direction don't. That's what scanners miss."
 4. (45–60s) Jev panel: per-dimension bars → consensus badge. Switch to PEPE: rules flag FLOW DANGER (top-5 0.55 + net-outflow 0.87) while Jev rates every dim <0.5 → **contested**. Then UNI: score 85 CAUTION — one WARN, and it's an unclassified `mintable` flag other tools would drop. "Two independent judges. When they disagree, we show the fight — never a fake consensus."
 5. (60–75s) Evidence receipts: 9 endpoint calls per verdict, params, credits, SHA-256. "Every number auditable."
-6. (75–90s) Case files: 7 of 9 tokens flag AVOID on concentrated flow — plus a CAUTION-85 pair and a low-confidence TITANO. Falsifier tells you exactly what flips each verdict. Close: "Structure tells you could it rug. Verdex tells you is it rugging. #BuildwithCMC"
+6. (75–90s) Case files: 34 verdicts on file — 22 AVOID, 11 CAUTION, 1 ENTRY-WORTHY — across 7 chains. Every falsifier tells you exactly what flips it. Close: "Structure tells you could it rug. Verdex tells you is it rugging. #BuildwithCMC"
 
 ## X post draft
 
