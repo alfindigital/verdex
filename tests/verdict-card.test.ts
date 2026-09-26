@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import { VerdictCard, type VerdictRecord } from "../src/components/verdict-card";
 
 const floki = JSON.parse(
-  readFileSync(join(process.cwd(), "snapshots", "e49cf505ca70.json"), "utf8"),
+  readFileSync(join(process.cwd(), "snapshots", "5071c7a844a8.json"), "utf8"),
 ) as VerdictRecord;
 
 const render = (v: VerdictRecord) => renderToStaticMarkup(h(VerdictCard, { v }));
@@ -17,7 +17,7 @@ describe("VerdictCard render", () => {
   it("renders stamp, gauge, ledger, falsifier and receipts from a real snapshot", () => {
     const html = render(floki);
     expect(html).toContain("AVOID");
-    expect(html).toContain('aria-label="score 60/100"');
+    expect(html).toContain('aria-label="score 45/100"');
     expect(html).toContain("SAFETY");
     expect(html).toContain("thresholds");
     expect(html).toContain("Falsifier");
