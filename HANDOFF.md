@@ -60,6 +60,16 @@ Push to `main` → Vercel auto-deploys. Vercel CLI `--token` does NOT accept the
 - Re-harvested all 34 snapshots: **30 CAUTION / 3 AVOID / 1 ENTRY-WORTHY (GMX 100, consensus)**. SUSHI (<$100M) and COMP/Gnosis (dead market) correctly stay AVOID.
 - 93 tests · tsc clean · build clean.
 
+## 2026-09-27 — S8: independent-audit remediation (second external review)
+- **Verdict routes now static:** `/verdict/[id]` + `opengraph-image` use `generateStaticParams` (68 baked paths = 34 hex + 34 slugs) + `dynamicParams=true`; `force-dynamic` removed; `outputFileTracingIncludes` keeps `snapshots/**` in the serverless bundle for on-demand ids.
+- **Fresh-install fix:** bogus `allowBuilds` placeholders removed from `pnpm-workspace.yaml`.
+- **Fonts self-hosted:** `next/font/local` (Archivo variable + Plex Mono static) — no Google Fonts fetch at build.
+- **Share-on-X** intent link on verdict pages; `metadataBase` set.
+- **Live mode is ON in prod** (POST `/api/verdict` → live CMC search verified); quota breaker + caps protect the monthly budget. Corpus **frozen** — no re-harvest before submission.
+- **OHLCV probe:** `/v1/dex/*/ohlcv/*` on current key (450k credits/mo plan) returns `system busy` on every variant → unavailable; proxy PUMP metrics retained.
+- SUBMISSION.md: Jev framed as optional advisory over 100%-CMC deterministic verdict; originality note added.
+- 97 tests · tsc clean · build clean (68 static verdict paths prerendered).
+
 ## Next actions (user-side)
 1. Record ~90s demo video — script updated 2026-09-26 in SUBMISSION.md (GMX yes → SUSHI avoid → AAVE contested arc).
 2. Submit DoraHacks (SUBMISSION.md has copy + exact form fields).

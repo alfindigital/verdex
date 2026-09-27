@@ -1,9 +1,15 @@
 import { ImageResponse } from "next/og";
-import { loadVerdict } from "@/lib/verdict-store";
+import { listSnapshotIds, listSnapshotSlugs, loadVerdict } from "@/lib/verdict-store";
 
 export const runtime = "nodejs";
+export const dynamicParams = true;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+export function generateStaticParams() {
+  const ids = [...listSnapshotIds(), ...listSnapshotSlugs()];
+  return [...new Set(ids)].map((id) => ({ id }));
+}
 
 const COLORS: Record<string, string> = {
   LAYAK: "#10b981",

@@ -52,6 +52,17 @@ export function loadVerdict(id: string): VerdictRecord | null {
   return null;
 }
 
+export function listSnapshotSlugs(): string[] {
+  const file = path.join(snapshotDir, "index.json");
+  if (!existsSync(file)) return [];
+  try {
+    const idx = JSON.parse(readFileSync(file, "utf8")) as Record<string, string>;
+    return Object.keys(idx);
+  } catch {
+    return [];
+  }
+}
+
 export function listSnapshotIds(): string[] {
   if (!existsSync(snapshotDir)) return [];
   return readdirSync(snapshotDir)

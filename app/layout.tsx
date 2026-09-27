@@ -1,20 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, IBM_Plex_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const archivo = Archivo({
-  subsets: ["latin"],
+// Self-hosted fonts (SIL OFL) — no Google Fonts fetch at build time.
+const archivo = localFont({
+  src: "./fonts/Archivo.ttf", // variable font, covers 100–900
   variable: "--font-archivo",
-  weight: ["400", "500", "600", "700", "800"],
 });
 
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
+const plexMono = localFont({
+  src: [
+    { path: "./fonts/IBMPlexMono-Regular.ttf", weight: "400" },
+    { path: "./fonts/IBMPlexMono-Medium.ttf", weight: "500" },
+    { path: "./fonts/IBMPlexMono-Bold.ttf", weight: "700" },
+  ],
   variable: "--font-plex-mono",
-  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://verdex-alpha.vercel.app"),
   title: "Verdex — Don't be the exit liquidity",
   description:
     "Paste a DEX token. Get an auditable verdict — entry-worthy, caution, or avoid — computed from CoinMarketCap evidence and cross-examined by an independent decision model.",

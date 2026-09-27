@@ -341,3 +341,24 @@ Root:      README · SUBMISSION.md (judges copy) · HANDOFF.md · LICENSE · env
 6. Grep diff range `8c89f6f..HEAD` for secrets; confirm only `.env.example` tracked.
 7. Confirm no token allowlist exists: grep `rules.ts` for symbol/address constants (there are none — only thresholds).
 8. Confirm Jev never mutates the verdict: `analyze.ts` returns `result` computed before jev is awaited.
+
+---
+
+## 15. Addendum — Second Independent Audit (2026-09-27) & Resolutions
+
+External auditor score: **6/10 → 8.5/10** conditional on fixes below. Their P0 claim (all verdict
+pages 404, homepage serving old hex corpus) was verified **stale** — it captured a pre-deploy window;
+live re-probe post-audit shows all slug pages 200 and the new 30/3/1 corpus. The underlying
+architectural fragility was real, however, and is now fixed:
+
+| Finding | Resolution |
+|---|---|
+| `force-dynamic` verdict routes (fs read per request on serverless) | `/verdict/[id]` + `opengraph-image` now `generateStaticParams` (68 paths baked: 34 hex + 34 slugs) + `dynamicParams=true` for live ids + `outputFileTracingIncludes` for `./snapshots/**` |
+| `pnpm-workspace.yaml` literal placeholders (`"set this to true or false"`) | removed bogus `allowBuilds` block; `onlyBuiltDependencies` retained |
+| `next/font/google` build-time fetch | fonts self-hosted (`next/font/local`): Archivo variable + IBM Plex Mono static TTFs in `app/fonts/` |
+| No share affordance | "share on X" intent link on every verdict page + `metadataBase` set |
+| SUBMISSION framing | explicit "verdict = 100% CMC data + deterministic rules; Jev/narrator optional" + originality note added |
+| "Live mode appears demo-only" | **Incorrect** — prod POST /api/verdict performs live CMC search (verified: GMX → ambiguous candidates with real mcap) |
+| Startup-tier DEX OHLCV upgrade | Probed `/v1/dex/{pairs,spot-pairs}/ohlcv/*` on current key (plan: 450k credits/mo) → all return `system busy` — treated as unavailable; proxy PUMP metrics retained, documented |
+| Homepage hex links | Already slugs in committed code (auditor saw stale HTML) |
+| Re-harvest churn on ids | Corpus **frozen** until submission — no more harvests |
