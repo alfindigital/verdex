@@ -1,5 +1,6 @@
 import React from "react";
-import { AbsoluteFill, Sequence, useCurrentFrame, interpolate } from "remotion";
+import { AbsoluteFill, Sequence, staticFile, useCurrentFrame, interpolate } from "remotion";
+import { Audio } from "@remotion/media";
 import { C, F, ensureFonts } from "./brand";
 import { Kicker, VerdictStamp, DimTag, rise, easeOut } from "./bits";
 
@@ -348,13 +349,16 @@ export const VerdexDemo: React.FC = () => {
   ensureFonts();
   return (
     <AbsoluteFill style={{ backgroundColor: C.ink }}>
-      <Sequence durationInFrames={240}><Hook /></Sequence>
-      <Sequence from={240} durationInFrames={210}><Intro /></Sequence>
-      <Sequence from={450} durationInFrames={300}><Method /></Sequence>
+      <Sequence durationInFrames={240}><Audio src={staticFile("vo/s1.mp3")} /><Hook /></Sequence>
+      <Sequence from={240} durationInFrames={210}><Audio src={staticFile("vo/s2.mp3")} /><Intro /></Sequence>
+      <Sequence from={450} durationInFrames={300}><Audio src={staticFile("vo/s3.mp3")} /><Method /></Sequence>
+      <Sequence from={750} durationInFrames={290}><Audio src={staticFile("vo/s4a.mp3")} /></Sequence>
+      <Sequence from={1040} durationInFrames={290}><Audio src={staticFile("vo/s4b.mp3")} /></Sequence>
+      <Sequence from={1330} durationInFrames={290}><Audio src={staticFile("vo/s4c.mp3")} playbackRate={1.06} /></Sequence>
       <Sequence from={750} durationInFrames={870}><Verdicts /></Sequence>
-      <Sequence from={1620} durationInFrames={330}><Receipts /></Sequence>
-      <Sequence from={1950} durationInFrames={330}><Scale /></Sequence>
-      <Sequence from={2280} durationInFrames={420}><Close /></Sequence>
+      <Sequence from={1620} durationInFrames={330}><Audio src={staticFile("vo/s5.mp3")} /><Receipts /></Sequence>
+      <Sequence from={1950} durationInFrames={330}><Audio src={staticFile("vo/s6.mp3")} /><Scale /></Sequence>
+      <Sequence from={2280} durationInFrames={420}><Audio src={staticFile("vo/s7.mp3")} /><Close /></Sequence>
     </AbsoluteFill>
   );
 };
