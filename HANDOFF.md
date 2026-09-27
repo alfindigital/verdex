@@ -70,8 +70,22 @@ Push to `main` → Vercel auto-deploys. Vercel CLI `--token` does NOT accept the
 - SUBMISSION.md: Jev framed as optional advisory over 100%-CMC deterministic verdict; originality note added.
 - 97 tests · tsc clean · build clean (68 static verdict paths prerendered).
 
+## 2026-09-27 — Demo video v2: three Remotion variants
+- v1 (77a4e25) judged too slow → full rework. Three compositions at
+  `video/src/Variant{A,B,C}.tsx`, shared real-data layer `data.ts`,
+  motion primitives `motion.tsx`, VO track via `@remotion/media`.
+- A `SlamCut` (word-slam + stamp shake + CutBar), B `EvidenceTape`
+  (persistent chrome, scrolling real sha256 ticker, progress rail —
+  recommended), C `VerdictField` (color-field wipe + count-up).
+- Deepgram `aura-2-orion-en` voiceover (9 segments, video/public/vo/),
+  s4c at playbackRate 1.06 to fit its window.
+- Renders verified via ffprobe: 90.048s, h264+AAC, 1920×1080, 30fps.
+  Files in `video/out/` (gitignored): verdex-A-slamcut.mp4,
+  verdex-B-evidencetape.mp4, verdex-C-verdictfield.mp4.
+- Commit `1bb92ac` pushed.
+
 ## Next actions (user-side)
-1. Record ~90s demo video — script updated 2026-09-26 in SUBMISSION.md (GMX yes → SUSHI avoid → AAVE contested arc).
+1. Pick one variant from `video/out/` → upload to YouTube → paste URL.
 2. Submit DoraHacks (SUBMISSION.md has copy + exact form fields).
 3. Post X draft (SUBMISSION.md §X post draft), replace BUIDL link.
 
