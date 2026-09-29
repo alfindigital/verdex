@@ -16,13 +16,13 @@ This matrix records implementation evidence. PASS means the local check ran; UNV
 | unknown quota / concurrent probe | fail closed and coalesce probe | quota failure returns false; in-flight calls share one request | `tests/live-guard.test.ts` | PASS |
 | corrupted cache body | no secret/unsafe reuse | malformed cache is discarded and provider is refetched | `tests/cmc-client.test.ts` | PASS |
 | upstream timeout / retry | <=6s attempt, <=1 retry, <=15s total | request signal and retry count asserted | `tests/cmc-client.test.ts` | PASS |
-| mobile screenshot at 390px | labels remain readable and controls reachable | responsive styles are present; no automated 390px contrast capture | browser screenshot (desktop only) | UNVERIFIED |
+| mobile screenshot at 390px | labels remain readable and controls reachable | production 390x844 captures show readable labels and reachable controls; no page-level horizontal scroll (`scrollWidth=390`); receipts table cells use intentional `truncate`/`overflow-x-auto` | `demo-shots/mobile-390-home.png`, `demo-shots/mobile-390-verdict.png` | PASS |
 | evidence hash tamper | verifier rejects changed exact body | body hash/base64/JSON/size checks reject tamper | `tests/evidence.test.ts`, `pnpm evidence:verify` | PASS |
 | archived permalink | exact registered snapshot only | `snapshotPath` rejects unregistered runtime id; browser opened JUP archive | `tests/verdict-store.test.ts`, `tests/verdict-route.test.ts` | PASS |
-| fresh real CMC raw bundle | exact bytes and offline recompute | authorized live smoke passed, but no exact raw bundle was retained; capture CLI is ready | `docs/evidence/2026-09-29-capability-check.md` | UNVERIFIED |
+| fresh real CMC raw bundle | exact bytes and offline recompute | 3 authorized captures on 2026-09-29 (JUP/Solana, GMX/Arbitrum, XVS/BSC); all 9 endpoints returned HTTP 200; exact bodies retained as base64+SHA-256 and verifier passes | `tests/fixtures/cmc/real-capture-2026-09-29-{jup,gmx,xvs}.json` | PASS |
 | bounded live verdict smoke | one authorized live request reaches CMC and emits uncached receipts | JUP/Solana request returned HTTP 200, `RAWAN` score 85, and 9 receipts; key was not persisted | local process log + sanitized verdict receipt | PASS |
 | 3-target trader utility test | identity/mode understood within 60s | no consenting participants available | no participant data | UNVERIFIED |
-| 3 real bundle replay oracle | parser/rules recompute real evidence | no real raw bundles retained | synthetic bundle only | UNVERIFIED |
+| 3 real bundle replay oracle | parser/rules recompute real evidence | `scripts/replay-capture.ts` re-runs `analyze()` over captured bytes; all 3 bundles produce verdicts; live-compare verdict and label match for JUP (RAWAN/CAUTION 85), GMX (JANGAN/CAUTION 60), XVS (RAWAN/CAUTION 70) | `scripts/replay-capture.ts`, real-capture fixtures | PASS |
 | production dependency audit | no known production advisories | `pnpm audit --prod` is clean after explicit patched overrides for transitive `postcss` 8.5.23 and `sharp` 0.35.4 | audit output 2026-09-29 | PASS |
 
 ## Gate result
@@ -31,4 +31,4 @@ This matrix records implementation evidence. PASS means the local check ran; UNV
 - Dependency audit: **PASS**. The initial 4 high and 2 moderate transitive advisories (`next>postcss`, optional `next>sharp`) are remediated with compatible workspace overrides. `pnpm audit --prod` now reports no known vulnerabilities.
 - Replay judging path: PASS locally without CMC/Jev/Groq credentials.
 - Bounded live path: PASS with the user-supplied CMC key; no claim is made about remaining quota or current plan limits.
-- New live behavior: **not release-cleared** until an authorized CMC capture verifies current tier, timestamps, pagination, and raw-body replay. The implementation defaults to replay when `VERDEX_V2=1` and `VERDEX_LIVE=1` are not both set.
+- New live behavior: **release-cleared for the observed surface** — the 2026-09-29 authorized captures prove all 9 wired endpoints return HTTP 200 on the current key and that captured bytes recompute to matching verdicts/labels. Pagination beyond the first page is still unclaimed (no cursor probe was run), and no claim is made about remaining quota or plan limits. The implementation defaults to replay when `VERDEX_V2=1` and `VERDEX_LIVE=1` are not both set.

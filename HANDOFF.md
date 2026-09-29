@@ -2,14 +2,16 @@
 
 ## Current execution state — 2026-09-29
 
-**Implementation status:** Tasks 1–8 executed in isolated worktree branch `codex/verdex-evidence-v2`. The branch is ready for review, not pushed or deployed.
+**Implementation status:** Tasks 1–8 merged into `main`, pushed, and deployed to `https://verdex-alpha.vercel.app` (production verified 2026-09-29: replay home, archived verdict pages, and `POST /api/verdict` all return HTTP 200). The Codex worktree `codex/verdex-evidence-v2` was pruned after merge verification.
 
 - Base: `a1abade` · latest implementation commits: `ca1b051`, `9755da7`, `cf4c7c1`, `8cc36af`, `87c15df`, `a24eae8`, `8e5b135`, `f4df122`.
 - Verification: full suite 18 files / 164 tests passed; `pnpm typecheck`, evidence verifier, docs verifier, production build, and redacted gitleaks history passed.
 - Runtime policy: replay unless `VERDEX_V2=1` and `VERDEX_LIVE=1` are both set. Live requires server env key and fresh quota permission; unknown quota fails closed.
 - New evidence contract: `schemaVersion: 2`, `rulesVersion: 2.0.0`, nullable coverage/metrics, source statuses, exact body hashes when retained, explicit `share.kind`.
 - Share policy: only committed snapshot ids get durable paths/X links. Live/runtime results are transient and exportable without a permanent link.
-- Known unverified items: authorized fresh CMC raw capture and current tier/pagination, 390px automated contrast, consenting trader utility study, three real raw bundle replay, and browser download transfer event.
+- Real raw captures verified 2026-09-29: JUP/Solana, GMX/Arbitrum, XVS/BSC — 9 endpoints each HTTP 200, exact bodies retained, `pnpm evidence:verify` passes, and `scripts/replay-capture.ts` recomputes matching verdicts/labels vs live.
+- Mobile 390px verified 2026-09-29 on production (`demo-shots/mobile-390-*.png`): no page-level horizontal scroll; only intentional `truncate`/`overflow-x-auto` cells clip.
+- Remaining unverified items: consenting trader utility study (needs 3 participants) and browser download transfer event. Pagination beyond page 1 is unclaimed.
 - Dependency audit: `pnpm audit --prod` passes with no known production vulnerabilities after explicit `postcss` 8.5.23 and `sharp` 0.35.4 overrides.
 - Install policy: `pnpm-workspace.yaml` now explicitly allows only `esbuild` and `sharp` build scripts. `pnpm install --frozen-lockfile` passes locally and is required for Vercel's pnpm 11 install path.
 - Boundary policy: the root Next typecheck excludes the Remotion `video/` workspace; video dependencies are verified separately with `npm run lint` and `npm run build` inside `video/`.

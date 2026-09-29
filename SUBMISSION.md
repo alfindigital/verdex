@@ -11,7 +11,7 @@ This file is a truthful copy pack. URLs that require a user action remain explic
 | Category | Markets and Trading Tools |
 | GitHub | `https://github.com/alfindigital/verdex` — verify public visibility before submitting |
 | Project website | `https://verdex-alpha.vercel.app` — production alias verified HTTP 200 |
-| Demo video | **not published** — record from [`docs/DEMO-WALKTHROUGH.md`](docs/DEMO-WALKTHROUGH.md) after the final deployment review |
+| Demo video | **not published** — rendered file ready at `video/out/verdex-B-evidencetape.mp4` (90s, 1080p, re-rendered 2026-09-29 with final copy); owner uploads to YouTube |
 | Social link | **not published** — post only after the BUIDL URL and video URL exist |
 | Logo | `public/logo.png`; verify PNG/JPEG size is under 2 MB in the DoraHacks form |
 | Track | Markets and Trading Tools |
@@ -59,7 +59,7 @@ The reviewed excerpt below is **synthetic fixture output**, not a live CMC respo
 }
 ```
 
-Full fixture: [`tests/fixtures/cmc/synthetic-lp-outage-bundle.json`](tests/fixtures/cmc/synthetic-lp-outage-bundle.json). A bounded live smoke test passed with the user-supplied key; an exact raw CMC bundle capture is still not retained.
+Full fixture: [`tests/fixtures/cmc/synthetic-lp-outage-bundle.json`](tests/fixtures/cmc/synthetic-lp-outage-bundle.json). Real exact-body captures from 2026-09-29 are retained at `tests/fixtures/cmc/real-capture-2026-09-29-{jup,gmx,xvs}.json` (9 endpoints, HTTP 200 each, verifier passes, replay matches live verdict/label).
 
 ## Demo sequence
 
@@ -69,7 +69,7 @@ Use the recorded path in [`docs/DEMO-WALKTHROUGH.md`](docs/DEMO-WALKTHROUGH.md):
 
 - [ ] Confirm the public repo URL and default branch contain the final commits.
 - [ ] Confirm a deployed replay page opens in a new browser without a key.
-- [ ] Record and review the final 90-second video; no invented live result or stale narration.
+- [x] Final 90-second video re-rendered 2026-09-29 (`video/out/verdex-B-evidencetape.mp4`, h264+AAC 1080p) with the corrected copy; owner still reviews and uploads.
 - [ ] Create the DoraHacks BUIDL and accept terms yourself.
 - [ ] Replace the `not published` video/social statuses only after the URLs open.
 - [ ] Post the X message with the actual BUIDL URL, video URL, and `#BuildwithCMC`.

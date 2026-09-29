@@ -12,8 +12,8 @@ Status: **not submitted** as of 2026-09-29. This checklist separates local evide
 - [x] Full tests, typecheck, docs verifier, build, and gitleaks pass; see [`validation-matrix.md`](evidence/validation-matrix.md).
 - [x] README, demo walkthrough, and handoff describe the current V2/replay boundary.
 - [x] Production alias returns HTTP 200 and an archived verdict API path returns HTTP 200.
-- [ ] Fresh authorized CMC raw-body capture and current entitlement verified.
-- [ ] Mobile 390px contrast/focus pass recorded.
+- [x] Fresh authorized CMC raw-body captures verified: 3 chains (JUP/GMX/XVS), 9 endpoints HTTP 200 each, exact-body bundles verify and replay to matching verdicts (`tests/fixtures/cmc/real-capture-2026-09-29-*.json`, `scripts/replay-capture.ts`).
+- [x] Mobile 390px pass recorded on production (`demo-shots/mobile-390-home.png`, `demo-shots/mobile-390-verdict.png`).
 - [ ] Three consenting trader utility checks recorded.
 - [x] Dependency audit advisories reviewed and remediated (`pnpm audit --prod` clean after patched transitive overrides).
 
