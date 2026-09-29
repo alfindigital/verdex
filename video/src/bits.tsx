@@ -1,5 +1,5 @@
 import React from "react";
-import { useCurrentFrame, Easing, interpolate } from "remotion";
+import { Easing, interpolate } from "remotion";
 import { C, F } from "./brand";
 
 // Small shared pieces. Every one exists because a scene needs it (C-3).

@@ -1,8 +1,21 @@
 # HANDOFF — Verdex (CMC API Hackathon)
 
-**Status: PRODUCTION READY** — live https://verdex-alpha.vercel.app · repo `alfindigital/verdex` · updated 2026-09-26.
+## Current execution state — 2026-09-29
 
-## Post-audit remediation (2026-09-26)
+**Implementation status:** Tasks 1–8 executed in isolated worktree branch `codex/verdex-evidence-v2`. The branch is ready for review, not pushed or deployed.
+
+- Base: `a1abade` · latest implementation commits: `ca1b051`, `9755da7`, `cf4c7c1`, `8cc36af`, `87c15df`, `a24eae8`, `8e5b135`, `f4df122`.
+- Verification: full suite 18 files / 164 tests passed; `pnpm typecheck`, evidence verifier, docs verifier, production build, and redacted gitleaks history passed.
+- Runtime policy: replay unless `VERDEX_V2=1` and `VERDEX_LIVE=1` are both set. Live requires server env key and fresh quota permission; unknown quota fails closed.
+- New evidence contract: `schemaVersion: 2`, `rulesVersion: 2.0.0`, nullable coverage/metrics, source statuses, exact body hashes when retained, explicit `share.kind`.
+- Share policy: only committed snapshot ids get durable paths/X links. Live/runtime results are transient and exportable without a permanent link.
+- Known unverified items: authorized fresh CMC raw capture and current tier/pagination, 390px automated contrast, consenting trader utility study, three real raw bundle replay, browser download transfer event, deployment smoke test, and dependency audit remediation.
+- Dependency review item: `pnpm audit --prod --json` reports 4 high and 2 moderate transitive advisories in Next/PostCSS/optional sharp. No forced upgrade was made.
+- Foreign file intentionally untouched: `pnpm-workspace.yaml` has an existing unstaged modification; do not stage it without the owner’s separate decision.
+
+Use [`docs/evidence/validation-matrix.md`](docs/evidence/validation-matrix.md), [`docs/DEMO-WALKTHROUGH.md`](docs/DEMO-WALKTHROUGH.md), and [`SUBMISSION.md`](SUBMISSION.md) as the current handoff. The historical notes below describe earlier states and are not the current release status.
+
+## Historical — post-audit remediation (2026-09-26)
 
 P0+P1 roast findings remediated in isolated sprints (see `.goal/out/S*.md`):
 
@@ -30,10 +43,10 @@ P0+P1 roast findings remediated in isolated sprints (see `.goal/out/S*.md`):
   still trip warns/dangers); documented honestly. TITANO + VGX carry the
   low-confidence showcase path.
 
-## What this is
+## Historical — product description
 DEX-native token forensic tool: deterministic rules verdict (LAYAK/RAWAN/JANGAN/BELUM_CUKUP_BUKTI) over 4 evidence dimensions (SAFETY, FLOW, LIQUIDITY, PUMP) + Jev (TypeSafe) per-dimension second opinion + auditable API receipts + shareable verdict pages.
 
-## Current state (post-audit)
+## Historical — state before the 2026-09-29 overhaul
 - `jevCrossExamine` (src/lib/jev.ts): 1 call → 4 noul questions → `dims` + mean `riskyProb`; full key rotation; rules verdict excluded from Jev state (independence).
 - `agreement()`: ≥3/4 comparable dims sign-match → consensus/contested; fallback aggregate band.
 - `resolveToken` returns `{token, receipt}` — every CMC call incl. resolution is receipted.
@@ -41,17 +54,17 @@ DEX-native token forensic tool: deterministic rules verdict (LAYAK/RAWAN/JANGAN/
 - Rules verdict is authoritative; Jev/UI never overrides it. `docs/CLAIMS.md` = source of truth for thresholds; `THRESHOLDS` exported → viz consumes same constants.
 - Unit convention: taxes & priceChange stored as **fractions** (0.003 = 0.3%); metrics.frac() normalizes `>1 → /100` defensively.
 
-## Verify
+## Historical — verify commands
 ```bash
 pnpm install && pnpm exec tsc --noEmit && pnpm test && pnpm build
 # Expected: tsc clean · 74/74 tests · build pass
 ```
 Demo mode works without keys (`VERDEX_LIVE` unset). Live needs `CMC_API_KEY` (+ optional `TYPESAFE_API_KEY`, `GROQ_API_KEY`).
 
-## Deploy
+## Historical — deploy notes
 Push to `main` → Vercel auto-deploys. Vercel CLI `--token` does NOT accept the OIDC token — use the GitHub integration path only.
 
-## 2026-09-26 — S7 calibration sprint (post-roast)
+## Historical — 2026-09-26 S7 calibration sprint (post-roast)
 - **Mature-asset tier (published):** `mcapUsd ≥ $100M` → `top5MakerShare`/`netBuyRatio` cap at WARN; insider-exit rows (`thirdPartySells`, `uniqueMakers`) keep full severity. `mcapTier` row shown in FLOW. AAVE/UNI/LINK now CAUTION, not AVOID.
 - **Safety taxonomy:** `mintable|pausable|blacklist|upgradeable|owner_change_balance|hidden_owner` → named `centralizationFlags` WARN row (was generic `unclassifiedFlags`).
 - **Jev agreement:** contested-wins — dim-level consensus AND aggregate band must both agree; AAVE-style cases now show `contested` honestly.
@@ -60,7 +73,7 @@ Push to `main` → Vercel auto-deploys. Vercel CLI `--token` does NOT accept the
 - Re-harvested all 34 snapshots: **30 CAUTION / 3 AVOID / 1 ENTRY-WORTHY (GMX 100, consensus)**. SUSHI (<$100M) and COMP/Gnosis (dead market) correctly stay AVOID.
 - 93 tests · tsc clean · build clean.
 
-## 2026-09-27 — S8: independent-audit remediation (second external review)
+## Historical — 2026-09-27 S8 independent-audit remediation
 - **Verdict routes now static:** `/verdict/[id]` + `opengraph-image` use `generateStaticParams` (68 baked paths = 34 hex + 34 slugs) + `dynamicParams=true`; `force-dynamic` removed; `outputFileTracingIncludes` keeps `snapshots/**` in the serverless bundle for on-demand ids.
 - **Fresh-install fix:** bogus `allowBuilds` placeholders removed from `pnpm-workspace.yaml`.
 - **Fonts self-hosted:** `next/font/local` (Archivo variable + Plex Mono static) — no Google Fonts fetch at build.
@@ -70,7 +83,7 @@ Push to `main` → Vercel auto-deploys. Vercel CLI `--token` does NOT accept the
 - SUBMISSION.md: Jev framed as optional advisory over 100%-CMC deterministic verdict; originality note added.
 - 97 tests · tsc clean · build clean (68 static verdict paths prerendered).
 
-## 2026-09-27 — Demo video v2: three Remotion variants
+## Historical — 2026-09-27 demo video v2
 - v1 (77a4e25) judged too slow → full rework. Three compositions at
   `video/src/Variant{A,B,C}.tsx`, shared real-data layer `data.ts`,
   motion primitives `motion.tsx`, VO track via `@remotion/media`.
@@ -84,12 +97,12 @@ Push to `main` → Vercel auto-deploys. Vercel CLI `--token` does NOT accept the
   verdex-B-evidencetape.mp4, verdex-C-verdictfield.mp4.
 - Commit `1bb92ac` pushed.
 
-## Next actions (user-side)
+## Historical — next actions (user-side)
 1. Pick one variant from `video/out/` → upload to YouTube → paste URL.
 2. Submit DoraHacks (SUBMISSION.md has copy + exact form fields).
 3. Post X draft (SUBMISSION.md §X post draft), replace BUIDL link.
 
-## Known limitations (documented in CLAIMS §Keterbatasan)
+## Historical — known limitations (documented in CLAIMS §Keterbatasan)
 - No OHLCV on Basic tier → no intraday sweep analysis.
 - No wallet labels → maker concentration only, not "smart money".
 - Swap window = latest 100 txs; legacy snapshots lack `jev.dims` (UI degrades gracefully).

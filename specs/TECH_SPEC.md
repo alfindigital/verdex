@@ -64,6 +64,16 @@ slug maupun hex id. Link publik kebal re-harvest (id baru, slug tetap).
 
 ## 3. CMC API — quirk terdokumentasi (hasil probe 24-25 Sep)
 
+### 3.1 Current replay/live policy
+
+New output records use `schemaVersion: 2` and `rulesVersion: "2.0.0"`.
+`POST /api/verdict` rejects legacy `pick`, caps JSON bodies at 4096 bytes, and
+uses stable `{platform,address}` selection. Replay is selected unless both
+`VERDEX_V2=1` and `VERDEX_LIVE=1` are set. Live requests have a 15-second total
+budget, 6-second attempt timeout, one transport retry, and fail-closed quota
+permission. `snapshotPath()` returns a durable link only for a registered
+committed id; runtime/live records remain transient.
+
 - Base: `https://pro-api.coinmarketcap.com`, header `X-CMC_PRO_API_KEY`.
 - Kebanyakan endpoint DEX pakai `platform=<short name>` (`Solana`, `BSC`,
   `Base` — dari `dex/platform/list` field `dn`). SECURITY/detail pakai
@@ -115,7 +125,7 @@ slug maupun hex id. Link publik kebal re-harvest (id baru, slug tetap).
 
 ## 7. Testing
 
-Vitest `tests/` (97 tests): fixtures JSON dari response riil di-inline di
-test files (tidak ada tests/fixtures/ dir), unit tests per metrics/rules
-function, boundary tests, orchestrator tests dengan DexClient mocked
-(termasuk wiring `mcapUsd` → mature tier), live-guard caps+quota probe.
+Vitest `tests/` (164 tests across 18 files): strict parser/identity fixtures,
+coverage/rules boundaries, evidence replay, route policy, live guard, UI
+server-render checks, and orchestrator tests with a mocked DexClient. The
+synthetic oracle validates arithmetic/policy only; it is not fraud accuracy.

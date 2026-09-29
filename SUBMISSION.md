@@ -1,100 +1,78 @@
-# DoraHacks submission pack — Verdex
+# Verdex — DoraHacks submission pack
 
-## Links
+This file is a truthful copy pack. URLs that require a user action remain explicitly `not published`.
 
-- **Live demo**: https://verdex-alpha.vercel.app
-- **Repo (public)**: https://github.com/alfindigital/verdex
-- **Shareable verdicts** (34 committed snapshots, real CMC data, recomputed 2026-09-26; links are **stable slugs** — they survive re-harvests):
-  - **GMX (Arbitrum) → ENTRY-WORTHY: https://verdex-alpha.vercel.app/verdict/gmx-arbitrum — score 100**, all four dims CLEAN, Jev **consensus** (0.10) — proof the engine can say yes when evidence is clean
-  - **AAVE (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/aave-ethereum — score 70**, Jev **contested**: SAFETY WARN on the named `upgradeable` centralization flag, FLOW WARN on arb-dominated DEX flow (mature-tier rule, mcap $2.4B — published in CLAIMS)
-  - UNI (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/uni-ethereum — score 70; `mintable` centralization flag surfaced by name, Jev contested
-  - LINK (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/link-ethereum — score 85; concentrated DEX maker flow read as WARN for a $14B asset, Jev contested
-  - SUSHI (Ethereum) → AVOID: https://verdex-alpha.vercel.app/verdict/sushi-ethereum — score 45; sub-$100M mcap → strict tier: top-5 makers 0.73 + `mintable` flag → falsifier names all three failing rows
-  - COMP (Gnosis) → AVOID: https://verdex-alpha.vercel.app/verdict/comp-gnosis — score 30; dead-market signature: 3 unique makers, top-5 = 100% of flow, $17 pool liquidity
-  - FLOKI (BSC) → CAUTION: https://verdex-alpha.vercel.app/verdict/floki-bsc — score 85, Jev contested
-  - TITANO (BSC) → CAUTION: https://verdex-alpha.vercel.app/verdict/titano-bsc — score 20, confidence **low** (thin swap window), Jev lean
-  - PEPE (Ethereum) → CAUTION: https://verdex-alpha.vercel.app/verdict/pepe-ethereum — Jev contested
-  - WIF (Solana) → CAUTION: https://verdex-alpha.vercel.app/verdict/wif-solana
-  - …plus 24 more majors across Ethereum, Solana, BSC, Arbitrum, Optimism, Polygon, Gnosis on the homepage `case_files/` table
+## Form fields
 
-## Track
-
-**Markets & Trading Tools**
-
-## Project name
-
-Verdex
-
-## Tagline
-
-Don't be the exit liquidity — an evidence-backed verdict on any DEX token before you click buy.
-
-## Description (paste-ready)
-
-Verdex answers the question every DEX trader asks seconds before buying: *is this token behaving like a trap right now?*
-
-Existing scanners check contract structure — could it rug? (honeypot.is even simulates one test trade — but a single simulated buy/sell can be whitelist-gamed by sophisticated traps.) Verdex checks **live behavior** — is it rugging? From ~100 *real* swaps by distinct wallets on CoinMarketCap DEX data we compute maker breadth, top-5 maker USD concentration, and the check almost nobody automates: **are there real third-party sells?** Hundreds of buys with zero independent sells is the hidden-honeypot signature — and real order flow can't be faked for the scanner's address.
-
-Every verdict is four published sub-verdicts (SAFETY · FLOW · LIQUIDITY · PUMP) rolled into a deterministic composite score — every threshold is public in docs/CLAIMS.md, including a **mature-asset tier** (mcap ≥ $100M): arb-dominated on-chain flow of large caps is weak rug evidence, so concentration/direction signals cap at WARN while insider-exit signals (zero third-party sells, <5 makers) still bite. Each result ships with a **falsifier** naming *every* failing row, a **Jev second opinion** (TypeSafe's calibrated decision model cross-examines the same metrics — consensus/contested/lean, disagreement always shown, never overriding rules), and **evidence receipts**: endpoint, params, timestamp, credit count, and SHA-256 of every CMC response.
-
-**The verdict itself is 100% CoinMarketCap data + published deterministic rules** — Jev is an optional, non-authoritative second opinion and the Groq narrator is optional prose; both fail gracefully and are absent from demo snapshots. This CMC integration and the entire product were built new for this hackathon (the workspace pivoted from an earlier concept inside the same repo).
-
-**Business value:** the verdict + falsifier + SHA-256 receipt bundle is built to be embedded, not just viewed — a pre-trade risk gate for wallets, DEX aggregators, and Telegram sniper bots that need an auditable "why" for every flag (B2B API-as-a-service), versus black-box scanner scores. The deterministic, replayable evidence trail is the moat: partners can verify our calls independently instead of trusting us.
-
-CMC endpoints used: dex/search, dex/tokens/transactions, dex/token/pools, dex/token (creator meta), dex/liquidity-change/list, dex/security/detail, global-metrics/quotes (latest+historical), fear-and-greed/latest — ~9 calls per verdict.
-
-Honest limits documented in README: no OHLCV on Basic tier → PUMP uses vol/mcap + makers-per-volume instead; no wallet labels → we report concentration, never claim "smart money"; thin tokens return INSUFFICIENT EVIDENCE rather than a fake answer.
-
-## Demo video script (~90s)
-
-1. (0–10s) Home: "Every day, traders lose money to tokens that pass every contract check but behave like rugs. Verdex answers the real question."
-2. (10–25s) Open GMX → **ENTRY-WORTHY 100/100**, all four dims CLEAN, Jev consensus — "the engine says yes when the data is clean." Then SUSHI → AVOID 45/100 — "same rules, opposite verdict. The difference is the evidence."
-3. (25–45s) Scroll SUSHI: sub-$100M token, top-5 makers = 73% of USD flow, `mintable` admin flag — falsifier names every failing row. Contrast AAVE → CAUTION 70: "$2.4B asset — the published mature-tier rule reads arb-dominated DEX flow as caution, not danger. Same metrics, honest severity."
-4. (45–60s) Jev panel on AAVE → **contested** badge: "Rules see warnings; Jev prices the risk at 0.27. When the judges disagree we show the fight — never a fake consensus." UNI: `mintable` centralization flag surfaced by name — "admin powers aren't proof of a rug, but they're a rug vector — so we flag them, by name."
-5. (60–75s) Evidence receipts: 9 endpoint calls per verdict, params, credits, SHA-256. "Every number auditable — that receipt bundle is exactly what a wallet or aggregator needs to trust a pre-trade check."
-6. (75–90s) Case files: 34 verdicts — 30 CAUTION, 3 AVOID, 1 ENTRY-WORTHY — across 7 chains. "Calibrated on real majors: AAVE, UNI, LINK land at caution; AVOID is reserved for genuinely trapped markets." Close: "Structure tells you could it rug. Verdex tells you is it rugging. #BuildwithCMC"
-
-## X post draft
-
-> Don't be the exit liquidity.
->
-> Verdex gives any DEX token a deterministic verdict — ENTRY-WORTHY / CAUTION / AVOID — from @CoinMarketCap DEX data, cross-examined by @TypeSafeAI's Jev.
->
-> Every number ships with a receipt. Every verdict with a falsifier.
->
-> Live: https://verdex-alpha.vercel.app
-> BUIDL: https://dorahacks.io/buidl/XXXX
->
-> #BuildwithCMC
-
-(Replace XXXX after DoraHacks BUIDL page exists.)
-
-## DoraHacks form fields (exact)
-
-| Field | Value |
+| Field | Value / status |
 |---|---|
-| BUIDL name | `Verdex` |
-| BUIDL logo | `public/logo.png` (480×480, 18KB ✅) |
-| Vision | "Make 'is this token behaving like a trap?' a checkable fact before every DEX buy — evidence-backed verdicts, not dashboards." |
+| BUIDL name | Verdex |
+| Vision | Make “what was observed before a DEX swap?” checkable with source-backed flow, liquidity, safety, and coverage evidence. |
 | Category | Markets and Trading Tools |
-| GitHub * | `https://github.com/alfindigital/verdex` |
-| Project website | `https://verdex-alpha.vercel.app` |
-| Demo video * | **YouTube link — user must record** (script below) |
-| Social link (≥1) | X post URL (after posting) |
+| GitHub | `https://github.com/alfindigital/verdex` — verify public visibility before submitting |
+| Project website | `https://verdex-alpha.vercel.app` — deployment status not verified in this execution |
+| Demo video | **not published** — record from [`docs/DEMO-WALKTHROUGH.md`](docs/DEMO-WALKTHROUGH.md) after the final deployment review |
+| Social link | **not published** — post only after the BUIDL URL and video URL exist |
+| Logo | `public/logo.png`; verify PNG/JPEG size is under 2 MB in the DoraHacks form |
+| Track | Markets and Trading Tools |
 
-## Positioning vs closest BUIDLs (43 total)
+## Paste-ready description
 
-- **CMC Witness** — pre-trade *gate for AI agents* (x402 paid, allow|caution|block). Verdex is **trader-facing** with full metric surface (third-party sells, maker concentration, LP pulls) + falsifier + Jev cross-exam. Gate vs courtroom.
-- **Middleman / Forwarding Address** (Edy Cu) — evidence over suspicion, but about slippage/pool choice and LP-pull adjudication. Verdex adjudicates the *token itself* pre-entry.
-- **Argus / Market Detective** — "why did it move" investigation + receipts. Verdex answers "should I buy" — receipts shared as pattern, verdict is the differentiator.
-- **MarketSentinel** — TEE manipulation signals, infra-heavy. Verdex is zero-infra, deterministic, reproducible by anyone.
+Verdex is a pre-trade DEX evidence reader. A trader enters a token ticker or address and chooses the exact chain when search is ambiguous. CoinMarketCap DEX responses are parsed into four dimensions: SAFETY, FLOW, LIQUIDITY, and PUMP. The result shows observed maker concentration, observed sell makers, provider-reported security fields, LP evidence status, coverage age, three next checks, and the receipts needed to review the calculation.
 
-## Checklist for submission form
+Verdex uses deterministic rules for the verdict. Jev and narration are optional secondary context; they never override the rules. A clean label means no known flag in the reviewed sample, not a recommendation or proof that a token is safe. Missing or failed inputs are unknown and lower coverage. A synthetic LP-outage fixture demonstrates this behavior and is labelled synthetic, not presented as a live incident.
 
-- [ ] Public repo: https://github.com/alfindigital/verdex
-- [ ] Demo link: https://verdex-alpha.vercel.app
-- [ ] Demo video/screen recording attached
-- [ ] X post contains DoraHacks link + video + #BuildwithCMC
-- [ ] Endpoints named in description (done above)
-- [ ] "Where the API got in the way" section (done — README)
-- [ ] Track: Markets & Trading Tools
+Replay is the judging path: committed snapshots open without a key or API credit. V2 live requires both `VERDEX_V2=1` and `VERDEX_LIVE=1`, a server-only CMC key, and a fresh successful quota check. Live results are transient and do not receive a permanent share link; archived snapshot ids do.
+
+The CMC integration is essential because it supplies the current DEX token search, swap rows, pools, LP changes, security report, and macro context that the rules inspect. The repository does not claim current tier entitlement, universal pagination, fraud-detection accuracy, user adoption, or a prize without separate evidence.
+
+## Endpoint list
+
+`/v1/dex/search`, `/v1/dex/tokens/transactions`, `/v1/dex/token/pools`, `/v1/dex/token`, `/v1/dex/liquidity-change/list`, `/v1/dex/security/detail`, `/v1/global-metrics/quotes/latest`, `/v1/global-metrics/quotes/historical`, `/v3/fear-and-greed/latest`.
+
+## Reproduction excerpt
+
+The key stays in the server environment; do not paste a real value into a README or submission form.
+
+```powershell
+$env:CMC_API_KEY = '<set only in the server environment>'
+$env:VERDEX_V2 = '1'
+$env:VERDEX_LIVE = '1'
+pnpm dev
+```
+
+Offline, no key is required:
+
+```powershell
+pnpm evidence:verify tests/fixtures/cmc/synthetic-lp-outage-bundle.json
+```
+
+The reviewed excerpt below is **synthetic fixture output**, not a live CMC response:
+
+```json
+{
+  "schemaVersion": 2,
+  "rulesVersion": "2.0.0",
+  "result": { "label": "INSUFFICIENT_EVIDENCE" },
+  "coverage": { "level": "insufficient", "reasons": ["LP source failed"] },
+  "manifest": { "origin": "synthetic-fixture", "completeRawEvidence": false }
+}
+```
+
+Full fixture: [`tests/fixtures/cmc/synthetic-lp-outage-bundle.json`](tests/fixtures/cmc/synthetic-lp-outage-bundle.json). Current raw CMC bundle capture is unverified because no credential was supplied during execution.
+
+## Demo sequence
+
+Use the recorded path in [`docs/DEMO-WALKTHROUGH.md`](docs/DEMO-WALKTHROUGH.md): choose an ambiguous identity, inspect the next reason, expand source evidence, download JSON, then open a dated archive. Do not describe historical Jev text as current advice.
+
+## Publishing checklist
+
+- [ ] Confirm the public repo URL and default branch contain the final commits.
+- [ ] Confirm a deployed replay page opens in a new browser without a key.
+- [ ] Record and review the final 90-second video; no invented live result or stale narration.
+- [ ] Create the DoraHacks BUIDL and accept terms yourself.
+- [ ] Replace the `not published` video/social statuses only after the URLs open.
+- [ ] Post the X message with the actual BUIDL URL, video URL, and `#BuildwithCMC`.
+- [ ] Submit the form and capture the confirmation URL before marking the entry submitted.
+
+See [`docs/SUBMISSION-CHECKLIST.md`](docs/SUBMISSION-CHECKLIST.md) for the same gates with evidence links.

@@ -1,14 +1,12 @@
-// Variant B · EVIDENCE TAPE · the product framed as a live evidence feed.
+// Variant B · EVIDENCE TAPE · the product framed as a recorded evidence feed.
 // Dial: ENERGY 3 / RHYTHM 3 / MOTION 3. Motif: the scrolling receipt ticker,
 // persistent chrome top and bottom; the whole video is the receipt stream.
 // The ticker scrolls real endpoints + real sha256 prefixes, never decoration.
 import React from "react";
-import { AbsoluteFill, Sequence, useCurrentFrame, interpolate } from "remotion";
+import { AbsoluteFill, Sequence, useCurrentFrame } from "remotion";
 import { C, F, ensureFonts } from "./brand";
 import { CASES, RECEIPTS, STATS, TL, CaseData } from "./data";
-import { VoTrack, snap, count, easeOut } from "./motion";
-
-const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
+import { VoTrack, snap, count } from "./motion";
 const mono = F.data;
 
 const TICKER = RECEIPTS.map(([a, , h]) => `${a}  sha256:${h}…`).join("    ·    ") + "    ·    ";
@@ -230,7 +228,7 @@ const ReceiptsB: React.FC = () => {
     <AbsoluteFill style={STAGE}>
       <Tag at={2}>evidence receipts</Tag>
       <div style={{ fontSize: 50, fontWeight: 900, color: C.text, marginTop: 22, letterSpacing: "-0.02em", ...snap(f, 6, 4) }}>
-        Nine API calls per verdict. <span style={{ color: C.dim }}>Every response hashed.</span>
+        Recorded sample: nine API calls. <span style={{ color: C.dim }}>Every response hashed.</span>
       </div>
       <div style={{ marginTop: 30, display: "flex", flexDirection: "column", gap: 6, maxWidth: 1560 }}>
         {RECEIPTS.map(([a, b, c], i) => (

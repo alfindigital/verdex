@@ -59,3 +59,15 @@ Tagline: **"Don't be the exit liquidity."**
 Selaras acceptance criteria di GOAL/plan: verdict end-to-end jalan untuk
 token riil Solana & BSC, fixture honeypot → JANGAN, thin data →
 BELUM_CUKUP_BUKTI, demo tanpa key, deploy live, submitted.
+
+## 6. Current V2 boundary (2026-09-29)
+
+- Replay is the default judging path and does not require credentials.
+- V2 live is opt-in only when `VERDEX_V2=1` and `VERDEX_LIVE=1`, with a fresh
+  quota permission and bounded request budget.
+- The primary user output is a risk label plus coverage and recheck reasons.
+  `observedSellMakers` is a sample observation, never “independent wallets”.
+- Evidence exports may be incomplete when raw response bodies were not retained;
+  the UI says so. Only committed snapshot ids receive durable share paths.
+- A current real CMC capture, participant utility study, deployment smoke test,
+  and submission publication are release tasks, not claims of this repository.

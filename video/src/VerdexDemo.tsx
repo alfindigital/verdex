@@ -173,7 +173,7 @@ export const Verdicts: React.FC = () => (
           ["LIQUIDITY", "CLEAN"],
           ["PUMP", "CLEAN"],
         ]}
-        foot={<span>Jev second opinion: <b style={{ color: C.safe }}>0.10 · consensus</b>. The engine says yes when evidence is clean.</span>}
+        foot={<span>Recorded archive (2026-09-26): Jev second opinion <b style={{ color: C.safe }}>0.10 · consensus</b>. No known flags were observed in this sample.</span>}
       />
     </Sequence>
     <Sequence from={290} durationInFrames={290}>
@@ -190,7 +190,7 @@ export const Verdicts: React.FC = () => (
           ["netBuyRatio −0.03 vs >0", "WARN"],
           ["LIQUIDITY / PUMP", "CLEAN"],
         ]}
-        foot={<span>Every failing row is named in the falsifier. Jev: <b style={{ color: C.warn }}>contested</b>.</span>}
+        foot={<span>Recorded archive (2026-09-26): every failing row is named in the falsifier. Jev: <b style={{ color: C.warn }}>contested</b>.</span>}
       />
     </Sequence>
     <Sequence from={580} durationInFrames={290}>
@@ -207,7 +207,7 @@ export const Verdicts: React.FC = () => (
           ["netBuyRatio −0.14, mature tier", "WARN"],
           ["LIQUIDITY / PUMP", "CLEAN"],
         ]}
-        foot={<span>Rules: caution. Jev: 0.27. <b style={{ color: C.warn }}>Contested.</b> The disagreement is shown, never hidden.</span>}
+        foot={<span>Recorded archive (2026-09-26): rules caution. Jev: 0.27. <b style={{ color: C.warn }}>Contested.</b> The disagreement is shown, never hidden.</span>}
       />
     </Sequence>
   </>
@@ -216,7 +216,7 @@ export const Verdicts: React.FC = () => (
 // ——— Scene 5 · Receipts (11s) ———
 export const Receipts: React.FC = () => {
   const f = useCurrentFrame();
-  // Real SHA-256 prefixes from verdict 8d3ea1d0c471 (GMX) — no fabricated data.
+  // Recorded SHA-256 prefixes from verdict 8d3ea1d0c471 (GMX archive).
   const rows = [
     ["/v1/dex/search", "GMX · Arbitrum", "e8517296"],
     ["/v1/dex/tokens/transactions", "100 swaps", "8a6b0f55"],
@@ -232,7 +232,7 @@ export const Receipts: React.FC = () => {
     <AbsoluteFill style={BG}>
       <Kicker>evidence receipts</Kicker>
       <div style={{ fontSize: 56, fontWeight: 800, color: C.text, marginTop: 30, lineHeight: 1.15, ...rise(f, 6) }}>
-        Nine API calls per verdict.
+        Recorded sample: nine API calls.
         <br />
         <span style={{ color: C.dim }}>Every response hashed.</span>
       </div>
@@ -275,7 +275,7 @@ export const Receipts: React.FC = () => {
         ))}
       </div>
       <div style={{ fontFamily: F.data, fontSize: 20, color: C.faint, marginTop: 26, ...rise(f, 140) }}>
-        receipts shown: verdict 8d3ea1d0c471 · /verdict/gmx-arbitrum
+        recorded receipts: verdict 8d3ea1d0c471 · /verdict/gmx-arbitrum
       </div>
       <div style={{ fontFamily: F.data, fontSize: 24, color: C.safe, marginTop: 14, ...rise(f, 150) }}>
         Replayable. Auditable. Don&apos;t take our word for it.
@@ -288,10 +288,10 @@ export const Receipts: React.FC = () => {
 export const Scale: React.FC = () => {
   const f = useCurrentFrame();
   const stats: [string, string][] = [
-    ["34", "verdicts on file"],
+    ["34", "recorded verdicts on file"],
     ["7", "chains covered"],
-    ["306", "API receipts"],
-    ["30 · 3 · 1", "caution · avoid · entry-worthy"],
+    ["306", "recorded API receipts"],
+    ["30 · 3 · 1", "recorded caution · avoid · entry-worthy"],
   ];
   return (
     <AbsoluteFill style={BG}>

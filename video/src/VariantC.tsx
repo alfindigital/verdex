@@ -179,7 +179,7 @@ const ReceiptsC: React.FC = () => {
     <AbsoluteFill style={BG}>
       <Micro at={2}>evidence receipts</Micro>
       <div style={{ fontSize: 68, fontWeight: 900, color: C.text, marginTop: 30, letterSpacing: "-0.03em", lineHeight: 1.1, ...snap(f, 6, 5, 20) }}>
-        Nine API calls.
+        Recorded sample: nine API calls.
         <br />
         <span style={{ color: C.dim }}>Every response hashed.</span>
       </div>
@@ -201,7 +201,7 @@ const ReceiptsC: React.FC = () => {
         ))}
       </div>
       <div style={{ fontFamily: F.data, fontSize: 22, color: C.faint, marginTop: 40, ...snap(f, 60, 4) }}>
-        verdict 8d3ea1d0c471 · /verdict/gmx-arbitrum
+        recorded verdict 8d3ea1d0c471 · /verdict/gmx-arbitrum
       </div>
       <div style={{ fontFamily: F.data, fontSize: 25, color: C.safe, marginTop: 16, fontWeight: 700, ...snap(f, 68, 4) }}>
         Replayable. Auditable.

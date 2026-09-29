@@ -30,7 +30,7 @@ export const CASES: CaseData[] = [
       ["LIQUIDITY", "CLEAN"],
       ["PUMP", "CLEAN"],
     ],
-    foot: "Jev second opinion:",
+    foot: "Recorded archive (2026-09-26): Jev second opinion",
     footAccent: "0.10 · consensus",
   },
   {
@@ -46,7 +46,7 @@ export const CASES: CaseData[] = [
       ["netBuyRatio -0.03 vs >0", "WARN"],
       ["LIQUIDITY / PUMP", "CLEAN"],
     ],
-    foot: "Every failing row is named. Jev:",
+    foot: "Recorded archive (2026-09-26): every failing row is named. Jev:",
     footAccent: "contested",
   },
   {
@@ -62,12 +62,12 @@ export const CASES: CaseData[] = [
       ["netBuyRatio -0.14, mature tier", "WARN"],
       ["LIQUIDITY / PUMP", "CLEAN"],
     ],
-    foot: "Rules: caution. Jev: 0.27.",
+    foot: "Recorded archive (2026-09-26): rules caution. Jev: 0.27.",
     footAccent: "Contested, shown not hidden",
   },
 ];
 
-// Real SHA-256 prefixes from verdict 8d3ea1d0c471 (GMX snapshot).
+// Recorded SHA-256 prefixes from verdict 8d3ea1d0c471 (GMX archive).
 export const RECEIPTS: [string, string, string][] = [
   ["/v1/dex/search", "GMX · Arbitrum", "e8517296"],
   ["/v1/dex/tokens/transactions", "100 swaps", "8a6b0f55"],
@@ -81,10 +81,10 @@ export const RECEIPTS: [string, string, string][] = [
 ];
 
 export const STATS: [string, string][] = [
-  ["34", "verdicts on file"],
+  ["34", "recorded verdicts on file"],
   ["7", "chains covered"],
-  ["306", "API receipts"],
-  ["30 · 3 · 1", "caution · avoid · entry-worthy"],
+  ["306", "recorded API receipts"],
+  ["30 · 3 · 1", "recorded caution · avoid · entry-worthy"],
 ];
 
 // Timeline windows (frames @30fps). Shared by every variant so the VO syncs identically.

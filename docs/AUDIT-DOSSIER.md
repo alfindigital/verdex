@@ -7,6 +7,29 @@
 >
 > Compiled: **2026-09-27** · Repo HEAD: `25152c1` (branch `main`) · Live deploy: Vercel auto-deploy per push.
 
+## Current execution addendum — 2026-09-29
+
+This dossier is a historical audit baseline. The current implementation review was
+completed in isolated branch `codex/verdex-evidence-v2` from base `a1abade`.
+Use [`HANDOFF.md`](../HANDOFF.md), [`docs/evidence/validation-matrix.md`](evidence/validation-matrix.md),
+and [`docs/SUBMISSION-CHECKLIST.md`](SUBMISSION-CHECKLIST.md) as the current release
+status; the tables below are not a claim that the old live deployment is still
+available or that its old observations are current.
+
+- Replay is the judging path. V2 live is opt-in only when `VERDEX_V2=1` and
+  `VERDEX_LIVE=1` are both set, with server-only credentials and fail-closed quota
+  permission.
+- The current branch passed 164 tests, typecheck, evidence verification, docs
+  verification, production build, and redacted gitleaks history scanning.
+- Current CMC tier entitlement, pagination behavior, fresh raw-body capture, real
+  bundle replay, production smoke, mobile contrast, and trader utility remain
+  **UNVERIFIED** because no credential or participant/deployment authorization was
+  supplied in this execution.
+- The dependency audit still reports 4 high and 2 moderate transitive advisories;
+  no forced upgrade was made. See the validation matrix for the exact follow-up.
+
+## Historical dossier snapshot
+
 ---
 
 ## 0. Identity & All URLs

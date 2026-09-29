@@ -273,7 +273,7 @@ const ReceiptsA: React.FC = () => {
       <CutBar />
       <Kicker>evidence receipts</Kicker>
       <div style={{ fontSize: 58, fontWeight: 900, color: C.text, marginTop: 26, lineHeight: 1.12, letterSpacing: "-0.02em", ...wipeX(f, 6, 7) }}>
-        Nine API calls per verdict.
+        Recorded sample: nine API calls.
         <br />
         <span style={{ color: C.dim }}>Every response hashed.</span>
       </div>
@@ -316,7 +316,7 @@ const ReceiptsA: React.FC = () => {
         ))}
       </div>
       <div style={{ fontFamily: F.data, fontSize: 20, color: C.faint, marginTop: 24, ...snap(f, 60, 4) }}>
-        receipts shown: verdict 8d3ea1d0c471 · /verdict/gmx-arbitrum
+        recorded receipts: verdict 8d3ea1d0c471 · /verdict/gmx-arbitrum
       </div>
       <div style={{ fontFamily: F.data, fontSize: 24, color: C.safe, marginTop: 12, ...snap(f, 68, 4) }}>
         Replayable. Auditable. Don&apos;t take our word for it.

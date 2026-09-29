@@ -8,6 +8,26 @@ gray zone selalu menghasilkan `BELUM_CUKUP_BUKTI`, bukan tebakan.
 `CLEAN` = bukti mendukung · `WARN` = mixed/gray · `DANGER` = red flag terbukti ·
 `INSUFFICIENT` = data tidak cukup untuk memutuskan.
 
+## V2 evidence contract (2026-09-29)
+
+The legacy rules below remain attached to historical v1 snapshots. New V2
+records use `schemaVersion: 2` and `rulesVersion: 2.0.0`:
+
+- `observedSellMakers` means distinct maker identities observed in valid sell
+  rows after pool/creator/owner exclusions. It is not a claim of independent
+  ownership or intent. The UI no longer labels it “third-party wallets”.
+- A result can be `NO_FLAGS_OBSERVED` only when required sources are fresh and
+  sufficient. Failed, unsupported, stale, invalid, and missing sources remain
+  visible as coverage reasons; they never become zero or CLEAN.
+- LP event failure makes LP change/depth linkage unknown even when pool depth is
+  present. The synthetic LP-outage fixture is a regression case, not a market
+  incident.
+- The swap window is the endpoint response that was actually captured. A
+  universal pagination or CMC cap claim is not published until a current
+  authorized probe verifies it.
+- Current tier entitlement, pagination, and a real exact-body capture remain
+  unverified for this execution because no credential was supplied.
+
 ## SAFETY (sumber: `dex/security/detail`)
 
 | Rule | Level |
