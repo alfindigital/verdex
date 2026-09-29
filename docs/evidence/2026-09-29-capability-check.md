@@ -22,6 +22,16 @@ The missing video dependency setup is a release reproducibility issue. It is not
 
 The repository has a local `.env.local`, but no API credential was supplied in this user request. Per the workspace credential rule, this task did not read or use that file and did not call CMC with a stored key. Therefore no current live response body, quota entitlement, pagination result, or Basic-tier capability is claimed here. Replay remains the safe judging path until a user explicitly supplies a credential for a bounded capture.
 
+## Deployment follow-up — 2026-09-29
+
+This baseline was recorded before the owner supplied an explicit CMC key and before
+the production install policy was repaired. `pnpm-workspace.yaml` now uses
+`allowBuilds: { esbuild: true, sharp: true }`; `pnpm install --frozen-lockfile`
+passes locally with both package scripts completing. The first Vercel auto-deploy
+for `abd1e04` failed at `pnpm install` with `ERR_PNPM_IGNORED_BUILDS`; a manual
+deployment is being verified separately. The supplied key is used only in the
+current process for a bounded live probe and is not written here or to the repo.
+
 ## Contract evidence available without a key
 
 The retained repository normalizer tests contain trimmed payloads with the fields listed in `tests/fixtures/cmc/README.md`. They are sufficient to specify parser input shapes, but not to establish current provider behavior, endpoint availability, response timestamps, pagination, or raw-body hashes. `real-shape-sample.json` is explicitly labelled `rawBodyRetained: false` for that reason.

@@ -27,6 +27,10 @@ available or that its old observations are current.
   supplied in this execution.
 - The dependency audit still reports 4 high and 2 moderate transitive advisories;
   no forced upgrade was made. See the validation matrix for the exact follow-up.
+- Vercel's first auto-deploy for `abd1e04` failed during pnpm install because the
+  old build-script policy was not accepted by pnpm 11. The policy is now explicit
+  (`esbuild: true`, `sharp: true`), frozen install passes, and a manual deploy is
+  being rechecked against the production alias.
 
 ## Historical dossier snapshot
 

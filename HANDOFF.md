@@ -11,7 +11,7 @@
 - Share policy: only committed snapshot ids get durable paths/X links. Live/runtime results are transient and exportable without a permanent link.
 - Known unverified items: authorized fresh CMC raw capture and current tier/pagination, 390px automated contrast, consenting trader utility study, three real raw bundle replay, browser download transfer event, deployment smoke test, and dependency audit remediation.
 - Dependency review item: `pnpm audit --prod --json` reports 4 high and 2 moderate transitive advisories in Next/PostCSS/optional sharp. No forced upgrade was made.
-- Foreign file intentionally untouched: `pnpm-workspace.yaml` has an existing unstaged modification; do not stage it without the owner’s separate decision.
+- Install policy: `pnpm-workspace.yaml` now explicitly allows only `esbuild` and `sharp` build scripts. `pnpm install --frozen-lockfile` passes locally and is required for Vercel's pnpm 11 install path.
 
 Use [`docs/evidence/validation-matrix.md`](docs/evidence/validation-matrix.md), [`docs/DEMO-WALKTHROUGH.md`](docs/DEMO-WALKTHROUGH.md), and [`SUBMISSION.md`](SUBMISSION.md) as the current handoff. The historical notes below describe earlier states and are not the current release status.
 

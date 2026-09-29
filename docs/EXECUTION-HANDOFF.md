@@ -37,4 +37,4 @@ Updated 2026-09-29. Tasks 1–8 of the approved overhaul were executed in the is
 - Judge path: [`docs/DEMO-WALKTHROUGH.md`](DEMO-WALKTHROUGH.md).
 - Publishing pack: [`SUBMISSION.md`](../SUBMISSION.md), [`docs/SUBMISSION-CHECKLIST.md`](SUBMISSION-CHECKLIST.md).
 
-Do not stage the foreign unstaged `pnpm-workspace.yaml` change without its owner’s separate decision. Do not claim a live scan, permanent live record, accuracy, adoption, or hackathon result until the corresponding evidence exists.
+The tracked `pnpm-workspace.yaml` explicitly allows only `esbuild` and `sharp` build scripts so pnpm 11 installs on Vercel do not fail closed. Do not claim a live scan, permanent live record, accuracy, adoption, or hackathon result until the corresponding evidence exists.
