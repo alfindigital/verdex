@@ -102,6 +102,17 @@ describe("analyze", () => {
     if (r.kind === "verdict") expect(r.result.verdict).toBe("BELUM_CUKUP_BUKTI");
   });
 
+  it("LP outage cannot produce a positive clean verdict", async () => {
+    const client = mkClient({
+      ...healthyHandlers,
+      "/v1/dex/liquidity-change/list": () => { throw new Error("lp outage"); },
+    });
+    const r = await analyze(client, { query: "PEPE" }, deps());
+    if (r.kind !== "verdict") throw new Error("expected verdict");
+    expect(r.result.label).toBe("INSUFFICIENT_EVIDENCE");
+    expect(r.coverage.dimensions.LIQUIDITY).not.toBe("sufficient");
+  });
+
   it("market-context calls surface receipts when up and failures when down", async () => {
     // healthyHandlers has no global-metrics/fng handlers → they throw → failures
     const r = await analyze(mkClient(healthyHandlers), { query: "PEPE" }, deps());

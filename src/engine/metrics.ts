@@ -22,6 +22,7 @@ export interface LiquidityMetrics {
   maxSinglePullPct: number; // largest remove / pool liq
   addCount: number;
   removeCount: number;
+  removalVsCurrentDepth?: number | null;
 }
 
 export interface PumpMetrics {
@@ -91,6 +92,7 @@ export function liquidityMetrics(events: LiqEvent[], pools: Pool[]): LiquidityMe
   let addCount = 0;
   let removeCount = 0;
   let maxPull = 0;
+  let unknownPoolMapping = false;
   for (const e of events) {
     if (e.kind === "add") {
       addUsd += e.usd;
@@ -98,11 +100,11 @@ export function liquidityMetrics(events: LiqEvent[], pools: Pool[]): LiquidityMe
     } else {
       removeUsd += e.usd;
       removeCount++;
-      // CLAIMS: "remove terbesar vs pool size" — the pool being pulled, not
-      // total liquidity (a big pull on a small pool would otherwise dilute).
-      // Unknown pools fall back to total rather than hiding the pull.
-      const denom = liqByPool.get(e.pool.toLowerCase()) ?? totalLiqUsd;
-      if (denom > 0) maxPull = Math.max(maxPull, e.usd / denom);
+      // V2 only reports a ratio when the event maps to a known pool. Falling
+      // back to aggregate depth would make an unknown event look smaller.
+      const denom = liqByPool.get(e.pool.toLowerCase());
+      if (denom === undefined || denom <= 0 || !Number.isFinite(denom)) unknownPoolMapping = true;
+      else maxPull = Math.max(maxPull, e.usd / denom);
     }
   }
   return {
@@ -112,6 +114,7 @@ export function liquidityMetrics(events: LiqEvent[], pools: Pool[]): LiquidityMe
     maxSinglePullPct: maxPull,
     addCount,
     removeCount,
+    removalVsCurrentDepth: pools.length === 0 || unknownPoolMapping ? null : maxPull,
   };
 }
 

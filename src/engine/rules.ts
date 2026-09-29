@@ -2,6 +2,7 @@
 // are the source of truth; keep the two in sync.
 
 import type { FlowMetrics, LiquidityMetrics, PumpMetrics, SafetyMetrics } from "./metrics";
+import type { RecheckCondition, RiskLabel } from "@/lib/verdict-types";
 
 export type SubDim = "SAFETY" | "FLOW" | "LIQUIDITY" | "PUMP";
 export type SubLevel = "CLEAN" | "WARN" | "DANGER" | "INSUFFICIENT";
@@ -36,6 +37,9 @@ export interface CompositeResult {
   subs: SubVerdict[];
   confidence: "high" | "medium" | "low";
   falsifier: string;
+  label?: RiskLabel;
+  recheck?: RecheckCondition[];
+  v2Subs?: SubVerdict[];
 }
 
 /** Shared thresholds — single source for rules AND UI viz tones. */
@@ -113,6 +117,11 @@ export function evalFlow(f: FlowMetrics, mature = false): SubVerdict {
   return { dim: "FLOW", level: worst(rows), metrics: rows };
 }
 
+/** V2 deliberately removes the market-cap cliff; concentration remains a flag. */
+export function evalFlowV2(f: FlowMetrics): SubVerdict {
+  return evalFlow(f, false);
+}
+
 export function evalLiquidity(l: LiquidityMetrics): SubVerdict {
   if (l.poolCount === 0) {
     return { dim: "LIQUIDITY", level: "INSUFFICIENT", metrics: [lvl("poolCount", 0, "≥1", "INSUFFICIENT")] };
@@ -121,6 +130,18 @@ export function evalLiquidity(l: LiquidityMetrics): SubVerdict {
   const rows: MetricRow[] = [
     lvl("maxSinglePullPct", round2(l.maxSinglePullPct), "<15%", l.maxSinglePullPct > THRESHOLDS.maxSinglePullPct.danger ? "DANGER" : l.maxSinglePullPct >= THRESHOLDS.maxSinglePullPct.warn ? "WARN" : "CLEAN"),
     lvl("netLpDeltaPct", round2(lpDeltaPct), "≥0", lpDeltaPct < THRESHOLDS.netLpDeltaPct.danger ? "DANGER" : lpDeltaPct < THRESHOLDS.netLpDeltaPct.warn ? "WARN" : "CLEAN"),
+    lvl("totalLiqUsd", Math.round(l.totalLiqUsd), "≥$10k", l.totalLiqUsd < 10_000 ? "WARN" : "CLEAN"),
+  ];
+  return { dim: "LIQUIDITY", level: worst(rows), metrics: rows };
+}
+
+export function evalLiquidityV2(l: LiquidityMetrics): SubVerdict {
+  if (l.poolCount === 0) return { dim: "LIQUIDITY", level: "INSUFFICIENT", metrics: [lvl("poolCount", 0, "≥1", "INSUFFICIENT")] };
+  const lpDeltaPct = l.totalLiqUsd > 0 ? l.netLpDeltaUsd / l.totalLiqUsd : null;
+  const removal = l.removalVsCurrentDepth ?? null;
+  const rows: MetricRow[] = [
+    lvl("removalVsCurrentDepth", removal === null ? "unknown" : round2(removal), "<15% of mapped pool depth", removal === null ? "INSUFFICIENT" : removal > THRESHOLDS.maxSinglePullPct.danger ? "DANGER" : removal >= THRESHOLDS.maxSinglePullPct.warn ? "WARN" : "CLEAN"),
+    lvl("netLpDeltaPct", lpDeltaPct === null ? "unknown" : round2(lpDeltaPct), "≥0", lpDeltaPct === null ? "INSUFFICIENT" : lpDeltaPct < THRESHOLDS.netLpDeltaPct.danger ? "DANGER" : lpDeltaPct < THRESHOLDS.netLpDeltaPct.warn ? "WARN" : "CLEAN"),
     lvl("totalLiqUsd", Math.round(l.totalLiqUsd), "≥$10k", l.totalLiqUsd < 10_000 ? "WARN" : "CLEAN"),
   ];
   return { dim: "LIQUIDITY", level: worst(rows), metrics: rows };

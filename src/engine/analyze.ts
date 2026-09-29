@@ -20,7 +20,9 @@ import {
 } from "@/lib/dex";
 import { tokenIdentity } from "@/lib/address";
 import { flowMetrics, liquidityMetrics, pumpMetrics, safetyMetrics, type FlowMetrics, type LiquidityMetrics, type PumpMetrics, type SafetyMetrics } from "@/engine/metrics";
-import { composite, type CompositeResult } from "@/engine/rules";
+import { composite, evalFlowV2, evalLiquidityV2, evalPump, evalSafety, type CompositeResult, type SubVerdict } from "@/engine/rules";
+import { buildRecheck, evaluateCoverage, labelRisk } from "@/engine/coverage";
+import type { Coverage, EvidenceSummary, ObservationWindow, SourceEvidence, SourceKey } from "@/lib/verdict-types";
 import { jevCrossExamine, agreement, type JevOpinion, type Agreement } from "@/lib/jev";
 import { narrate, type Narration } from "@/engine/narrator";
 
@@ -55,6 +57,17 @@ export type AnalyzeResult =
       narration: Narration | null;
       receipts: Receipt[];
       failures: FailedCall[];
+      schemaVersion: 2;
+      rulesVersion: "2.0.0";
+      mode: "live" | "replay";
+      computedAt: string;
+      sourceRecordId: string;
+      coverage: Coverage;
+      window: ObservationWindow;
+      sources: SourceEvidence[];
+      evidence: EvidenceSummary[];
+      context: { btcDom: number | null; btcDomDelta7d: number | null; fearGreed: number | null };
+      share: { kind: "snapshot" | "none"; path: string | null };
     };
 
 export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeDeps = {}): Promise<AnalyzeResult> {
@@ -119,11 +132,51 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
   receipts.push(...ctxR.receipts);
   failures.push(...ctxR.failures);
   const ctx = ctxR.context;
-
   const swaps = swapsR?.swaps ?? [];
   const pools = poolsR?.pools ?? [];
   const events = liqR?.events ?? [];
   const sec = secR === null ? null : (secR?.security ?? null);
+
+  const receiptByEndpoint = new Map(receipts.map((receipt) => [receipt.endpoint, receipt]));
+  const failureByEndpoint = new Map(failures.map((failure) => [failure.endpoint, failure]));
+  const paramsFor = (endpoint: string): Record<string, string | number> => {
+    const params = receiptByEndpoint.get(endpoint)?.params ?? {};
+    return Object.fromEntries(Object.entries(params).filter(([, value]) => typeof value === "string" || typeof value === "number")) as Record<string, string | number>;
+  };
+  const source = (key: SourceKey, endpoint: string, acceptedRows = 0, rejectedRows = 0, emptyWhenZero = false): SourceEvidence => {
+    const receipt = receiptByEndpoint.get(endpoint);
+    const failure = failureByEndpoint.get(endpoint);
+    const status = failure ? "failed" : receipt ? (emptyWhenZero && acceptedRows === 0 ? "empty" : "ok") : "not-captured";
+    return {
+      key, status, endpoint, params: paramsFor(endpoint), fetchedAt: receipt?.ts ?? checkedAt,
+      providerAt: receipt?.ts ?? null, httpStatus: receipt ? 200 : null, credits: receipt?.credits ?? null,
+      bodySha256: receipt?.sha256 ?? null, bodyBase64: null, evidenceKind: receipt ? "receipt-only" : "none",
+      parserVersion: "v1-normalizer", acceptedRows, rejectedRows, cached: receipt?.cached ?? false,
+      reason: failure?.error ?? (status === "not-captured" ? "source was not captured" : null),
+    };
+  };
+  const checkedAt = new Date(now()).toISOString();
+  const sources: SourceEvidence[] = [
+    source("search", "/v1/dex/search", 1),
+    source("swaps", "/v1/dex/tokens/transactions", swapsR?.swaps.length ?? 0, swapsR?.rejected ?? 0, true),
+    source("pools", "/v1/dex/token/pools", poolsR?.pools.length ?? 0, 0, true),
+    source("lp", "/v1/dex/liquidity-change/list", liqR?.events.length ?? 0, liqR?.rejected ?? 0, true),
+    source("security", "/v1/dex/security/detail", secR?.security ? 1 : 0, 0, false),
+    source("meta", "/v1/dex/token", metaR ? 1 : 0, 0, false),
+    source("globalLatest", "/v1/global-metrics/quotes/latest", ctx.btcDom === null ? 0 : 1, 0, false),
+    source("globalHistorical", "/v1/global-metrics/quotes/historical", ctx.btcDomDelta7d === null ? 0 : 1, 0, false),
+    source("fearGreed", "/v3/fear-and-greed/latest", ctx.fearGreed === null ? 0 : 1, 0, false),
+  ];
+  const window: ObservationWindow = {
+    firstSwapAt: swaps.length ? new Date(Math.min(...swaps.map((swap) => swap.ts))).toISOString() : null,
+    lastSwapAt: swaps.length ? new Date(Math.max(...swaps.map((swap) => swap.ts))).toISOString() : null,
+    validSwaps: swaps.length,
+    rejectedSwaps: swapsR?.rejected ?? 0,
+    duplicateRows: swapsR?.duplicates ?? 0,
+    requestedLimit: 100,
+    fetchedPages: 1,
+    truncated: false,
+  };
 
   // --- metrics → rules ---
   const metrics = {
@@ -140,6 +193,17 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     context: { btcDomDelta7d: ctx.btcDomDelta7d, fearGreed: ctx.fearGreed },
     mcapUsd: token.mcapUsd,
   });
+  const exclusionStatus: Coverage["exclusionStatus"] = !metaR ? "unknown" : metaR.creator && metaR.owner ? "creator-owner-known" : "partial";
+  const coverage = evaluateCoverage(sources, window, exclusionStatus, checkedAt);
+  const v2Subs: SubVerdict[] = [
+    evalSafety(metrics.safety),
+    evalFlowV2(metrics.flow),
+    evalLiquidityV2(metrics.liq),
+    evalPump(metrics.pump, { btcDomDelta7d: ctx.btcDomDelta7d, fearGreed: ctx.fearGreed }),
+  ];
+  result.v2Subs = v2Subs;
+  result.label = labelRisk(v2Subs, coverage);
+  result.recheck = buildRecheck(v2Subs, coverage);
 
   // --- Jev cross-examination + narration (both optional, never blocking) ---
   const metricsSummary = {
@@ -168,5 +232,16 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     narration: narration ?? null,
     receipts,
     failures,
+    schemaVersion: 2,
+    rulesVersion: "2.0.0",
+    mode: "live",
+    computedAt: checkedAt,
+    sourceRecordId: id,
+    coverage,
+    window,
+    sources,
+    evidence: [],
+    context: ctx,
+    share: { kind: "none", path: null },
   };
 }

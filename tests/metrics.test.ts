@@ -88,9 +88,9 @@ describe("liquidityMetrics", () => {
     // $3k pulled from the $10k pool = 30% (vs 2.7% if diluted by total).
     const m = liquidityMetrics([{ ts: 1, kind: "remove", usd: 3000, pool: "P1", maker: "m" }], twoPools);
     expect(m.maxSinglePullPct).toBeCloseTo(0.3);
-    // Unknown pool falls back to total liquidity.
+    // Unknown pool mapping remains unavailable; total depth must not dilute the ratio.
     const m2 = liquidityMetrics([{ ts: 1, kind: "remove", usd: 3000, pool: "P9", maker: "m" }], twoPools);
-    expect(m2.maxSinglePullPct).toBeCloseTo(3000 / 110000);
+    expect(m2.removalVsCurrentDepth).toBeNull();
   });
   it("no pools → insufficient-ish zeros", () => {
     const m = liquidityMetrics([], []);

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { evalSafety, evalFlow, evalLiquidity, evalPump, composite, type EngineInput } from "@/engine/rules";
+import { evalSafety, evalFlow, evalFlowV2, evalLiquidity, evalLiquidityV2, evalPump, composite, type EngineInput } from "@/engine/rules";
 import type { FlowMetrics, LiquidityMetrics, PumpMetrics, SafetyMetrics } from "@/engine/metrics";
 
 const fm = (o: Partial<FlowMetrics>): FlowMetrics => ({
@@ -99,6 +99,11 @@ describe("evalFlow", () => {
     // Zero third-party sells is venue-independent — still DANGER.
     expect(evalFlow(fm({ thirdPartySells: 0, buyCount: 80 }), true).level).toBe("DANGER");
   });
+  it("V2 does not change concentration severity at the mature market-cap boundary", () => {
+    const f = fm({ top5MakerShare: 0.8, netBuyRatio: -0.35 });
+    expect(evalFlow(f, true).level).toBe("WARN");
+    expect(evalFlowV2(f).level).toBe("DANGER");
+  });
   it("composite wires mcapUsd → mature tier", () => {
     const mature = composite(input({ mcapUsd: 250_000_000, flow: fm({ top5MakerShare: 0.8, netBuyRatio: -0.35 }) }));
     expect(mature.subs.find((s) => s.dim === "FLOW")?.level).toBe("WARN");
@@ -119,6 +124,10 @@ describe("evalLiquidity", () => {
   });
   it("clean otherwise", () => {
     expect(evalLiquidity(lm({})).level).toBe("CLEAN");
+  });
+  it("V2 leaves unknown pool mapping unavailable", () => {
+    const l = lm({ maxSinglePullPct: 0, removalVsCurrentDepth: null });
+    expect(evalLiquidityV2(l).metrics.find((row) => row.name === "removalVsCurrentDepth")?.level).toBe("INSUFFICIENT");
   });
 });
 
