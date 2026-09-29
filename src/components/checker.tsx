@@ -146,6 +146,9 @@ export function Checker({ live }: { live: boolean }) {
       </form>
 
       {loading && <ScanSkeleton />}
+      <p className="sr-only" aria-live="polite">
+        {loading ? "Inspecting token identity and evidence sources" : out ? "Verdex result ready" : ""}
+      </p>
 
       {out && "error" in out && (
         <div className="mt-4 rounded-md border border-danger/40 bg-danger/5 px-4 py-3">

@@ -23,11 +23,18 @@ const LABEL: Record<string, string> = {
   JANGAN: "AVOID",
   BELUM_CUKUP_BUKTI: "INSUFFICIENT EVIDENCE",
 };
+const V2_LABEL: Record<string, string> = {
+  NO_FLAGS_OBSERVED: "NO FLAGS OBSERVED",
+  CAUTION: "CAUTION",
+  HIGH_RISK_FLAGS: "HIGH RISK FLAGS",
+  INSUFFICIENT_EVIDENCE: "INSUFFICIENT EVIDENCE",
+};
 
 export default async function Og({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const v = loadVerdict(id);
   const verdict = v?.result.verdict ?? "BELUM_CUKUP_BUKTI";
+  const displayLabel = v?.schemaVersion === 2 && v.result.label ? V2_LABEL[v.result.label] ?? "INSUFFICIENT EVIDENCE" : LABEL[verdict] ?? LABEL.BELUM_CUKUP_BUKTI;
   const color = COLORS[verdict] ?? COLORS.BELUM_CUKUP_BUKTI;
 
   return new ImageResponse(
@@ -45,9 +52,9 @@ export default async function Og({ params }: { params: Promise<{ id: string }> }
         }}
       >
         <div style={{ color: "#737373", fontSize: 28, marginBottom: 12 }}>Verdex · evidence-backed verdict</div>
-        <div style={{ color, fontSize: 96, fontWeight: 900, lineHeight: 1 }}>{LABEL[verdict]}</div>
+        <div style={{ color, fontSize: 96, fontWeight: 900, lineHeight: 1 }}>{displayLabel}</div>
         <div style={{ color: "#e5e5e5", fontSize: 44, marginTop: 24 }}>
-          {v ? `${v.token.symbol} on ${v.token.platform} — score ${v.result.score}/100` : "verdict not found"}
+          {v ? `${v.token.symbol} on ${v.token.platform} — ${v.schemaVersion === 2 ? (v.mode === "replay" ? "recorded replay" : "live scan") : `legacy score ${v.result.score}/100`}` : "verdict not found"}
         </div>
         <div style={{ color: "#525252", fontSize: 24, marginTop: 32 }}>
           Don&apos;t be the exit liquidity · powered by CoinMarketCap DEX data

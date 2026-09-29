@@ -1,62 +1,25 @@
-// SSR render tests for VerdictCard — mechanical guard against the classes of
-// bugs the review caught: boolean fields, null metrics, dead thresholds.
-import { createElement as h } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { VerdictCard, type VerdictRecord } from "../src/components/verdict-card";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "fs";
+import { listSnapshotIds, loadVerdict } from "@/lib/verdict-store";
+import { VerdictCard, type VerdictRecord } from "@/components/verdict-card";
 
-const sushi = JSON.parse(
-  readFileSync(join(process.cwd(), "snapshots", "5071c7a844a8.json"), "utf8"),
-) as VerdictRecord;
+const legacyFixture = loadVerdict(listSnapshotIds()[0]);
+if (!legacyFixture) throw new Error("snapshot corpus is empty");
+if (legacyFixture.schemaVersion) throw new Error("expected a v1 legacy fixture");
+const lpFailureFixture = (JSON.parse(readFileSync("tests/fixtures/cmc/synthetic-lp-outage-bundle.json", "utf8")) as { record: VerdictRecord }).record;
 
-const render = (v: VerdictRecord) => renderToStaticMarkup(h(VerdictCard, { v }));
-
-describe("VerdictCard render", () => {
-  it("renders stamp, gauge, ledger, falsifier and receipts from a real snapshot", () => {
-    const html = render(sushi);
-    expect(html).toContain("AVOID");
-    expect(html).toContain('aria-label="score 45/100"');
-    expect(html).toContain("SAFETY");
-    expect(html).toContain("thresholds");
-    expect(html).toContain("Falsifier");
-    expect(html).toContain("receipts");
+describe("VerdictCard evidence framing", () => {
+  it("makes replay status and missing raw evidence explicit", () => {
+    const html = renderToStaticMarkup(createElement(VerdictCard, { v: legacyFixture }));
+    expect(html).toContain("Archived");
+    expect(html).toContain("Raw source bodies not retained");
+    expect(html).not.toContain("permanent record");
   });
 
-  it("renders vendor flag YES when flaggedByVendor is boolean true", () => {
-    const v: VerdictRecord = {
-      ...sushi,
-      metrics: { ...sushi.metrics, safety: { ...sushi.metrics.safety, flaggedByVendor: true } },
-    };
-    const html = render(v);
-    expect(html).toContain("vendor flag");
-    expect(html).toContain("YES");
-  });
-
-  it("renders em-dash, not fabricated zeros, when pump metrics are null", () => {
-    const v: VerdictRecord = {
-      ...sushi,
-      metrics: {
-        ...sushi.metrics,
-        pump: { volMcapRatio: null, makersPer100kVol: null, priceChange24h: null },
-      },
-    };
-    const html = render(v);
-    expect(html).toContain("—");
-    expect(html).not.toContain("+0.00%");
-    expect(html).not.toContain("VOL/MCAP</span>\n          <span class=\"\">0.00%");
-  });
-
-  it("renders empty SplitBar as neutral track when buy+sell = 0", () => {
-    const v: VerdictRecord = {
-      ...sushi,
-      metrics: {
-        ...sushi.metrics,
-        flow: { ...sushi.metrics.flow, buyUsd: 0, sellUsd: 0, buyCount: 0, sellCount: 0 },
-      },
-    };
-    const html = render(v);
-    expect(html).toContain('aria-label="no data"');
+  it("shows unknown liquidity as unknown rather than zero", () => {
+    const html = renderToStaticMarkup(createElement(VerdictCard, { v: lpFailureFixture }));
+    expect(html).toContain("LP evidence unavailable");
   });
 });

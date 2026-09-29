@@ -2,8 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Checker } from "@/components/checker";
 import { listSnapshotIds, loadVerdict, slugFor } from "@/lib/verdict-store";
-import { VERDICT_STYLE } from "@/components/verdict-card";
+import { VERDICT_STYLE } from "@/lib/verdict-display";
 import { fmtNum, fmtUsd, num, Stat } from "@/components/viz";
+import { resolveScanMode } from "@/lib/scan-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ const TEXT: Record<string, string> = {
 };
 
 export default function Home() {
-  const live = process.env.VERDEX_LIVE === "1";
+  const live = resolveScanMode(process.env) === "v2-live";
   const snapshots = listSnapshotIds()
     .map((id) => loadVerdict(id))
     .filter((v): v is NonNullable<typeof v> => v !== null);
@@ -37,6 +38,11 @@ export default function Home() {
   const avgScore = snapshots.length
     ? Math.round(snapshots.reduce((a, v) => a + v.result.score, 0) / snapshots.length)
     : 0;
+  const showcase = [
+    snapshots.find((v) => v.result.verdict === "LAYAK"),
+    snapshots.find((v) => v.result.verdict === "RAWAN"),
+    snapshots.find((v) => v.result.verdict === "BELUM_CUKUP_BUKTI"),
+  ].filter((v): v is NonNullable<typeof v> => Boolean(v));
 
   return (
     <main className="relative z-[1] mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6">
@@ -59,7 +65,7 @@ export default function Home() {
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5 font-data text-[10px] uppercase tracking-widest text-dim">
             <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-safe" : "bg-warn"}`} aria-hidden="true" />
-            {live ? "live" : "snapshot"}
+            {live ? "live scan available" : "recorded examples only"}
           </span>
           <a
             href="https://github.com/alfindigital/verdex"
@@ -105,6 +111,38 @@ export default function Home() {
           </div>
         </aside>
       </section>
+
+      {showcase.length > 0 && (
+        <section className="mt-8" aria-labelledby="recorded-heading">
+          <div className="mb-2 flex items-baseline justify-between">
+            <h2 id="recorded-heading" className="font-data text-[10px] uppercase tracking-[0.25em] text-faint">recorded examples/</h2>
+            <span className="font-data text-[10px] text-faint">dated replay · no live credits</span>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {showcase.map((v) => {
+              const st = VERDICT_STYLE[v.result.verdict] ?? VERDICT_STYLE.BELUM_CUKUP_BUKTI;
+              return (
+                <Link key={v.id} href={`/verdict/${slugFor(v.token.symbol, v.token.platform)}`} className="rounded-md border border-line bg-panel p-4 transition-colors hover:border-safe/50">
+                  <div className="flex items-center justify-between gap-2"><span className={`stamp text-[9px] ${TEXT[st.tone]}`}>{st.label}</span><span className="font-data text-[10px] text-faint">archived</span></div>
+                  <div className="mt-3 text-lg font-bold">{v.token.symbol.replace(/^\$/, "")} <span className="font-data text-xs font-normal uppercase text-faint">· {v.token.platform}</span></div>
+                  <div className="mt-1 font-data text-[10px] text-faint">captured {new Date(v.ts).toISOString().slice(0, 10)} · {v.token.address.slice(0, 10)}…</div>
+                  <div className="mt-3 font-data text-xs text-dim">{v.result.verdict === "LAYAK" ? "observed sample with no legacy flags" : v.result.verdict === "RAWAN" ? "concentrated or warning observations" : "insufficient evidence in recorded sample"}</div>
+                  <div className="mt-3 font-data text-[10px] uppercase tracking-widest text-safe">open recorded case →</div>
+                </Link>
+              );
+            })}
+            {showcase.length < 3 && (
+              <div className="rounded-md border border-dashed border-warn/40 bg-warn/5 p-4">
+                <div className="flex items-center justify-between gap-2"><span className="stamp text-[9px] text-warn">INSUFFICIENT EVIDENCE</span><span className="font-data text-[10px] text-warn">synthetic regression</span></div>
+                <div className="mt-3 text-lg font-bold">LP outage <span className="font-data text-xs font-normal uppercase text-faint">· fixture</span></div>
+                <div className="mt-1 font-data text-[10px] text-faint">provider LP source fails while pools remain present</div>
+                <div className="mt-3 font-data text-xs text-dim">Synthetic test case only; not a CoinMarketCap incident or live token finding.</div>
+                <div className="mt-3 font-data text-[10px] uppercase tracking-widest text-warn">review in evidence fixture →</div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ——— Case files: dense data table ——— */}
       {snapshots.length > 0 && (
@@ -154,7 +192,7 @@ export default function Home() {
                         {net >= 0 ? "+" : ""}{fmtUsd(net)}
                       </td>
                       <td className="num px-4 py-3 text-right font-data text-xs">
-                        {fmtNum(num(v.metrics.flow?.thirdPartySells))}
+                        {fmtNum(num(v.metrics.flow?.observedSellMakers ?? v.metrics.flow?.thirdPartySells))}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span className={`num font-data text-base font-bold ${tone}`}>{v.result.score}</span>

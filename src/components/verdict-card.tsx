@@ -1,7 +1,11 @@
+"use client";
+
 // Verdex terminal verdict card — dense data-viz layout, minimal prose.
 
 import { Donut, HBar, LevelMeter, NeedleGauge, ScoreGauge, SplitBar, Stat, fmtNum, fmtPct, fmtUsd } from "./viz";
 import { THRESHOLDS } from "@/engine/rules";
+import type { Coverage, EvidenceSummary, ObservationWindow, RecheckCondition, SourceEvidence } from "@/lib/verdict-types";
+import { EvidencePanel } from "@/components/evidence-panel";
 
 export type TokenRef = { platform: string; address: string; name: string; symbol: string; mcapUsd?: number | null; vol24hUsd?: number | null };
 export type MetricRow = { name: string; value: number | string; threshold: string; level: string };
@@ -12,12 +16,23 @@ export type VerdictRecord = {
   ts: string;
   token: TokenRef;
   metrics: Record<string, Record<string, number | string | boolean | null | (string | number)[]>>;
-  result: { verdict: string; score: number; confidence: string; falsifier: string; subs: SubVerdict[] };
+  result: { verdict: string; score: number; confidence: string; falsifier: string; subs: SubVerdict[]; label?: string; recheck?: RecheckCondition[]; v2Subs?: SubVerdict[] };
   jev: { available: boolean; riskyProb: number | null; dims?: Record<string, number | null> };
   agreement: string;
   narration: { source: string; headline: string; bullets: string[] } | null;
   receipts: { endpoint: string; params: Record<string, unknown>; ts: string; credits: number; sha256: string; cached: boolean }[];
   failures: { endpoint: string; error: string }[];
+  schemaVersion?: 2;
+  rulesVersion?: string;
+  mode?: "live" | "replay";
+  computedAt?: string;
+  sourceRecordId?: string;
+  coverage?: Coverage;
+  window?: ObservationWindow;
+  sources?: SourceEvidence[];
+  evidence?: EvidenceSummary[];
+  context?: { btcDom: number | null; btcDomDelta7d: number | null; fearGreed: number | null };
+  share?: { kind: "snapshot" | "none"; path: string | null };
 };
 
 type ToneKey = "safe" | "warn" | "danger" | "unknown";
@@ -30,11 +45,68 @@ export const VERDICT_STYLE: Record<string, { label: string; tone: ToneKey }> = {
   JANGAN: { label: "AVOID", tone: "danger" },
   BELUM_CUKUP_BUKTI: { label: "INSUFFICIENT", tone: "unknown" },
 };
+const RISK_STYLE: Record<string, { label: string; tone: ToneKey }> = {
+  NO_FLAGS_OBSERVED: { label: "NO FLAGS OBSERVED", tone: "safe" },
+  CAUTION: { label: "CAUTION", tone: "warn" },
+  HIGH_RISK_FLAGS: { label: "HIGH RISK FLAGS", tone: "danger" },
+  INSUFFICIENT_EVIDENCE: { label: "INSUFFICIENT EVIDENCE", tone: "unknown" },
+};
 const LEVEL_TONE: Record<string, ToneKey> = { CLEAN: "safe", WARN: "warn", DANGER: "danger", INSUFFICIENT: "unknown" };
 
 const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
 type MetricsBag = Record<string, number | string | boolean | null | (string | number)[]>;
 const shortAddr = (a: string) => (a.length > 20 ? `${a.slice(0, 10)}…${a.slice(-8)}` : a);
+const age = (iso: string) => {
+  const ms = Date.now() - Date.parse(iso);
+  if (!Number.isFinite(ms) || ms < 0) return "time unknown";
+  const mins = Math.floor(ms / 60_000);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+};
+
+function CopyButton({ value, label = "copy" }: { value: string; label?: string }) {
+  return (
+    <button type="button" onClick={() => void navigator.clipboard?.writeText(value)} className="rounded-sm border border-line px-2 py-1 font-data text-[10px] uppercase tracking-widest text-dim transition-colors hover:border-safe/60 hover:text-safe">
+      {label}
+    </button>
+  );
+}
+
+function DownloadButton({ v }: { v: VerdictRecord }) {
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        const blob = new Blob([JSON.stringify(v, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `verdex-${v.id}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }}
+      className="rounded-sm border border-line px-2 py-1 font-data text-[10px] uppercase tracking-widest text-dim transition-colors hover:border-safe/60 hover:text-safe"
+    >
+      download evidence JSON
+    </button>
+  );
+}
+
+function ReasonList({ v }: { v: VerdictRecord }) {
+  const reasons = v.result.recheck?.slice(0, 3).map((r) => `${r.dimension}: ${r.reason}`) ?? v.result.subs.filter((s) => s.level !== "CLEAN").slice(0, 3).map((s) => `${s.dim}: ${s.level.toLowerCase()} evidence`);
+  return (
+    <div className="border-t border-line bg-raised/40 px-5 py-4 sm:px-6">
+      <div className="mb-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">what to inspect next</div>
+      {reasons.length > 0 ? (
+        <ol className="grid gap-2 text-xs leading-relaxed text-dim md:grid-cols-3">
+          {reasons.map((reason, i) => <li key={`${reason}-${i}`}><span className="mr-2 font-data text-safe">0{i + 1}</span>{reason}</li>)}
+        </ol>
+      ) : <p className="font-data text-xs text-dim">No flags in this sample. A new flag or insufficient/stale evidence changes this assessment.</p>}
+    </div>
+  );
+}
 
 function DimPanel({ sub, children }: { sub: SubVerdict; children: React.ReactNode }) {
   const t = LEVEL_TONE[sub.level] ?? "unknown";
@@ -91,7 +163,7 @@ function FlowViz({ m }: { m: MetricsBag }) {
         <div className="grid flex-1 grid-cols-2 gap-3">
           <Stat k="swaps" v={fmtNum(num(m.swapCount))} />
           <Stat k="makers" v={fmtNum(num(m.uniqueMakers))} />
-          <Stat k="3rd-party sells" v={fmtNum(num(m.thirdPartySells))} tone={num(m.thirdPartySells) === 0 && num(m.buyCount) >= 20 ? "text-danger" : num(m.thirdPartySells) >= THRESHOLDS.thirdPartySellsClean ? "text-safe" : "text-warn"} />
+          <Stat k="observed sell makers" v={fmtNum(num(m.observedSellMakers ?? m.thirdPartySells))} tone={num(m.observedSellMakers ?? m.thirdPartySells) === 0 && num(m.buyCount) >= 20 ? "text-danger" : num(m.observedSellMakers ?? m.thirdPartySells) >= THRESHOLDS.thirdPartySellsClean ? "text-safe" : "text-warn"} />
           <Stat k="net flow" v={fmtUsd(num(m.netBuyUsd))} />
         </div>
         <div className="text-center">
@@ -126,7 +198,7 @@ function LiqViz({ m }: { m: MetricsBag }) {
       <div className="grid grid-cols-2 gap-3">
         <Stat k="liquidity" v={fmtUsd(num(m.totalLiqUsd))} />
         <Stat k="pools" v={fmtNum(num(m.poolCount))} />
-        <Stat k="net LP Δ" v={fmtUsd(num(m.netLpDeltaUsd))} tone={num(m.netLpDeltaUsd) < 0 ? "text-danger" : "text-safe"} />
+        <Stat k="net LP Δ" v={m.removalVsCurrentDepth == null ? "—" : fmtUsd(num(m.netLpDeltaUsd))} tone={m.removalVsCurrentDepth == null ? "text-faint" : num(m.netLpDeltaUsd) < 0 ? "text-danger" : "text-safe"} />
       </div>
     </div>
   );
@@ -210,17 +282,28 @@ const DIM_VIZ: Record<string, (m: MetricsBag) => React.ReactNode> = {
 const DIM_KEY: Record<string, string> = { FLOW: "flow", LIQUIDITY: "liq", PUMP: "pump", SAFETY: "safety" };
 
 export function VerdictCard({ v }: { v: VerdictRecord }) {
-  const style = VERDICT_STYLE[v.result.verdict] ?? VERDICT_STYLE.BELUM_CUKUP_BUKTI;
+  const isV2 = v.schemaVersion === 2;
+  const archived = !isV2 || v.mode === "replay";
+  const style = (isV2 && v.result.label ? RISK_STYLE[v.result.label] : undefined) ?? VERDICT_STYLE[v.result.verdict] ?? VERDICT_STYLE.BELUM_CUKUP_BUKTI;
   const tone = style.tone;
   const chg = typeof v.metrics.pump?.priceChange24h === "number" ? (v.metrics.pump.priceChange24h as number) : null;
   const jevScore = v.jev.riskyProb != null ? Math.round((1 - v.jev.riskyProb) * 100) : null;
+  const subs = (isV2 && v.result.v2Subs?.length ? v.result.v2Subs : v.result.subs);
+  const rawEvidence = v.sources?.some((source) => source.bodyBase64) ?? false;
+  const coverage = isV2 ? v.coverage?.level ?? "insufficient" : "archived";
 
   return (
     <section className="reveal overflow-hidden rounded-md border border-line bg-panel" aria-label={`Verdict for ${v.token.symbol}`}>
       {/* ——— Scan header ——— */}
       <div className="border-b border-line bg-raised px-4 py-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">
-        verdex://scan/{v.id} · {v.ts.slice(0, 19).replace("T", " ")}Z · deterministic rules
+        verdex://scan/{v.id} · {v.ts.slice(0, 19).replace("T", " ")}Z · {archived ? "recorded replay" : "live scan"} · deterministic rules
       </div>
+
+      {archived && !isV2 && (
+        <div className="border-b border-warn/30 bg-warn/5 px-5 py-3 font-data text-xs leading-relaxed text-warn sm:px-6">
+          Archived assessment under legacy rules, captured {new Date(v.ts).toISOString()}. Raw source bodies not retained.
+        </div>
+      )}
 
       {/* ——— Token + verdict band ——— */}
       <div className="flex flex-wrap items-center gap-x-8 gap-y-5 border-b border-line px-5 py-5 sm:px-6">
@@ -230,7 +313,7 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
             {v.token.name} <span className="font-data text-dim">${v.token.symbol.replace(/^\$/, "")}</span>
           </h2>
           <p className="mt-1 font-data text-[11px] text-faint">
-            {v.token.platform.toUpperCase()} · {shortAddr(v.token.address)}
+            {v.token.platform.toUpperCase()} · {shortAddr(v.token.address)} <CopyButton value={v.token.address} label="copy address" />
           </p>
         </div>
         <div className="flex items-center gap-6">
@@ -253,32 +336,37 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 border-b border-line px-5 py-3 font-data text-[10px] uppercase tracking-widest text-faint sm:px-6">
+        <span className={`rounded-sm border px-2 py-1 ${archived ? "border-warn/40 text-warn" : "border-safe/40 text-safe"}`}>{archived ? "ARCHIVED / REPLAY" : "LIVE SCAN"}</span>
+        <span className={`rounded-sm border px-2 py-1 ${coverage === "sufficient" ? "border-safe/40 text-safe" : "border-warn/40 text-warn"}`}>coverage: {coverage}</span>
+        <span>captured {new Date(v.computedAt ?? v.ts).toISOString()} · {age(v.computedAt ?? v.ts)}</span>
+        <span className="ml-auto">{rawEvidence ? "raw bodies available" : "raw source bodies not retained"}</span>
+      </div>
+
       {/* ——— 4-dimension evidence grid ——— */}
       <div className="grid lg:grid-cols-2">
-        {v.result.subs.map((s) => (
+        {subs.map((s) => (
           <DimPanel key={s.dim} sub={s}>
             {(DIM_VIZ[s.dim] ?? (() => null))(v.metrics[DIM_KEY[s.dim] ?? s.dim.toLowerCase()] ?? {})}
           </DimPanel>
         ))}
       </div>
 
+      {v.coverage?.reasons.some((reason) => /lp|liquidity/i.test(reason)) && (
+        <div className="border-t border-warn/30 bg-warn/5 px-5 py-3 font-data text-xs leading-relaxed text-warn sm:px-6">
+          LP evidence unavailable for this sample. Liquidity depth is shown separately; missing LP events are unknown, not zero.
+        </div>
+      )}
+
+      <ReasonList v={v} />
+
       {/* ——— Second opinion band ——— */}
       <div className="border-t border-line bg-raised/60 px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <span className="font-data text-[10px] uppercase tracking-[0.2em] text-faint">Jev · 2nd opinion</span>
+          <span className="font-data text-[10px] uppercase tracking-[0.2em] text-faint">Jev · archived model opinion</span>
           {v.jev.available && jevScore != null ? (
             <>
-              <div className="flex items-center gap-2 font-data text-xs">
-                <span className="text-faint">rules</span>
-                <div className="w-28"><HBar value={v.result.score} max={100} tone={tone === "safe" ? "bg-safe" : tone === "warn" ? "bg-warn" : tone === "danger" ? "bg-danger" : "bg-unknown"} height={5} /></div>
-                <span className="num font-bold">{v.result.score}</span>
-              </div>
-              <div className="flex items-center gap-2 font-data text-xs">
-                <span className="text-faint">jev</span>
-                <div className="w-28"><HBar value={jevScore} max={100} tone="bg-text/60" height={5} /></div>
-                <span className="num font-bold">{jevScore}</span>
-                <span className="text-faint">P(risky)={v.jev.riskyProb?.toFixed(2)}</span>
-              </div>
+              <span className="font-data text-xs text-dim">Model opinion available: risk signal {jevScore}/100 · P(risky)={v.jev.riskyProb?.toFixed(2)}</span>
               {v.jev.dims && (
                 <div className="flex items-end gap-1.5" title="Jev P(risky) per dimension">
                   {(["SAFETY", "FLOW", "LIQUIDITY", "PUMP"] as const).map((d) => {
@@ -316,7 +404,7 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
           <p className="mt-1.5 font-data text-xs leading-relaxed text-dim">{v.result.falsifier}</p>
         </div>
         <div className="border-t border-line p-4 sm:p-5 md:border-t-0">
-          {v.narration ? (
+          {v.narration && isV2 ? (
             <>
               <p className="font-data text-[10px] uppercase tracking-[0.2em] text-faint">AI narration · {v.narration.source}</p>
               <p className="mt-1.5 text-sm font-semibold leading-snug">{v.narration.headline}</p>
@@ -326,6 +414,8 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
                 ))}
               </ul>
             </>
+          ) : v.narration && !isV2 ? (
+            <p className="font-data text-xs leading-relaxed text-faint">Archived narrative is retained in the downloaded record; inspect source evidence and recheck conditions instead of treating historical text as advice.</p>
           ) : (
             <p className="font-data text-xs text-faint">narration unavailable</p>
           )}
@@ -342,6 +432,14 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
           ))}
         </div>
       )}
+
+      <div className="flex flex-wrap items-center gap-2 border-t border-line px-5 py-3 sm:px-6">
+        <DownloadButton v={v} />
+        {v.share?.path && <CopyButton value={v.share.path} label="copy recorded link" />}
+        <span className="font-data text-[10px] text-faint">export preserves the displayed receipt and limitation fields</span>
+      </div>
+
+      <EvidencePanel sources={v.sources} evidence={v.evidence} chain={v.token.platform} />
 
       {/* ——— Receipts ——— */}
       <details className="group border-t border-line">
