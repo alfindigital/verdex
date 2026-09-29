@@ -1,4 +1,5 @@
 import type { Swap, Pool, LiqEvent, SecurityReport } from "@/lib/dex";
+import { walletIdentity, canonicalChain } from "@/lib/address";
 
 export interface FlowMetrics {
   swapCount: number;
@@ -11,6 +12,7 @@ export interface FlowMetrics {
   uniqueMakers: number;
   top5MakerShare: number; // share of total USD by top-5 makers
   thirdPartySells: number; // distinct non-creator, non-pool makers with ≥1 sell
+  observedSellMakers?: number;
 }
 
 export interface LiquidityMetrics {
@@ -36,9 +38,10 @@ export interface SafetyMetrics {
   flaggedByVendor: boolean;
 }
 
-export function flowMetrics(swaps: Swap[], poolAddrs: string[] = [], creator?: string): FlowMetrics {
-  const poolSet = new Set(poolAddrs.map((a) => a.toLowerCase()));
-  const creatorLc = creator?.toLowerCase();
+export function flowMetrics(swaps: Swap[], poolAddrs: string[] = [], excluded: string | string[] = [], platform = "Ethereum"): FlowMetrics {
+  const chain = canonicalChain(platform) ?? platform;
+  const poolSet = new Set(poolAddrs.map((a) => walletIdentity(chain, a)));
+  const excludedSet = new Set((Array.isArray(excluded) ? excluded : excluded ? [excluded] : []).filter(Boolean).map((a) => walletIdentity(chain, a)));
   let buyUsd = 0;
   let sellUsd = 0;
   let buyCount = 0;
@@ -47,22 +50,23 @@ export function flowMetrics(swaps: Swap[], poolAddrs: string[] = [], creator?: s
   const sellers = new Set<string>();
 
   for (const s of swaps) {
-    const m = s.maker.toLowerCase();
+    const m = walletIdentity(chain, s.maker);
     if (s.side === "buy") {
       buyUsd += s.usd;
       buyCount++;
     } else {
       sellUsd += s.usd;
       sellCount++;
-      if (m !== creatorLc && !poolSet.has(m)) sellers.add(m);
+      if (s.usd > 0 && !excludedSet.has(m) && !poolSet.has(m)) sellers.add(m);
     }
     // Pools are infrastructure, not traders — excluded from maker stats so a
     // pool address in `ma` can't inflate breadth or concentration.
     if (!poolSet.has(m)) makerUsd.set(m, (makerUsd.get(m) ?? 0) + s.usd);
   }
 
-  const totalUsd = buyUsd + sellUsd;
+  const eligibleUsd = [...makerUsd.values()].reduce((a, b) => a + b, 0);
   const top5 = [...makerUsd.values()].sort((a, b) => b - a).slice(0, 5).reduce((a, b) => a + b, 0);
+  const totalUsd = buyUsd + sellUsd;
 
   return {
     swapCount: swaps.length,
@@ -73,8 +77,9 @@ export function flowMetrics(swaps: Swap[], poolAddrs: string[] = [], creator?: s
     netBuyUsd: buyUsd - sellUsd,
     netBuyRatio: totalUsd > 0 ? (buyUsd - sellUsd) / totalUsd : 0,
     uniqueMakers: makerUsd.size,
-    top5MakerShare: totalUsd > 0 ? top5 / totalUsd : 1,
+    top5MakerShare: eligibleUsd > 0 ? top5 / eligibleUsd : 1,
     thirdPartySells: sellers.size,
+    observedSellMakers: sellers.size,
   };
 }
 

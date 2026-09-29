@@ -18,6 +18,7 @@ import {
   type DexClient,
   type TokenRef,
 } from "@/lib/dex";
+import { tokenIdentity } from "@/lib/address";
 import { flowMetrics, liquidityMetrics, pumpMetrics, safetyMetrics, type FlowMetrics, type LiquidityMetrics, type PumpMetrics, type SafetyMetrics } from "@/engine/metrics";
 import { composite, type CompositeResult } from "@/engine/rules";
 import { jevCrossExamine, agreement, type JevOpinion, type Agreement } from "@/lib/jev";
@@ -27,6 +28,7 @@ export interface AnalyzeQuery {
   query: string;
   platform?: string;
   pick?: number; // index into candidates when caller already resolved ambiguity
+  selection?: { platform: string; address: string };
 }
 export interface AnalyzeDeps {
   jev?: (metrics: Record<string, unknown>) => Promise<JevOpinion>;
@@ -75,8 +77,12 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
       const plat = q.platform?.toLowerCase();
       const filtered = plat ? candidates.filter((c) => c.platform.toLowerCase() === plat) : candidates;
       if (filtered.length === 0) return { kind: "notFound", query: q.query };
-      if (filtered.length > 1 && q.pick === undefined) return { kind: "ambiguous", query: q.query, candidates: filtered };
-      const chosen = filtered[q.pick ?? 0];
+      const selected = q.selection
+        ? filtered.find((candidate) => tokenIdentity(candidate.platform, candidate.address) === tokenIdentity(q.selection!.platform, q.selection!.address))
+        : undefined;
+      if (q.selection && !selected) return { kind: "notFound", query: q.query };
+      if (filtered.length > 1 && q.pick === undefined && !selected) return { kind: "ambiguous", query: q.query, candidates: filtered };
+      const chosen = selected ?? filtered[q.pick ?? 0];
       if (!chosen) return { kind: "notFound", query: q.query }; // pick out of range — never a 500
       token = chosen;
     }
@@ -121,7 +127,7 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
 
   // --- metrics → rules ---
   const metrics = {
-    flow: flowMetrics(swaps, pools.map((p) => p.address), metaR?.creator ?? undefined),
+    flow: flowMetrics(swaps, pools.map((p) => p.address), [metaR?.creator ?? "", metaR?.owner ?? ""], token.platform),
     liq: liquidityMetrics(events, pools),
     pump: pumpMetrics(swaps, token, pools.map((p) => p.address)),
     safety: safetyMetrics(sec),

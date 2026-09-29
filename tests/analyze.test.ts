@@ -135,7 +135,7 @@ describe("analyze", () => {
         swaps: Array.from({ length: 60 }, (_, i) => ({
           ts: 1700000000 + i,
           tp: i % 4 === 0 ? "sell" : "buy",
-          ma: i % 10 === 0 ? "deployer1" : `m${i}`,
+          ma: i % 10 === 0 ? "DEPLOYER1" : `m${i}`,
           v: 10,
           tx: `t${i}`,
           f: "pool1",
@@ -145,8 +145,40 @@ describe("analyze", () => {
     });
     const r = await analyze(client, { query: "PEPE" }, deps());
     if (r.kind !== "verdict") throw new Error("expected verdict");
-    // 15 sells; sellers i=0,20,40 are the (case-insensitive) creator → excluded.
+    // 15 sells; sellers i=0,20,40 use the exact Solana creator identity → excluded.
     expect(r.metrics.flow.thirdPartySells).toBe(12);
+  });
+
+  it("excludes both creator and owner wallets from observed sell makers", async () => {
+    const client = mkClient({
+      ...healthyHandlers,
+      "/v1/dex/token": () => ({ crt: "creator", own: "owner" }),
+      "/v1/dex/tokens/transactions": () => ({
+        swaps: [
+          { ts: 1700000000, tp: "sell", ma: "creator", v: 10, tx: "c", f: "pool1", en: "d" },
+          { ts: 1700000001, tp: "sell", ma: "owner", v: 10, tx: "o", f: "pool1", en: "d" },
+          { ts: 1700000002, tp: "sell", ma: "public", v: 10, tx: "p", f: "pool1", en: "d" },
+        ],
+      }),
+    });
+    const r = await analyze(client, { query: "PEPE" }, deps());
+    if (r.kind !== "verdict") throw new Error("expected verdict");
+    expect(r.metrics.flow.observedSellMakers).toBe(1);
+    expect(r.metrics.flow.thirdPartySells).toBe(1);
+  });
+
+  it("selects a candidate by platform and address instead of a numeric index", async () => {
+    const client = mkClient({
+      ...healthyHandlers,
+      "/v1/dex/search": () => fakeSearch([SOL_TOKEN, BSC_TOKEN]).data,
+    });
+    const r = await analyze(client, {
+      query: "PEPE",
+      selection: { platform: "BSC", address: BSC_TOKEN.addr },
+    }, deps());
+    if (r.kind !== "verdict") throw new Error("expected verdict");
+    expect(r.token.platform).toBe("BSC");
+    expect(r.token.address).toBe(BSC_TOKEN.addr);
   });
 
   it("pick out of range → notFound, not a crash", async () => {

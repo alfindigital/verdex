@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normSwap, normPool, normLiqEvent, normSecurity, isAddress, resolveToken, TokenNotFoundError, type DexClient } from "@/lib/dex";
+import { normSwap, normPool, normLiqEvent, normSecurity, isAddress, resolveToken, TokenNotFoundError, parseSwaps, parseLiquidityEvents, type DexClient } from "@/lib/dex";
 
 // fixtures = real CMC response shapes probed 24 Sep 2026 (trimmed)
 const RAW_SWAP = { ts: "1790235901000", tp: "sell", ma: "GHHktoepDkShfcqYDVyVTJBx3ja71oWH7QBzsxYN71U9", v: 218.016, tx: "rqfcFoK", f: "pAMMBay", en: "PumpSwap" };
@@ -75,5 +75,30 @@ describe("resolveToken", () => {
     const c: DexClient = { get: async <T,>(_e: string, p?: Record<string, unknown>) => { q = String(p?.q); return { data: { tks: [] } as T, receipt: {} as never }; } };
     await resolveToken(c, "$FOO").catch(() => {});
     expect(q).toBe("FOO");
+  });
+
+  it("does not fall back to an Ethereum candidate for a BSC request", async () => {
+    const c = stubClient([{ plt: "Ethereum", addr: "0x00000000000000000000000000000000000000aa", n: "X", s: "X" }]);
+    await expect(resolveToken(c, "0x00000000000000000000000000000000000000aa", "BSC")).rejects.toBeInstanceOf(TokenNotFoundError);
+  });
+
+  it("parses strict rows and rejects unknown side, empty maker and non-finite USD", () => {
+    const p = parseSwaps({ swaps: [
+      { ...RAW_SWAP, tp: "other", ma: "maker-1" },
+      { ...RAW_SWAP, tp: "sell", ma: "", v: 1 },
+      { ...RAW_SWAP, tp: "sell", ma: "maker-2", v: "NaN" },
+    ] }, "Ethereum");
+    expect(p.rows).toHaveLength(0);
+    expect(p.rejected).toBe(3);
+  });
+
+  it("deduplicates a repeated liquidity log without collapsing distinct transactions", () => {
+    const p = parseLiquidityEvents({ lcs: [
+      { ...RAW_LC, tp: "remove", tx: "tx-1", lgid: "0", m: "lp" },
+      { ...RAW_LC, tp: "remove", tx: "tx-1", lgid: "0", m: "lp" },
+      { ...RAW_LC, tp: "remove", tx: "tx-1", lgid: "1", m: "lp" },
+    ] }, "Ethereum");
+    expect(p.rows).toHaveLength(2);
+    expect(p.duplicates).toBe(1);
   });
 });

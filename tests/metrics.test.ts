@@ -56,6 +56,17 @@ describe("flowMetrics", () => {
     expect(m.uniqueMakers).toBe(1);
     expect(m.thirdPartySells).toBe(1);
   });
+
+  it("accepts creator and owner exclusions and exposes observed makers", () => {
+    const swaps = [
+      swap("sell", "CREATOR", 10),
+      swap("sell", "OWNER", 10),
+      swap("sell", "public", 10),
+    ];
+    const m = flowMetrics(swaps, [], ["creator", "owner"], "Ethereum");
+    expect(m.observedSellMakers).toBe(1);
+    expect(m.thirdPartySells).toBe(1);
+  });
 });
 
 describe("liquidityMetrics", () => {

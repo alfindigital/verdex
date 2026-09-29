@@ -1,6 +1,8 @@
 // Normalized types + DEX fetchers over cmc-client.
 // Raw CMC field names are abbreviated (ts/tp/ma/v/f/en, lcs, tks...) —
 // every normalizer maps them to the public contract in specs/TECH_SPEC.md.
+import { canonicalAddress, canonicalChain, isEvmChain, tokenIdentity, walletIdentity } from "@/lib/address";
+import type { ParsedRows } from "@/lib/verdict-types";
 
 export interface TokenRef {
   platform: string; // 'Solana' | 'BSC' | 'Base' | ... (dex/platform/list `dn`)
@@ -22,6 +24,8 @@ export interface Swap {
   tx: string;
   pool: string;
   dex: string;
+  sourceRowIndex?: number;
+  logIndex?: string | null;
 }
 
 export interface Pool {
@@ -39,6 +43,8 @@ export interface LiqEvent {
   usd: number;
   pool: string;
   maker: string;
+  sourceRowIndex?: number;
+  logIndex?: string | null;
 }
 
 export interface SecurityReport {
@@ -70,6 +76,8 @@ export function normSwap(raw: Record<string, unknown>): Swap {
     tx: String(raw.tx ?? ""),
     pool: String(raw.f ?? ""),
     dex: String(raw.en ?? ""),
+    sourceRowIndex: typeof raw.sourceRowIndex === "number" ? raw.sourceRowIndex : undefined,
+    logIndex: raw.lgid == null ? null : String(raw.lgid),
   };
 }
 
@@ -93,6 +101,8 @@ export function normLiqEvent(raw: Record<string, unknown>): LiqEvent {
     usd: Number(raw.tu ?? 0),
     pool: String(raw.f ?? ""),
     maker: String(raw.m ?? ""),
+    sourceRowIndex: typeof raw.sourceRowIndex === "number" ? raw.sourceRowIndex : undefined,
+    logIndex: raw.lgid == null ? null : String(raw.lgid),
   };
 }
 
@@ -152,7 +162,7 @@ export async function searchTokenCandidates(client: DexClient, input: string): P
   const candidates: TokenRef[] = [];
   for (const t of res.data?.tks ?? []) {
     const ref = toRef(t);
-    const k = `${ref.platform}:${ref.address.toLowerCase()}`;
+    const k = tokenIdentity(ref.platform, ref.address) ?? `${ref.platform}:${ref.address}`;
     if (!seen.has(k)) {
       seen.add(k);
       candidates.push(ref);
@@ -168,10 +178,14 @@ export async function resolveToken(
 ): Promise<{ token: TokenRef; receipt: import("./cmc-client").Receipt }> {
   const q = input.trim().replace(/^\$/, "");
   const { candidates, receipt } = await searchTokenCandidates(client, q);
+  const requestedChain = platformHint ? canonicalChain(platformHint) : null;
+  if (platformHint && !requestedChain) throw new TokenNotFoundError(q);
+  const exactAddress = isAddress(q)
+    ? candidates.find((t) => tokenIdentity(t.platform, t.address) === tokenIdentity(t.platform, q))
+    : undefined;
   const pick = isAddress(q)
-    ? candidates.find((t) => t.address.toLowerCase() === q.toLowerCase() && (!platformHint || t.platform.toLowerCase() === platformHint.toLowerCase())) ??
-      candidates.find((t) => t.address.toLowerCase() === q.toLowerCase())
-    : candidates.find((t) => !platformHint || t.platform.toLowerCase() === platformHint.toLowerCase()) ?? candidates[0];
+    ? exactAddress && (!requestedChain || canonicalChain(exactAddress.platform) === requestedChain) ? exactAddress : undefined
+    : candidates.find((t) => !requestedChain || canonicalChain(t.platform) === requestedChain);
   if (!pick) throw new TokenNotFoundError(q);
   return { token: pick, receipt };
 }
@@ -188,8 +202,89 @@ export async function getTokenMeta(client: DexClient, ref: TokenRef) {
   const d = (r.data ?? {}) as Record<string, unknown>;
   // `crt` = creator, `own` = owner (per CMC dex/token payload, probed).
   // Type-guard: a non-string field must degrade to null, not crash toLowerCase.
-  const creator = typeof d.crt === "string" ? d.crt : typeof d.own === "string" ? d.own : null;
-  return { creator, receipt: r.receipt };
+  const creator = typeof d.crt === "string" && d.crt.trim() ? d.crt.trim() : null;
+  const owner = typeof d.own === "string" && d.own.trim() ? d.own.trim() : null;
+  return { creator, owner, receipt: r.receipt };
+}
+
+function finiteNonNegative(value: unknown): number | null {
+  if (typeof value === "string" && value.trim() === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+function timestampMs(value: unknown, nowMs: number): number | null {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  const ms = n < 100_000_000_000 ? n * 1000 : n;
+  if (ms > nowMs + 5 * 60_000) return null;
+  return ms;
+}
+
+function stableValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stableValue);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => [k, stableValue(v)]));
+  }
+  return value;
+}
+
+function rowKey(raw: Record<string, unknown>, platform: string): string {
+  const tx = typeof raw.tx === "string" ? raw.tx : typeof raw.h === "string" ? raw.h : "";
+  const logIndex = raw.lgid == null ? null : String(raw.lgid);
+  if (tx && logIndex !== null) return `${canonicalChain(platform) ?? platform}:${tx}:${logIndex}`;
+  return JSON.stringify(stableValue(raw));
+}
+
+export function parseSwaps(raw: unknown, platform: string, nowMs = Date.now()): ParsedRows<Swap> {
+  const source = raw && typeof raw === "object" ? (raw as { swaps?: unknown }).swaps : undefined;
+  const list = Array.isArray(source) ? source : [];
+  const rows: Swap[] = [];
+  const seen = new Set<string>();
+  const reasons: string[] = [];
+  let rejected = 0;
+  let duplicates = 0;
+  for (const [sourceRowIndex, candidate] of list.entries()) {
+    if (!candidate || typeof candidate !== "object") { rejected++; reasons.push(`swap[${sourceRowIndex}]: row is not an object`); continue; }
+    const r = candidate as Record<string, unknown>;
+    const side = r.tp === "buy" || r.tp === "sell" ? r.tp : null;
+    const ts = timestampMs(r.ts, nowMs);
+    const usd = finiteNonNegative(r.v);
+    const maker = typeof r.ma === "string" ? r.ma.trim() : "";
+    const tx = typeof r.tx === "string" ? r.tx.trim() : typeof r.h === "string" ? r.h.trim() : "";
+    if (!side || ts === null || usd === null || !maker || !tx) { rejected++; reasons.push(`swap[${sourceRowIndex}]: invalid side, timestamp, USD, maker, or transaction`); continue; }
+    const key = rowKey(r, platform);
+    if (seen.has(key)) { duplicates++; continue; }
+    seen.add(key);
+    rows.push({ ts, side, maker, usd, tx, pool: typeof r.f === "string" ? r.f : "", dex: typeof r.en === "string" ? r.en : "", sourceRowIndex, logIndex: r.lgid == null ? null : String(r.lgid) });
+  }
+  return { rows, rejected, duplicates, reasons };
+}
+
+export function parseLiquidityEvents(raw: unknown, platform: string, nowMs = Date.now()): ParsedRows<LiqEvent> {
+  const source = raw && typeof raw === "object" ? (raw as { lcs?: unknown }).lcs : undefined;
+  const list = Array.isArray(source) ? source : [];
+  const rows: LiqEvent[] = [];
+  const seen = new Set<string>();
+  const reasons: string[] = [];
+  let rejected = 0;
+  let duplicates = 0;
+  for (const [sourceRowIndex, candidate] of list.entries()) {
+    if (!candidate || typeof candidate !== "object") { rejected++; reasons.push(`liquidity[${sourceRowIndex}]: row is not an object`); continue; }
+    const r = candidate as Record<string, unknown>;
+    const kind = r.tp === "add" || r.tp === "remove" ? r.tp : null;
+    const ts = timestampMs(r.ts, nowMs);
+    const usd = finiteNonNegative(r.tu);
+    const maker = typeof r.m === "string" ? r.m.trim() : "";
+    const pool = typeof r.f === "string" ? r.f.trim() : "";
+    const tx = typeof r.tx === "string" ? r.tx.trim() : typeof r.h === "string" ? r.h.trim() : "";
+    if (!kind || ts === null || usd === null || !maker || !pool) { rejected++; reasons.push(`liquidity[${sourceRowIndex}]: invalid kind, timestamp, USD, maker, or pool`); continue; }
+    const key = rowKey(r, platform);
+    if (seen.has(key)) { duplicates++; continue; }
+    seen.add(key);
+    rows.push({ ts, kind, usd, pool, maker, sourceRowIndex, logIndex: r.lgid == null ? null : String(r.lgid) });
+  }
+  return { rows, rejected, duplicates, reasons };
 }
 
 export async function getSwaps(client: DexClient, ref: TokenRef, limit = 100) {
@@ -198,7 +293,8 @@ export async function getSwaps(client: DexClient, ref: TokenRef, limit = 100) {
     address: ref.address,
     limit,
   });
-  return { swaps: (r.data?.swaps ?? []).map(normSwap), receipt: r.receipt };
+  const parsed = parseSwaps(r.data, ref.platform);
+  return { swaps: parsed.rows, rejected: parsed.rejected, duplicates: parsed.duplicates, reasons: parsed.reasons, receipt: r.receipt };
 }
 
 export async function getPools(client: DexClient, ref: TokenRef) {
@@ -211,7 +307,8 @@ export async function getLiqEvents(client: DexClient, ref: TokenRef) {
     platform: ref.platform,
     address: ref.address,
   });
-  return { events: (r.data?.lcs ?? []).map(normLiqEvent), receipt: r.receipt };
+  const parsed = parseLiquidityEvents(r.data, ref.platform);
+  return { events: parsed.rows, rejected: parsed.rejected, duplicates: parsed.duplicates, reasons: parsed.reasons, receipt: r.receipt };
 }
 
 export async function getSecurity(client: DexClient, ref: TokenRef) {
