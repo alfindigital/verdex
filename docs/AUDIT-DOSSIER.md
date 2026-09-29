@@ -31,6 +31,9 @@ available or that its old observations are current.
   old build-script policy was not accepted by pnpm 11. The policy is now explicit
   (`esbuild: true`, `sharp: true`), frozen install passes, and a manual deploy is
   being rechecked against the production alias.
+- The manual deploy then exposed a second clean-room issue: root `tsconfig.json`
+  included `video/remotion.config.ts` without installing video dependencies. The
+  root config now excludes `video/`; the Remotion package is checked separately.
 
 ## Historical dossier snapshot
 

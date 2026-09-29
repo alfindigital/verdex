@@ -12,6 +12,7 @@
 - Known unverified items: authorized fresh CMC raw capture and current tier/pagination, 390px automated contrast, consenting trader utility study, three real raw bundle replay, browser download transfer event, deployment smoke test, and dependency audit remediation.
 - Dependency review item: `pnpm audit --prod --json` reports 4 high and 2 moderate transitive advisories in Next/PostCSS/optional sharp. No forced upgrade was made.
 - Install policy: `pnpm-workspace.yaml` now explicitly allows only `esbuild` and `sharp` build scripts. `pnpm install --frozen-lockfile` passes locally and is required for Vercel's pnpm 11 install path.
+- Boundary policy: the root Next typecheck excludes the Remotion `video/` workspace; video dependencies are verified separately with `npm run lint` and `npm run build` inside `video/`.
 
 Use [`docs/evidence/validation-matrix.md`](docs/evidence/validation-matrix.md), [`docs/DEMO-WALKTHROUGH.md`](docs/DEMO-WALKTHROUGH.md), and [`SUBMISSION.md`](SUBMISSION.md) as the current handoff. The historical notes below describe earlier states and are not the current release status.
 

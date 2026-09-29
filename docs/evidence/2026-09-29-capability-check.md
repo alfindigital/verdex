@@ -32,6 +32,11 @@ for `abd1e04` failed at `pnpm install` with `ERR_PNPM_IGNORED_BUILDS`; a manual
 deployment is being verified separately. The supplied key is used only in the
 current process for a bounded live probe and is not written here or to the repo.
 
+The manual build then failed because the root TypeScript include glob reached
+`video/remotion.config.ts` while Vercel installs only the root dependencies. The
+root `tsconfig.json` now excludes `video/`; the video workspace remains covered by
+its own `npm run lint` and `npm run build` checks.
+
 ## Contract evidence available without a key
 
 The retained repository normalizer tests contain trimmed payloads with the fields listed in `tests/fixtures/cmc/README.md`. They are sufficient to specify parser input shapes, but not to establish current provider behavior, endpoint availability, response timestamps, pagination, or raw-body hashes. `real-shape-sample.json` is explicitly labelled `rawBodyRetained: false` for that reason.
