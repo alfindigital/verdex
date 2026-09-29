@@ -10,7 +10,7 @@ This file is a truthful copy pack. URLs that require a user action remain explic
 | Vision | Make “what was observed before a DEX swap?” checkable with source-backed flow, liquidity, safety, and coverage evidence. |
 | Category | Markets and Trading Tools |
 | GitHub | `https://github.com/alfindigital/verdex` — verify public visibility before submitting |
-| Project website | `https://verdex-alpha.vercel.app` — deployment status not verified in this execution |
+| Project website | `https://verdex-alpha.vercel.app` — production alias verified HTTP 200 |
 | Demo video | **not published** — record from [`docs/DEMO-WALKTHROUGH.md`](docs/DEMO-WALKTHROUGH.md) after the final deployment review |
 | Social link | **not published** — post only after the BUIDL URL and video URL exist |
 | Logo | `public/logo.png`; verify PNG/JPEG size is under 2 MB in the DoraHacks form |
@@ -59,7 +59,7 @@ The reviewed excerpt below is **synthetic fixture output**, not a live CMC respo
 }
 ```
 
-Full fixture: [`tests/fixtures/cmc/synthetic-lp-outage-bundle.json`](tests/fixtures/cmc/synthetic-lp-outage-bundle.json). Current raw CMC bundle capture is unverified because no credential was supplied during execution.
+Full fixture: [`tests/fixtures/cmc/synthetic-lp-outage-bundle.json`](tests/fixtures/cmc/synthetic-lp-outage-bundle.json). A bounded live smoke test passed with the user-supplied key; an exact raw CMC bundle capture is still not retained.
 
 ## Demo sequence
 

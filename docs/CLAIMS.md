@@ -25,8 +25,9 @@ records use `schemaVersion: 2` and `rulesVersion: 2.0.0`:
 - The swap window is the endpoint response that was actually captured. A
   universal pagination or CMC cap claim is not published until a current
   authorized probe verifies it.
-- Current tier entitlement, pagination, and a real exact-body capture remain
-  unverified for this execution because no credential was supplied.
+- A bounded live smoke test passed with an authorized key, but current tier
+  entitlement, pagination, and a real exact-body capture remain unverified
+  because no exact raw bundle was retained.
 
 ## SAFETY (sumber: `dex/security/detail`)
 

@@ -19,14 +19,16 @@ This matrix records implementation evidence. PASS means the local check ran; UNV
 | mobile screenshot at 390px | labels remain readable and controls reachable | responsive styles are present; no automated 390px contrast capture | browser screenshot (desktop only) | UNVERIFIED |
 | evidence hash tamper | verifier rejects changed exact body | body hash/base64/JSON/size checks reject tamper | `tests/evidence.test.ts`, `pnpm evidence:verify` | PASS |
 | archived permalink | exact registered snapshot only | `snapshotPath` rejects unregistered runtime id; browser opened JUP archive | `tests/verdict-store.test.ts`, `tests/verdict-route.test.ts` | PASS |
-| fresh real CMC raw bundle | exact bytes and offline recompute | no credential supplied in execution turn; capture CLI is ready | `docs/evidence/2026-09-29-capability-check.md` | UNVERIFIED |
+| fresh real CMC raw bundle | exact bytes and offline recompute | authorized live smoke passed, but no exact raw bundle was retained; capture CLI is ready | `docs/evidence/2026-09-29-capability-check.md` | UNVERIFIED |
+| bounded live verdict smoke | one authorized live request reaches CMC and emits uncached receipts | JUP/Solana request returned HTTP 200, `RAWAN` score 85, and 9 receipts; key was not persisted | local process log + sanitized verdict receipt | PASS |
 | 3-target trader utility test | identity/mode understood within 60s | no consenting participants available | no participant data | UNVERIFIED |
 | 3 real bundle replay oracle | parser/rules recompute real evidence | no real raw bundles retained | synthetic bundle only | UNVERIFIED |
-| production dependency audit | no known production advisories | `pnpm audit --prod --json` found 4 high + 2 moderate transitive advisories in Next/PostCSS/sharp; no upgrade applied in this sprint | audit output 2026-09-29 | UNVERIFIED |
+| production dependency audit | no known production advisories | `pnpm audit --prod` is clean after explicit patched overrides for transitive `postcss` 8.5.23 and `sharp` 0.35.4 | audit output 2026-09-29 | PASS |
 
 ## Gate result
 
 - Local code gate: PASS after full test, typecheck, evidence verifier, docs verifier, and build commands.
-- Dependency audit: **UNVERIFIED / follow-up required**. Production audit reported 4 high and 2 moderate transitive advisories (`next>postcss`, optional `next>sharp`); this sprint did not force a breaking dependency upgrade. Treat this as a release review item.
+- Dependency audit: **PASS**. The initial 4 high and 2 moderate transitive advisories (`next>postcss`, optional `next>sharp`) are remediated with compatible workspace overrides. `pnpm audit --prod` now reports no known vulnerabilities.
 - Replay judging path: PASS locally without CMC/Jev/Groq credentials.
+- Bounded live path: PASS with the user-supplied CMC key; no claim is made about remaining quota or current plan limits.
 - New live behavior: **not release-cleared** until an authorized CMC capture verifies current tier, timestamps, pagination, and raw-body replay. The implementation defaults to replay when `VERDEX_V2=1` and `VERDEX_LIVE=1` are not both set.

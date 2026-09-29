@@ -1,11 +1,11 @@
 # Verdex — execution handoff
 
-Updated 2026-09-29. Tasks 1–8 of the approved overhaul were executed in the isolated worktree branch `codex/verdex-evidence-v2`.
+Updated 2026-09-29. Tasks 1–8 of the approved overhaul were executed in the isolated worktree branch `codex/verdex-evidence-v2` and merged to `main`.
 
 ## Verified result
 
 - Base SHA: `a1abade`.
-- Latest commit: `f4df122` plus the documentation/submission alignment commit that follows this handoff update.
+- Latest commit: `2a85b5c` (includes the deploy fixes and documentation updates).
 - Full suite: 18 files, 164 tests passed.
 - `pnpm typecheck`: PASS.
 - `pnpm evidence:verify tests/fixtures/cmc/synthetic-lp-outage-bundle.json`: PASS.
@@ -24,11 +24,11 @@ Updated 2026-09-29. Tasks 1–8 of the approved overhaul were executed in the is
 
 ## Unverified or owner-required
 
-- No credential was supplied in the execution turn, so current CMC entitlement, pagination, fresh raw-body capture, and real bundle replay remain unverified.
+- A bounded live verdict smoke test with the user-supplied CMC key passed locally and produced 9 uncached CMC receipts without persisting the key. Current entitlement, pagination, fresh raw-body capture, and real bundle replay remain unverified.
 - Mobile 390px contrast/focus capture and a three-person utility study remain unverified.
 - In-app browser exposed the export link metadata but did not expose the download event; verify the downloaded file once in a normal browser.
-- Production audit reported 4 high and 2 moderate transitive advisories in Next/PostCSS/optional sharp. No forced upgrade was made.
-- No deploy, DoraHacks terms acceptance, BUIDL creation, video upload, X post, or submission was performed.
+- Production dependency audit passes with no known vulnerabilities after patched transitive overrides (`postcss` 8.5.23 and `sharp` 0.35.4).
+- Production deploy is READY at `https://verdex-alpha.vercel.app`; no DoraHacks terms acceptance, BUIDL creation, video upload, X post, or final submission was performed.
 
 ## Files to review
 

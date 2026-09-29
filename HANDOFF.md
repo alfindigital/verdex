@@ -9,8 +9,8 @@
 - Runtime policy: replay unless `VERDEX_V2=1` and `VERDEX_LIVE=1` are both set. Live requires server env key and fresh quota permission; unknown quota fails closed.
 - New evidence contract: `schemaVersion: 2`, `rulesVersion: 2.0.0`, nullable coverage/metrics, source statuses, exact body hashes when retained, explicit `share.kind`.
 - Share policy: only committed snapshot ids get durable paths/X links. Live/runtime results are transient and exportable without a permanent link.
-- Known unverified items: authorized fresh CMC raw capture and current tier/pagination, 390px automated contrast, consenting trader utility study, three real raw bundle replay, browser download transfer event, deployment smoke test, and dependency audit remediation.
-- Dependency review item: `pnpm audit --prod --json` reports 4 high and 2 moderate transitive advisories in Next/PostCSS/optional sharp. No forced upgrade was made.
+- Known unverified items: authorized fresh CMC raw capture and current tier/pagination, 390px automated contrast, consenting trader utility study, three real raw bundle replay, and browser download transfer event.
+- Dependency audit: `pnpm audit --prod` passes with no known production vulnerabilities after explicit `postcss` 8.5.23 and `sharp` 0.35.4 overrides.
 - Install policy: `pnpm-workspace.yaml` now explicitly allows only `esbuild` and `sharp` build scripts. `pnpm install --frozen-lockfile` passes locally and is required for Vercel's pnpm 11 install path.
 - Boundary policy: the root Next typecheck excludes the Remotion `video/` workspace; video dependencies are verified separately with `npm run lint` and `npm run build` inside `video/`.
 

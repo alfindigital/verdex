@@ -22,18 +22,21 @@ available or that its old observations are current.
 - The current branch passed 164 tests, typecheck, evidence verification, docs
   verification, production build, and redacted gitleaks history scanning.
 - Current CMC tier entitlement, pagination behavior, fresh raw-body capture, real
-  bundle replay, production smoke, mobile contrast, and trader utility remain
-  **UNVERIFIED** because no credential or participant/deployment authorization was
-  supplied in this execution.
-- The dependency audit still reports 4 high and 2 moderate transitive advisories;
-  no forced upgrade was made. See the validation matrix for the exact follow-up.
+  bundle replay, mobile contrast, and trader utility remain **UNVERIFIED**. A
+  bounded live verdict smoke test with the user-supplied key passed locally; no key
+  was written to the repository.
+- The dependency audit is now clean after compatible workspace overrides for
+  `postcss` 8.5.23 and `sharp` 0.35.4. See the validation matrix for the exact
+  command and result.
 - Vercel's first auto-deploy for `abd1e04` failed during pnpm install because the
   old build-script policy was not accepted by pnpm 11. The policy is now explicit
-  (`esbuild: true`, `sharp: true`), frozen install passes, and a manual deploy is
-  being rechecked against the production alias.
+  (`esbuild: true`, `sharp: true`), frozen install passes, and the production alias
+  now points to a READY deployment.
 - The manual deploy then exposed a second clean-room issue: root `tsconfig.json`
   included `video/remotion.config.ts` without installing video dependencies. The
   root config now excludes `video/`; the Remotion package is checked separately.
+- Production smoke: `https://verdex-alpha.vercel.app` returned HTTP 200 and the
+  archived JUP API path returned HTTP 200 after deployment `2a85b5c`.
 
 ## Historical dossier snapshot
 

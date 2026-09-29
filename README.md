@@ -44,7 +44,7 @@ Live requests have a 15-second total budget, a 6-second per-attempt timeout, and
 | `/v1/global-metrics/quotes/latest` + `/historical` | optional macro context |
 | `/v3/fear-and-greed/latest` | optional sentiment context |
 
-The normal orchestration estimates nine calls, but receipts record the actual calls and retries. Current provider tier entitlement, pagination semantics, and a fresh raw-body capture are **UNVERIFIED in this execution** because no credential was supplied.
+The normal orchestration estimates nine calls, but receipts record the actual calls and retries. A bounded live smoke test passed with an authorized key; current provider tier entitlement, pagination semantics, and a fresh exact raw-body capture remain **UNVERIFIED** because no bundle was retained.
 
 ## Evidence and sharing
 
@@ -59,7 +59,7 @@ Only a registered committed snapshot id receives a durable `/verdict/<id>` path 
 - No wallet labels: maker breadth is a transaction observation, not ownership or intent.
 - No OHLCV claim is made in V2; PUMP uses available volume/mcap context and marks missing macro inputs.
 - Synthetic regression cases are policy checks, not fraud-detection accuracy or backtest results.
-- Production audit currently reports four high and two moderate transitive advisories in Next/PostCSS/optional sharp; no breaking upgrade was forced in this sprint. See [`docs/evidence/validation-matrix.md`](docs/evidence/validation-matrix.md).
+- Production dependency audit passes with no known vulnerabilities. The workspace pins patched transitive `postcss` 8.5.23 and `sharp` 0.35.4 versions; see [`docs/evidence/validation-matrix.md`](docs/evidence/validation-matrix.md).
 
 ## Architecture
 

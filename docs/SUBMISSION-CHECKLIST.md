@@ -11,10 +11,11 @@ Status: **not submitted** as of 2026-09-29. This checklist separates local evide
 - [x] Evidence verifier passes the reviewed synthetic bundle.
 - [x] Full tests, typecheck, docs verifier, build, and gitleaks pass; see [`validation-matrix.md`](evidence/validation-matrix.md).
 - [x] README, demo walkthrough, and handoff describe the current V2/replay boundary.
+- [x] Production alias returns HTTP 200 and an archived verdict API path returns HTTP 200.
 - [ ] Fresh authorized CMC raw-body capture and current entitlement verified.
 - [ ] Mobile 390px contrast/focus pass recorded.
 - [ ] Three consenting trader utility checks recorded.
-- [ ] Dependency audit advisories reviewed or remediated.
+- [x] Dependency audit advisories reviewed and remediated (`pnpm audit --prod` clean after patched transitive overrides).
 
 ## DoraHacks fields
 
@@ -22,7 +23,7 @@ Status: **not submitted** as of 2026-09-29. This checklist separates local evide
 - Vision: `Make what was observed before a DEX swap checkable with source-backed evidence.`
 - Track: `Markets and Trading Tools`
 - GitHub: `https://github.com/alfindigital/verdex` (verify visibility)
-- Project website: `https://verdex-alpha.vercel.app` (verify deployment)
+- Project website: `https://verdex-alpha.vercel.app` (production alias verified)
 - Logo: `public/logo.png` (verify form size)
 - Demo video URL: **not published**
 - X/social URL: **not published**

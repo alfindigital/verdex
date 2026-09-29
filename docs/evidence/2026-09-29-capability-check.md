@@ -29,13 +29,19 @@ the production install policy was repaired. `pnpm-workspace.yaml` now uses
 `allowBuilds: { esbuild: true, sharp: true }`; `pnpm install --frozen-lockfile`
 passes locally with both package scripts completing. The first Vercel auto-deploy
 for `abd1e04` failed at `pnpm install` with `ERR_PNPM_IGNORED_BUILDS`; a manual
-deployment is being verified separately. The supplied key is used only in the
-current process for a bounded live probe and is not written here or to the repo.
+deployment is now READY at the production alias. The supplied key was used only
+in the current process for a bounded live probe and was not written here or to the
+repo.
 
 The manual build then failed because the root TypeScript include glob reached
 `video/remotion.config.ts` while Vercel installs only the root dependencies. The
 root `tsconfig.json` now excludes `video/`; the video workspace remains covered by
 its own `npm run lint` and `npm run build` checks.
+
+Current follow-up: `pnpm-workspace.yaml` now explicitly allows the vetted
+`esbuild` and `sharp` build scripts and pins patched transitive `postcss` 8.5.23
+and `sharp` 0.35.4 overrides. `pnpm install --frozen-lockfile`, `pnpm audit
+--prod`, the full test suite, typecheck, and production build all pass.
 
 ## Contract evidence available without a key
 
