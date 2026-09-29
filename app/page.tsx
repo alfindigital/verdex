@@ -1,8 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Checker } from "@/components/checker";
+import { DirToggle } from "@/components/dir-toggle";
+import { CaseTable } from "@/components/case-table";
+import type { CaseRow } from "@/lib/case-table";
 import { listSnapshotIds, loadVerdict, slugFor } from "@/lib/verdict-store";
-import { VERDICT_STYLE } from "@/lib/verdict-display";
+import { displayFor } from "@/lib/verdict-display";
 import { fmtNum, fmtUsd, num, Stat } from "@/components/viz";
 import { resolveScanMode } from "@/lib/scan-policy";
 
@@ -26,6 +29,13 @@ const TEXT: Record<string, string> = {
   unknown: "text-unknown",
 };
 
+const SHOWCASE_BLURB: Record<string, string> = {
+  LAYAK: "no flags observed in this recorded sample",
+  RAWAN: "concentration or warning observations on file",
+  JANGAN: "danger-level flags in the recorded window",
+  BELUM_CUKUP_BUKTI: "insufficient evidence in recorded sample",
+};
+
 export default function Home() {
   const live = resolveScanMode(process.env) === "v2-live";
   const snapshots = listSnapshotIds()
@@ -34,233 +44,244 @@ export default function Home() {
 
   const totalSwaps = snapshots.reduce((a, v) => a + num(v.metrics.flow?.swapCount), 0);
   const totalReceipts = snapshots.reduce((a, v) => a + v.receipts.length, 0);
-  const chains = new Set(snapshots.map((v) => v.token.platform)).size;
-  const avgScore = snapshots.length
-    ? Math.round(snapshots.reduce((a, v) => a + v.result.score, 0) / snapshots.length)
-    : 0;
+  const chainList = [...new Set(snapshots.map((v) => v.token.platform.toLowerCase()))];
+
   const showcase = [
     snapshots.find((v) => v.result.verdict === "LAYAK"),
     snapshots.find((v) => v.result.verdict === "RAWAN"),
+    snapshots.find((v) => v.result.verdict === "JANGAN"),
     snapshots.find((v) => v.result.verdict === "BELUM_CUKUP_BUKTI"),
-  ].filter((v): v is NonNullable<typeof v> => Boolean(v));
+  ]
+    .filter((v): v is NonNullable<typeof v> => Boolean(v))
+    .slice(0, 3);
+
+  const rows: CaseRow[] = snapshots.map((v) => {
+    const st = displayFor(v);
+    return {
+      slug: slugFor(v.token.symbol, v.token.platform),
+      id: v.id,
+      symbol: v.token.symbol,
+      name: v.token.name,
+      platform: v.token.platform,
+      address: v.token.address,
+      verdictKey: v.result.verdict,
+      label: st.label,
+      tone: st.tone,
+      score: v.result.score,
+      mcapUsd: v.token.mcapUsd ?? null,
+      liqUsd: num(v.metrics.liq?.totalLiqUsd),
+      netUsd: num(v.metrics.flow?.netBuyUsd),
+      sells: num(v.metrics.flow?.observedSellMakers ?? v.metrics.flow?.thirdPartySells),
+      jevProb: v.jev.riskyProb,
+      agreement: v.agreement,
+      captured: v.ts,
+    };
+  });
 
   return (
-    <main className="relative z-[1] mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6">
+    <main className="relative z-[1] mx-auto max-w-7xl px-4 pb-16 pt-5 sm:px-6">
       <a
         href="#scan"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-safe focus:px-3 focus:py-2 focus:font-data focus:text-xs focus:font-bold focus:text-ink"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-accent focus:px-3 focus:py-2 focus:font-data focus:text-xs focus:font-bold focus:text-ink"
       >
         Skip to scanner
       </a>
 
       {/* ——— Top bar ——— */}
-      <header className="flex items-center justify-between border-b border-line pb-3">
-        <Link href="/" className="flex items-center gap-2.5">
-          <Image src="/logo.png" alt="Verdex" width={28} height={28} className="rounded-sm" />
-          <span className="font-data text-sm font-bold tracking-[0.3em]">VERDEX</span>
-          <span className="hidden font-data text-[10px] uppercase tracking-widest text-faint sm:inline">
+      <header className="flex items-center justify-between gap-4 border-b border-line pb-4">
+        <Link href="/" className="flex items-center gap-3">
+          <Image src="/logo.png" alt="Verdex" width={30} height={30} className="rounded-sm" />
+          <span className="deco text-xl leading-none">Verdex</span>
+          <span className="hidden font-data text-[10px] uppercase tracking-[0.18em] text-dim md:inline">
             pre-trade DEX forensics
           </span>
         </Link>
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 font-data text-[10px] uppercase tracking-widest text-dim">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="chip">
             <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-safe" : "bg-warn"}`} aria-hidden="true" />
-            {live ? "live scan available" : "recorded examples only"}
+            {live ? "live scan" : "recorded replay"}
           </span>
+          <DirToggle />
           <a
             href="https://github.com/alfindigital/verdex"
             rel="noopener noreferrer"
-            className="font-data text-[10px] uppercase tracking-widest text-dim transition-colors hover:text-safe"
+            className="font-data text-[11px] uppercase tracking-widest text-dim transition-colors hover:text-accent"
           >
             GitHub ↗
           </a>
         </div>
       </header>
 
-      {/* ——— Scan console ——— */}
-      <section id="scan" className="mt-6 grid gap-4 lg:grid-cols-[1fr_300px]">
+      {/* ——— Hero: one focal point, real numbers ——— */}
+      <section aria-labelledby="hero-title" className="grid gap-10 border-b border-line py-10 sm:py-14 lg:grid-cols-[1.55fr_1fr] lg:items-end">
+        <div>
+          <p className="flex flex-wrap items-center gap-3">
+            <span className="paper-tag">CMC DEX forensics</span>
+            <span className="font-data text-[11px] uppercase tracking-[0.16em] text-dim">
+              {snapshots.length} recorded exhibits · {chainList.length} chains
+            </span>
+          </p>
+          <h1 id="hero-title" className="deco mt-6 text-[clamp(2.9rem,7.5vw,5.4rem)] leading-[0.98]">
+            Don&apos;t be the <span className="wonk text-accent">exit liquidity</span>.
+          </h1>
+          <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-dim sm:text-base">
+            Paste a DEX token contract. Verdex returns an auditable verdict —{" "}
+            <span className="text-safe">entry-worthy</span>, <span className="text-warn">caution</span>, or{" "}
+            <span className="text-danger">avoid</span> — where every claim traces to a hashed CoinMarketCap
+            receipt and a named falsifier.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+          <Stat k="verdicts on file" v={String(snapshots.length)} sub="committed snapshots" />
+          <Stat k="CMC receipts" v={fmtNum(totalReceipts)} sub="SHA-256 per call" />
+          <Stat k="swaps analyzed" v={fmtNum(totalSwaps)} sub="across all cases" />
+          <Stat k="chains" v={String(chainList.length)} sub={chainList.slice(0, 4).join(" · ")} />
+        </div>
+      </section>
+
+      {/* ——— Scanner instrument ——— */}
+      <section id="scan" aria-labelledby="scan-title" className="mt-12 grid gap-5 lg:grid-cols-[1fr_320px]">
         <div className="rounded-md border border-line bg-panel">
-          <div className="border-b border-line px-4 py-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">
-            <span className="text-safe">verdex@cmc</span>:~$ scan
+          <div className="panel-head">
+            <span id="scan-title">Scanner</span>
+            <span className={live ? "text-safe" : "text-warn"}>{live ? "live mode" : "replay · zero live credits"}</span>
           </div>
-          <div className="p-4">
+          <div className="p-4 sm:p-6">
             <Checker live={live} />
           </div>
         </div>
 
-        {/* ——— Aside: engine stats, always real numbers ——— */}
-        <aside className="flex flex-col rounded-md border border-line bg-panel">
-          <div className="border-b border-line px-4 py-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">
-            engine
-          </div>
-          <div className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-1">
-            <Stat k="verdicts on file" v={String(snapshots.length)} />
-            <Stat k="swaps analyzed" v={fmtNum(totalSwaps)} />
-            <Stat k="CMC receipts" v={fmtNum(totalReceipts)} />
-            <Stat k="chains" v={String(chains)} sub={[...new Set(snapshots.map((v) => v.token.platform.toLowerCase()))].join(" · ") || "—"} />
-            <Stat k="avg score" v={String(avgScore)} />
-          </div>
-          <div className="mt-auto border-t border-line p-4">
-            <div className="font-data text-[10px] uppercase tracking-widest text-faint">verdict logic</div>
-            <div className="mt-2 space-y-1.5 font-data text-[10px] leading-relaxed text-dim">
-              <div><span className="text-danger">AVOID</span> ← DANGER in SAFETY|FLOW</div>
-              <div><span className="text-warn">CAUTION</span> ← DANGER elsewhere, or any WARN</div>
-              <div><span className="text-safe">ENTRY</span> ← all CLEAN + score≥70</div>
-              <div><span className="text-unknown">INSUFFICIENT</span> ← data missing, no DANGER/&lt;2 WARN</div>
-            </div>
+        <aside className="rounded-md border border-line bg-panel">
+          <div className="panel-head">Verdict logic</div>
+          <ul className="space-y-3 p-4 sm:p-5">
+            <li className="flex items-baseline gap-3">
+              <span className="stamp stamp-sm shrink-0 text-danger">Avoid</span>
+              <span className="text-xs leading-relaxed text-dim">DANGER-level evidence in SAFETY or FLOW</span>
+            </li>
+            <li className="flex items-baseline gap-3">
+              <span className="stamp stamp-sm shrink-0 text-warn">Caution</span>
+              <span className="text-xs leading-relaxed text-dim">DANGER elsewhere, or any WARN-level flag</span>
+            </li>
+            <li className="flex items-baseline gap-3">
+              <span className="stamp stamp-sm shrink-0 text-safe">Entry</span>
+              <span className="text-xs leading-relaxed text-dim">all four dimensions CLEAN and score ≥ 70</span>
+            </li>
+            <li className="flex items-baseline gap-3">
+              <span className="stamp stamp-sm shrink-0 text-unknown">Insuf.</span>
+              <span className="text-xs leading-relaxed text-dim">data missing, no DANGER, under 2 WARN</span>
+            </li>
+          </ul>
+          <div className="border-t border-line p-4 font-data text-[10px] leading-relaxed text-dim sm:px-5">
+            Thresholds are published constants in the rules engine — every verdict is reproducible from its
+            committed evidence bundle.
           </div>
         </aside>
       </section>
 
+      {/* ——— EX-01 · Recorded cases ——— */}
       {showcase.length > 0 && (
-        <section className="mt-8" aria-labelledby="recorded-heading">
-          <div className="mb-2 flex items-baseline justify-between">
-            <h2 id="recorded-heading" className="font-data text-[10px] uppercase tracking-[0.25em] text-faint">recorded examples/</h2>
-            <span className="font-data text-[10px] text-faint">dated replay · no live credits</span>
+        <section className="mt-14" aria-labelledby="ex1-title">
+          <div className="exhibit">
+            <span className="exhibit-no">EX-01</span>
+            <h2 id="ex1-title" className="exhibit-title">Recorded cases</h2>
+            <span className="exhibit-rule" aria-hidden="true" />
+            <span className="hidden font-data text-[10px] uppercase tracking-widest text-dim sm:inline">dated replay · shareable</span>
           </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            {showcase.map((v) => {
-              const st = VERDICT_STYLE[v.result.verdict] ?? VERDICT_STYLE.BELUM_CUKUP_BUKTI;
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {showcase.map((v, i) => {
+              const st = displayFor(v);
               return (
-                <Link key={v.id} href={`/verdict/${slugFor(v.token.symbol, v.token.platform)}`} className="rounded-md border border-line bg-panel p-4 transition-colors hover:border-safe/50">
-                  <div className="flex items-center justify-between gap-2"><span className={`stamp text-[9px] ${TEXT[st.tone]}`}>{st.label}</span><span className="font-data text-[10px] text-faint">archived</span></div>
-                  <div className="mt-3 text-lg font-bold">{v.token.symbol.replace(/^\$/, "")} <span className="font-data text-xs font-normal uppercase text-faint">· {v.token.platform}</span></div>
-                  <div className="mt-1 font-data text-[10px] text-faint">captured {new Date(v.ts).toISOString().slice(0, 10)} · {v.token.address.slice(0, 10)}…</div>
-                  <div className="mt-3 font-data text-xs text-dim">{v.result.verdict === "LAYAK" ? "observed sample with no legacy flags" : v.result.verdict === "RAWAN" ? "concentrated or warning observations" : "insufficient evidence in recorded sample"}</div>
-                  <div className="mt-3 font-data text-[10px] uppercase tracking-widest text-safe">open recorded case →</div>
+                <Link key={v.id} href={`/verdict/${slugFor(v.token.symbol, v.token.platform)}`} className="dossier">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className={`stamp stamp-sm ${TEXT[st.tone]}`}>{st.label}</span>
+                    <span className="paper-tag">ex-{`01.${i + 1}`}</span>
+                  </div>
+                  <div className="deco mt-5 text-2xl leading-none">
+                    {v.token.symbol.replace(/^\$/, "")}
+                    <span className="ml-2 align-middle font-data text-[10px] font-normal uppercase tracking-widest text-dim">
+                      {v.token.platform}
+                    </span>
+                  </div>
+                  <div className="mono-strip mt-2.5">
+                    {v.token.address.slice(0, 14)}<b>…</b>{v.token.address.slice(-6)}
+                  </div>
+                  <p className="mt-4 text-sm leading-relaxed text-dim">
+                    {SHOWCASE_BLURB[v.result.verdict] ?? SHOWCASE_BLURB.BELUM_CUKUP_BUKTI} · captured{" "}
+                    {new Date(v.ts).toISOString().slice(0, 10)}
+                  </p>
+                  <div className="mt-5 font-data text-[10px] uppercase tracking-[0.16em] text-accent">open exhibit →</div>
                 </Link>
               );
             })}
-            {showcase.length < 3 && (
-              <div className="rounded-md border border-dashed border-warn/40 bg-warn/5 p-4">
-                <div className="flex items-center justify-between gap-2"><span className="stamp text-[9px] text-warn">INSUFFICIENT EVIDENCE</span><span className="font-data text-[10px] text-warn">synthetic regression</span></div>
-                <div className="mt-3 text-lg font-bold">LP outage <span className="font-data text-xs font-normal uppercase text-faint">· fixture</span></div>
-                <div className="mt-1 font-data text-[10px] text-faint">provider LP source fails while pools remain present</div>
-                <div className="mt-3 font-data text-xs text-dim">Synthetic test case only; not a CoinMarketCap incident or live token finding.</div>
-                <div className="mt-3 font-data text-[10px] uppercase tracking-widest text-warn">review in evidence fixture →</div>
-              </div>
-            )}
           </div>
         </section>
       )}
 
-      {/* ——— Case files: dense data table ——— */}
-      {snapshots.length > 0 && (
-        <section className="mt-8">
-          <div className="mb-2 flex items-baseline justify-between">
-            <h2 className="font-data text-[10px] uppercase tracking-[0.25em] text-faint">case_files/</h2>
-            <span className="font-data text-[10px] text-faint">{snapshots.length} records</span>
+      {/* ——— EX-02 · Case files ——— */}
+      {rows.length > 0 && (
+        <section className="mt-14" aria-labelledby="ex2-title">
+          <div className="exhibit">
+            <span className="exhibit-no">EX-02</span>
+            <h2 id="ex2-title" className="exhibit-title">Case files</h2>
+            <span className="exhibit-rule" aria-hidden="true" />
+            <span className="hidden font-data text-[10px] uppercase tracking-widest text-dim sm:inline">{rows.length} records</span>
           </div>
-          <div className="overflow-x-auto rounded-md border border-line bg-panel">
-            <table className="w-full min-w-[760px] text-left">
-              <thead>
-                <tr className="border-b border-line bg-raised font-data text-[9px] uppercase tracking-widest text-faint">
-                  <th className="px-4 py-2.5">verdict</th>
-                  <th className="px-4 py-2.5">token</th>
-                  <th className="px-4 py-2.5">chain</th>
-                  <th className="px-4 py-2.5 text-right">mcap</th>
-                  <th className="px-4 py-2.5 text-right">liq</th>
-                  <th className="px-4 py-2.5 text-right">net flow</th>
-                  <th className="px-4 py-2.5 text-right">3p sells</th>
-                  <th className="px-4 py-2.5 text-right">score</th>
-                  <th className="px-4 py-2.5">jev</th>
-                  <th className="px-4 py-2.5"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {snapshots.map((v) => {
-                  const st = VERDICT_STYLE[v.result.verdict] ?? VERDICT_STYLE.BELUM_CUKUP_BUKTI;
-                  const tone = TEXT[st.tone] ?? TEXT.unknown;
-                  const net = num(v.metrics.flow?.netBuyUsd);
-                  return (
-                    <tr key={v.id} className="group border-b border-line/50 last:border-b-0 hover:bg-raised">
-                      <td className="px-4 py-3">
-                        <span className={`stamp text-[9px] ${tone}`}>{st.label}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Link href={`/verdict/${slugFor(v.token.symbol, v.token.platform)}`} className="font-semibold hover:text-safe">
-                          {v.token.symbol.replace(/^\$/, "")}
-                        </Link>
-                        <span className="ml-1.5 hidden font-data text-[10px] text-faint xl:inline">
-                          {v.token.address.slice(0, 8)}…
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 font-data text-[11px] uppercase text-dim">{v.token.platform}</td>
-                      <td className="num px-4 py-3 text-right font-data text-xs">{fmtUsd(v.token.mcapUsd)}</td>
-                      <td className="num px-4 py-3 text-right font-data text-xs">{fmtUsd(num(v.metrics.liq?.totalLiqUsd))}</td>
-                      <td className={`num px-4 py-3 text-right font-data text-xs ${net >= 0 ? "text-safe" : "text-danger"}`}>
-                        {net >= 0 ? "+" : ""}{fmtUsd(net)}
-                      </td>
-                      <td className="num px-4 py-3 text-right font-data text-xs">
-                        {fmtNum(num(v.metrics.flow?.observedSellMakers ?? v.metrics.flow?.thirdPartySells))}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className={`num font-data text-base font-bold ${tone}`}>{v.result.score}</span>
-                      </td>
-                      <td className="px-4 py-3 font-data text-[10px] text-dim">
-                        {v.jev.riskyProb != null ? `P=${v.jev.riskyProb.toFixed(2)}` : "—"}
-                        <span className={`ml-1 ${v.agreement === "consensus" ? "text-safe" : v.agreement === "contested" ? "text-danger" : "text-faint"}`}>
-                          {v.agreement === "consensus" ? "✓" : v.agreement === "contested" ? "✗" : "·"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Link href={`/verdict/${slugFor(v.token.symbol, v.token.platform)}`} className="font-data text-xs text-faint transition-colors group-hover:text-safe">
-                          open →
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="mt-6">
+            <CaseTable rows={rows} />
           </div>
-          <p className="mt-2 font-data text-[10px] text-faint">
-            every row = committed evidence · SHA-256 receipts per CMC call · falsifier per verdict
-          </p>
         </section>
       )}
 
-      {/* ——— Method, compressed to a data row ——— */}
-      <section className="mt-8 grid gap-4 md:grid-cols-2">
-        <div className="rounded-md border border-line bg-panel">
-          <div className="border-b border-line px-4 py-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">
-            pipeline
-          </div>
-          <ol className="font-data text-[11px] leading-relaxed text-dim">
-            {[
-              "resolve → dex/search (address|ticker|ambiguous=list)",
-              "evidence → swaps×100 · pools · lpΔ · security",
-              "score → SAFETY·FLOW·LIQ·PUMP published thresholds",
-              "audit → jev 2nd opinion (consensus|contested|lean)",
-              "publish → falsifier + sha256 receipts",
-            ].map((s, i) => (
-              <li key={i} className="flex gap-3 border-b border-line/40 px-4 py-2 last:border-b-0">
-                <span className="text-safe">{String(i + 1).padStart(2, "0")}</span>
-                <span>{s}</span>
-              </li>
-            ))}
-          </ol>
+      {/* ——— EX-03 · Method ——— */}
+      <section className="mt-14" aria-labelledby="ex3-title">
+        <div className="exhibit">
+          <span className="exhibit-no">EX-03</span>
+          <h2 id="ex3-title" className="exhibit-title">Method</h2>
+          <span className="exhibit-rule" aria-hidden="true" />
         </div>
-        <div className="rounded-md border border-line bg-panel">
-          <div className="border-b border-line px-4 py-2 font-data text-[10px] uppercase tracking-[0.2em] text-faint">
-            cmc endpoints
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          <div className="rounded-md border border-line bg-panel">
+            <div className="panel-head">Pipeline</div>
+            <ol>
+              {[
+                ["resolve", "dex/search — address, ticker, or ranked ambiguity list"],
+                ["evidence", "swaps ×100 · pools · LP deltas · security detail"],
+                ["score", "SAFETY · FLOW · LIQUIDITY · PUMP on published thresholds"],
+                ["audit", "independent model opinion — consensus, lean, or contested"],
+                ["publish", "named falsifier + SHA-256 receipt per CMC call"],
+              ].map(([step, desc], i) => (
+                <li key={step} className="flex items-baseline gap-4 border-b border-line/50 px-4 py-3.5 last:border-b-0 sm:px-5">
+                  <span className="font-data text-[11px] text-accent">{String(i + 1).padStart(2, "0")}</span>
+                  <div>
+                    <span className="text-sm font-semibold uppercase tracking-wide">{step}</span>
+                    <span className="mt-0.5 block text-xs leading-relaxed text-dim">{desc}</span>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
-          <div className="flex flex-wrap content-start gap-1.5 p-4">
-            {ENDPOINTS.map((e) => (
-              <code key={e} className="rounded-sm border border-line bg-raised px-2 py-1 font-data text-[10px] text-dim">
-                /v1/{e}
-              </code>
-            ))}
-            <p className="mt-2 w-full font-data text-[10px] leading-relaxed text-faint">
-              rules = verdict · jev = labeled second opinion · not financial advice
-            </p>
+          <div className="rounded-md border border-line bg-panel">
+            <div className="panel-head">CMC endpoints</div>
+            <div className="flex flex-wrap content-start gap-1.5 p-4 sm:p-5">
+              {ENDPOINTS.map((e) => (
+                <code key={e} className="rounded-sm border border-line bg-raised px-2 py-1 font-data text-[10px] text-dim">
+                  /v1/{e}
+                </code>
+              ))}
+              <p className="mt-4 w-full text-xs leading-relaxed text-dim">
+                Deterministic rules produce the verdict; the model opinion is labeled and never overrides them.
+                <span className="mt-1 block font-data text-[10px] uppercase tracking-widest text-dim">
+                  not financial advice · recorded samples are dated evidence, not live quotes
+                </span>
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      <footer className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 font-data text-[10px] uppercase tracking-widest text-faint">
+      <footer className="mt-16 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 font-data text-[10px] uppercase tracking-widest text-dim">
+        <span>deterministic rules · second-opinion model · not financial advice</span>
         <span>build with cmc hackathon · markets &amp; trading tools</span>
-        <span>don&apos;t be the exit liquidity</span>
       </footer>
     </main>
   );

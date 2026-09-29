@@ -1,4 +1,4 @@
-// Pure-SVG data-viz primitives for the Verdex terminal UI. Zero dependencies.
+// Pure-SVG data-viz primitives. Zero dependencies. Tokens from globals.css.
 
 export function fmtUsd(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
@@ -81,7 +81,7 @@ export function NeedleGauge({ value, min = -1, max = 1 }: { value: number; min?:
 }
 
 /** Score arc gauge 0..100, ~240° sweep. */
-export function ScoreGauge({ score, tone = "#34d399", size = 120 }: { score: number; tone?: string; size?: number }) {
+export function ScoreGauge({ score, tone = "var(--color-safe)", size = 120 }: { score: number; tone?: string; size?: number }) {
   const r = 44;
   const cx = 50;
   const cy = 54;
@@ -105,7 +105,7 @@ export function ScoreGauge({ score, tone = "#34d399", size = 120 }: { score: num
       <text x={cx} y={cy - 2} textAnchor="middle" fontSize="24" fontWeight="700" fill="var(--color-text)" fontFamily="var(--font-data)">
         {score}
       </text>
-      <text x={cx} y={cy + 12} textAnchor="middle" fontSize="8" fill="var(--color-faint)" fontFamily="var(--font-data)">
+      <text x={cx} y={cy + 12} textAnchor="middle" fontSize="8" fill="var(--color-dim)" fontFamily="var(--font-data)">
         /100
       </text>
     </svg>
@@ -113,7 +113,7 @@ export function ScoreGauge({ score, tone = "#34d399", size = 120 }: { score: num
 }
 
 /** Donut for share metrics (e.g. top5 maker share). */
-export function Donut({ share, tone = "#34d399", size = 64, label }: { share: number; tone?: string; size?: number; label: string }) {
+export function Donut({ share, tone = "var(--color-safe)", size = 64, label }: { share: number; tone?: string; size?: number; label: string }) {
   const r = 20;
   const c = 2 * Math.PI * r;
   const frac = Math.max(0, Math.min(1, share));
@@ -147,20 +147,20 @@ export function LevelMeter({ level }: { level: string }) {
       {segs.map((c, i) => (
         <span
           key={c}
-          className={`h-1.5 w-6 rounded-sm ${i <= pos ? c : "bg-line"} ${pos === -1 ? "bg-line" : ""}`}
+          className={`h-2 w-7 rounded-sm ${i <= pos ? c : "bg-line"} ${pos === -1 ? "bg-line" : ""}`}
         />
       ))}
     </div>
   );
 }
 
-/** Dense stat tile. */
+/** Stat tile — human label over tabular mono value. */
 export function Stat({ k, v, sub, tone }: { k: string; v: string; sub?: string; tone?: string }) {
   return (
     <div className="border-l-2 border-line pl-3">
-      <div className="font-data text-[10px] uppercase tracking-[0.15em] text-faint">{k}</div>
-      <div className={`num mt-0.5 font-data text-lg font-bold leading-none ${tone ?? "text-text"}`}>{v}</div>
-      {sub && <div className="mt-0.5 font-data text-[10px] text-faint">{sub}</div>}
+      <div className="text-[11px] uppercase tracking-[0.14em] text-dim">{k}</div>
+      <div className={`num mt-1 font-data text-xl font-bold leading-none ${tone ?? "text-text"}`}>{v}</div>
+      {sub && <div className="mt-1 font-data text-[10px] text-dim">{sub}</div>}
     </div>
   );
 }
