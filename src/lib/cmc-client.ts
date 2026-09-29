@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
+import type { SourceEvidence } from "@/lib/verdict-types";
 
 export interface Receipt {
   endpoint: string;
@@ -14,6 +15,7 @@ export interface Receipt {
 export interface CmcResult<T> {
   data: T;
   receipt: Receipt;
+  source?: SourceEvidence;
 }
 
 export class CmcError extends Error {

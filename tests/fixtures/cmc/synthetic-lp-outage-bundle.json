@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 2,
+  "record": {
+    "kind": "verdict",
+    "id": "synthetic-lp-outage",
+    "ts": "2026-09-29T00:00:00.000Z",
+    "token": {
+      "platform": "Ethereum",
+      "address": "0x0000000000000000000000000000000000000001",
+      "name": "Synthetic",
+      "symbol": "SYN",
+      "mcapUsd": 1000000,
+      "vol24hUsd": 10000,
+      "priceChange24h": 0.01,
+      "liqUsd": 100000
+    },
+    "metrics": {
+      "flow": {
+        "swapCount": 1,
+        "buyCount": 0,
+        "sellCount": 1,
+        "buyUsd": 0,
+        "sellUsd": 10,
+        "netBuyUsd": -10,
+        "netBuyRatio": -1,
+        "uniqueMakers": 1,
+        "top5MakerShare": 1,
+        "thirdPartySells": 1,
+        "observedSellMakers": 1
+      },
+      "liq": {
+        "poolCount": 1,
+        "totalLiqUsd": 100000,
+        "netLpDeltaUsd": 0,
+        "maxSinglePullPct": 0,
+        "removalVsCurrentDepth": null,
+        "addCount": 0,
+        "removeCount": 0
+      },
+      "pump": { "volMcapRatio": 0.01, "makersPer100kVol": 10000, "priceChange24h": 0.01 },
+      "safety": { "level": "safe", "hits": [], "buyTax": 0, "sellTax": 0, "flaggedByVendor": false }
+    },
+    "result": {
+      "verdict": "BELUM_CUKUP_BUKTI",
+      "score": 60,
+      "subs": [
+        { "dim": "SAFETY", "level": "CLEAN", "metrics": [] },
+        { "dim": "FLOW", "level": "INSUFFICIENT", "metrics": [{ "name": "swapCount", "value": 1, "threshold": "≥50", "level": "INSUFFICIENT" }] },
+        { "dim": "LIQUIDITY", "level": "CLEAN", "metrics": [] },
+        { "dim": "PUMP", "level": "CLEAN", "metrics": [] }
+      ],
+      "confidence": "low",
+      "falsifier": "Recheck the incomplete sample and LP evidence.",
+      "label": "INSUFFICIENT_EVIDENCE",
+      "recheck": [{ "dimension": "LIQUIDITY", "metric": "lpEvents", "observed": "unknown", "requirement": "source available", "reason": "LP source failed" }]
+    },
+    "jev": { "available": false, "riskyProb": null },
+    "agreement": "unknown",
+    "narration": null,
+    "receipts": [],
+    "failures": [{ "endpoint": "/v1/dex/liquidity-change/list", "error": "synthetic LP outage" }],
+    "schemaVersion": 2,
+    "rulesVersion": "2.0.0",
+    "mode": "replay",
+    "computedAt": "2026-09-29T00:00:00.000Z",
+    "sourceRecordId": "synthetic-lp-outage",
+    "coverage": {
+      "level": "insufficient",
+      "reasons": ["LP source failed"],
+      "checkedAt": "2026-09-29T00:00:00.000Z",
+      "stale": false,
+      "exclusionStatus": "creator-owner-known",
+      "dimensions": { "SAFETY": "sufficient", "FLOW": "insufficient", "LIQUIDITY": "limited", "PUMP": "sufficient" }
+    },
+    "window": {
+      "firstSwapAt": "2026-09-29T00:00:00.000Z",
+      "lastSwapAt": "2026-09-29T00:00:00.000Z",
+      "validSwaps": 1,
+      "rejectedSwaps": 0,
+      "duplicateRows": 0,
+      "requestedLimit": 100,
+      "fetchedPages": 1,
+      "truncated": false
+    },
+    "sources": [
+      { "key": "search", "status": "ok", "endpoint": "/v1/dex/search", "params": {}, "fetchedAt": "2026-09-29T00:00:00.000Z", "providerAt": "2026-09-29T00:00:00.000Z", "httpStatus": 200, "credits": 1, "bodySha256": "b4ec8d1c359e637fc8f328ae73801f81cca5e487c965140aac4eaefda3ee87b0", "bodyBase64": "eyJ0a3MiOlt7InBsdCI6IkV0aGVyZXVtIiwiYWRkciI6IjB4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMSIsIm4iOiJTeW50aGV0aWMiLCJzIjoiU1lOIn1dfQ==", "evidenceKind": "exact-body", "parserVersion": "v2.0.0", "acceptedRows": 1, "rejectedRows": 0, "cached": false, "reason": null },
+      { "key": "swaps", "status": "ok", "endpoint": "/v1/dex/tokens/transactions", "params": {}, "fetchedAt": "2026-09-29T00:00:00.000Z", "providerAt": "2026-09-29T00:00:00.000Z", "httpStatus": 200, "credits": 1, "bodySha256": "c18ac32848b87de3ad51b05d07421112f5f145106067a56410747ee09fad9eef", "bodyBase64": "eyJzd2FwcyI6W3sidHMiOjE3OTA2MzAwMDAwMDAsInRwIjoic2VsbCIsIm1hIjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDExIiwidiI6MTAsInR4Ijoic3ludGhldGljLXR4IiwibGdpZCI6IjAiLCJmIjoicG9vbC0xIiwiZW4iOiJTeW50aGV0aWMifV19", "evidenceKind": "exact-body", "parserVersion": "v2.0.0", "acceptedRows": 1, "rejectedRows": 0, "cached": false, "reason": null },
+      { "key": "pools", "status": "ok", "endpoint": "/v1/dex/token/pools", "params": {}, "fetchedAt": "2026-09-29T00:00:00.000Z", "providerAt": "2026-09-29T00:00:00.000Z", "httpStatus": 200, "credits": 1, "bodySha256": "d8070503da32ce3b4c69b9c3f43b7f80639f74d988d61b51fd67718d4ab18edd", "bodyBase64": "W3siZmEiOiJwb29sLTEiLCJleG4iOiJTeW50aGV0aWMiLCJsaXFVc2QiOjEwMDAwMCwidjI0IjoxMDAwLCJ0MCI6eyJzeW0iOiJTWU4ifSwidDEiOnsic3ltIjoiRVRIIn19XQ==", "evidenceKind": "exact-body", "parserVersion": "v2.0.0", "acceptedRows": 1, "rejectedRows": 0, "cached": false, "reason": null },
+      { "key": "lp", "status": "failed", "endpoint": "/v1/dex/liquidity-change/list", "params": {}, "fetchedAt": "2026-09-29T00:00:00.000Z", "providerAt": null, "httpStatus": null, "credits": null, "bodySha256": null, "bodyBase64": null, "evidenceKind": "none", "parserVersion": "v2.0.0", "acceptedRows": 0, "rejectedRows": 0, "cached": false, "reason": "synthetic LP outage" },
+      { "key": "security", "status": "ok", "endpoint": "/v1/dex/security/detail", "params": {}, "fetchedAt": "2026-09-29T00:00:00.000Z", "providerAt": "2026-09-29T00:00:00.000Z", "httpStatus": 200, "credits": 1, "bodySha256": "6c1219fad5a7922a89deab1845e038751a4476e7320793dbad2fb6f7ba23d215", "bodyBase64": "W3sic2VjdXJpdHlMZXZlbCI6InNhZmUiLCJzZWN1cml0eUl0ZW1zIjpbXSwiZXh0cmEiOnsiYnV5VGF4IjowLCJzZWxsVGF4IjowLCJpc0ZsYWdnZWRieVZlbmRvciI6ZmFsc2V9fV0=", "evidenceKind": "exact-body", "parserVersion": "v2.0.0", "acceptedRows": 1, "rejectedRows": 0, "cached": false, "reason": null },
+      { "key": "meta", "status": "ok", "endpoint": "/v1/dex/token", "params": {}, "fetchedAt": "2026-09-29T00:00:00.000Z", "providerAt": "2026-09-29T00:00:00.000Z", "httpStatus": 200, "credits": 1, "bodySha256": "fb72c3a44aad54d4c250ac7f1a598bf1dc2fc089fd8e35406fdc2e8981af473a", "bodyBase64": "eyJjcnQiOiIweDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwYWEiLCJvd24iOiIweDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwYmIifQ==", "evidenceKind": "exact-body", "parserVersion": "v2.0.0", "acceptedRows": 1, "rejectedRows": 0, "cached": false, "reason": null },
+      { "key": "globalLatest", "status": "ok", "endpoint": "/v1/global-metrics/quotes/latest", "params": {}, "fetchedAt": "2026-09-29T00:00:00.000Z", "providerAt": "2026-09-29T00:00:00.000Z", "httpStatus": 200, "credits": 0, "bodySha256": "513cc810ddd7cb74350ca111248c0b32cd73ebac330fd1cb181bba71132426d5", "bodyBase64": "eyJidGNfZG9taW5hbmNlIjo1NX0=", "evidenceKind": "exact-body", "parserVersion": "v2.0.0", "acceptedRows": 1, "rejectedRows": 0, "cached": false, "reason": null },
+      { "key": "globalHistorical", "status": "ok", "endpoint": "/v1/global-metrics/quotes/historical", "params": {}, "fetchedAt": "2026-09-29T00:00:00.000Z", "providerAt": "2026-09-29T00:00:00.000Z", "httpStatus": 200, "credits": 0, "bodySha256": "1c3499a141f3d7c6f839f837eb905e8316423e32cb230d1b926355890aea59b4", "bodyBase64": "eyJxdW90ZXMiOlt7ImJ0Y19kb21pbmFuY2UiOjU0fV19", "evidenceKind": "exact-body", "parserVersion": "v2.0.0", "acceptedRows": 1, "rejectedRows": 0, "cached": false, "reason": null },
+      { "key": "fearGreed", "status": "ok", "endpoint": "/v3/fear-and-greed/latest", "params": {}, "fetchedAt": "2026-09-29T00:00:00.000Z", "providerAt": "2026-09-29T00:00:00.000Z", "httpStatus": 200, "credits": 0, "bodySha256": "b3ff35319045aae558b55e787ba2ece9f2edb99905342c076ee98f9f834a36fe", "bodyBase64": "eyJ2YWx1ZSI6NTB9", "evidenceKind": "exact-body", "parserVersion": "v2.0.0", "acceptedRows": 1, "rejectedRows": 0, "cached": false, "reason": null }
+    ],
+    "evidence": [],
+    "context": { "btcDom": 55, "btcDomDelta7d": 1, "fearGreed": 50 },
+    "share": { "kind": "none", "path": null }
+  },
+  "manifest": {
+    "capturedAt": "2026-09-29T00:00:00.000Z",
+    "rulesVersion": "2.0.0",
+    "parserVersion": "v2.0.0",
+    "origin": "synthetic-fixture",
+    "completeRawEvidence": false
+  }
+}
