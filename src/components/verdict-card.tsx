@@ -75,22 +75,15 @@ function CopyButton({ value, label = "copy" }: { value: string; label?: string }
 }
 
 function DownloadButton({ v }: { v: VerdictRecord }) {
+  const href = `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(v))}`;
   return (
-    <button
-      type="button"
-      onClick={() => {
-        const blob = new Blob([JSON.stringify(v, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `verdex-${v.id}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }}
+    <a
+      href={href}
+      download={`verdex-${v.id}.json`}
       className="rounded-sm border border-line px-2 py-1 font-data text-[10px] uppercase tracking-widest text-dim transition-colors hover:border-safe/60 hover:text-safe"
     >
       download evidence JSON
-    </button>
+    </a>
   );
 }
 

@@ -16,6 +16,7 @@ describe("VerdictCard evidence framing", () => {
     expect(html).toContain("Archived");
     expect(html).toContain("Raw source bodies not retained");
     expect(html).not.toContain("permanent record");
+    expect(html).toContain("download=\"verdex-");
   });
 
   it("shows unknown liquidity as unknown rather than zero", () => {
