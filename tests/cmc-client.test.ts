@@ -96,4 +96,116 @@ describe("cmc-client", () => {
     expect(lines).toHaveLength(2);
     expect(JSON.parse(lines[0]).endpoint).toBe("/v1/a");
   });
+
+  it("falls back to secondary key when primary key hits 429 rate limit", async () => {
+    const FALLBACK_KEY = "fallback-key-xyz789";
+    const calls: RequestInit[] = [];
+    const fn = async (_url: string, init?: RequestInit) => {
+      calls.push(init ?? {});
+      const key = (init?.headers as Record<string, string>)["X-CMC_PRO_API_KEY"];
+      if (key === API_KEY) {
+        return {
+          ok: false,
+          status: 429,
+          text: async () => JSON.stringify({ status: { error_code: 1008, error_message: "Rate limit" } }),
+        } as Response;
+      }
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ data: { price: 999 }, status: { error_code: 0, credit_count: 1 } }),
+      } as Response;
+    };
+
+    const c = createCmcClient({
+      apiKey: API_KEY,
+      fallbackApiKey: FALLBACK_KEY,
+      logPath: path.join(dir, "l.jsonl"),
+      cacheDir: dir,
+      fetchImpl: fn as typeof fetch,
+    });
+
+    const res = await c.get<{ price: number }>("/v1/price");
+    expect(res.data.price).toBe(999);
+    expect(calls).toHaveLength(2);
+    expect((calls[0].headers as Record<string, string>)["X-CMC_PRO_API_KEY"]).toBe(API_KEY);
+    expect((calls[1].headers as Record<string, string>)["X-CMC_PRO_API_KEY"]).toBe(FALLBACK_KEY);
+  });
+
+  it("falls back to secondary key when primary key returns envelope error 1008 (credit limit reached)", async () => {
+    const FALLBACK_KEY = "fallback-key-xyz789";
+    const calls: RequestInit[] = [];
+    const fn = async (_url: string, init?: RequestInit) => {
+      calls.push(init ?? {});
+      const key = (init?.headers as Record<string, string>)["X-CMC_PRO_API_KEY"];
+      if (key === API_KEY) {
+        return {
+          ok: true,
+          status: 200,
+          text: async () => JSON.stringify({ status: { error_code: 1008, error_message: "Credit limit reached" } }),
+        } as Response;
+      }
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ data: { ok: true }, status: { error_code: 0, credit_count: 1 } }),
+      } as Response;
+    };
+
+    const c = createCmcClient({
+      apiKeys: [API_KEY, FALLBACK_KEY],
+      logPath: path.join(dir, "l.jsonl"),
+      cacheDir: dir,
+      fetchImpl: fn as typeof fetch,
+    });
+
+    const res = await c.get<{ ok: boolean }>("/v1/check");
+    expect(res.data.ok).toBe(true);
+    expect(calls).toHaveLength(2);
+    expect((calls[0].headers as Record<string, string>)["X-CMC_PRO_API_KEY"]).toBe(API_KEY);
+    expect((calls[1].headers as Record<string, string>)["X-CMC_PRO_API_KEY"]).toBe(FALLBACK_KEY);
+  });
+
+  it("falls back to secondary key when primary key /v1/key/info reports low credits", async () => {
+    const FALLBACK_KEY = "fallback-key-xyz789";
+    const calls: RequestInit[] = [];
+    const fn = async (_url: string, init?: RequestInit) => {
+      calls.push(init ?? {});
+      const key = (init?.headers as Record<string, string>)["X-CMC_PRO_API_KEY"];
+      if (key === API_KEY) {
+        return {
+          ok: true,
+          status: 200,
+          text: async () =>
+            JSON.stringify({
+              data: { usage: { current_month: { credits_left: 250 } } },
+              status: { error_code: 0, credit_count: 1 },
+            }),
+        } as Response;
+      }
+      return {
+        ok: true,
+        status: 200,
+        text: async () =>
+          JSON.stringify({
+            data: { usage: { current_month: { credits_left: 15000 } } },
+            status: { error_code: 0, credit_count: 1 },
+          }),
+      } as Response;
+    };
+
+    const c = createCmcClient({
+      apiKey: `${API_KEY},${FALLBACK_KEY}`,
+      logPath: path.join(dir, "l.jsonl"),
+      cacheDir: dir,
+      quotaFloor: 1000,
+      fetchImpl: fn as typeof fetch,
+    });
+
+    const res = await c.get<{ usage: { current_month: { credits_left: number } } }>("/v1/key/info");
+    expect(res.data.usage.current_month.credits_left).toBe(15000);
+    expect((calls[0].headers as Record<string, string>)["X-CMC_PRO_API_KEY"]).toBe(API_KEY);
+    expect((calls[1].headers as Record<string, string>)["X-CMC_PRO_API_KEY"]).toBe(FALLBACK_KEY);
+  });
 });
+

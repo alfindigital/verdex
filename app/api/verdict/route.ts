@@ -13,9 +13,11 @@ const dataDir = process.env.VERCEL ? "/tmp/verdex" : path.join(process.cwd(), "d
 
 function client() {
   const apiKey = process.env.CMC_API_KEY;
-  if (!apiKey) throw new Error("CMC_API_KEY missing");
+  const fallbackApiKey = process.env.CMC_FALLBACK_API_KEY;
+  if (!apiKey && !fallbackApiKey) throw new Error("CMC_API_KEY missing");
   return createCmcClient({
-    apiKey,
+    apiKey: apiKey ?? "",
+    fallbackApiKey,
     logPath: path.join(dataDir, "api_log.jsonl"),
     cacheDir: path.join(dataDir, "cache"),
   });

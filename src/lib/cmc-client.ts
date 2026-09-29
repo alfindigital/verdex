@@ -28,11 +28,14 @@ export class CmcError extends Error {
 }
 
 export interface CmcClientOpts {
-  apiKey: string;
+  apiKey?: string;
+  apiKeys?: string[];
+  fallbackApiKey?: string;
   logPath: string;
   cacheDir: string;
   fetchImpl?: typeof fetch;
   baseUrl?: string;
+  quotaFloor?: number;
 }
 
 interface CmcEnvelope<T> {
@@ -45,6 +48,30 @@ export function createCmcClient(opts: CmcClientOpts) {
   const baseUrl = opts.baseUrl ?? "https://pro-api.coinmarketcap.com";
   mkdirSync(path.dirname(opts.logPath), { recursive: true });
   mkdirSync(opts.cacheDir, { recursive: true });
+
+  const rawList: (string | undefined)[] = [];
+  if (opts.apiKeys && opts.apiKeys.length > 0) {
+    rawList.push(...opts.apiKeys);
+  } else {
+    if (opts.apiKey) rawList.push(opts.apiKey);
+    if (opts.fallbackApiKey) rawList.push(opts.fallbackApiKey);
+  }
+
+  const keys = Array.from(
+    new Set(
+      rawList
+        .flatMap((k) => (k ? String(k).split(",") : []))
+        .map((k) => k.trim())
+        .filter(Boolean),
+    ),
+  );
+
+  if (keys.length === 0) {
+    throw new Error("createCmcClient: at least one API key is required");
+  }
+
+  let activeKeyIndex = 0;
+  const permanentlyExhausted = new Set<number>();
 
   function cacheKey(endpoint: string, params: Record<string, unknown>) {
     return createHash("sha256").update(endpoint + JSON.stringify(sortObj(params))).digest("hex");
@@ -68,57 +95,135 @@ export function createCmcClient(opts: CmcClientOpts) {
     const url = new URL(baseUrl + endpoint);
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
 
-    // TECH_SPEC §6: 5xx/429 + transport errors retry ×2 with backoff.
-    // 4xx and CMC envelope errors fail fast (they're caller's problem, not flaky).
     const MAX_ATTEMPTS = 3;
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     let lastErr: unknown;
     let receipt: Receipt | undefined;
     let data: T | undefined;
 
-    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-      try {
-        const res = await fetchImpl(url.toString(), {
-          headers: { "X-CMC_PRO_API_KEY": opts.apiKey, Accept: "application/json" },
-          signal: AbortSignal.timeout(15_000),
-        });
-        const rawText = await res.text();
-        if (!res.ok) {
-          if ((res.status >= 500 || res.status === 429) && attempt < MAX_ATTEMPTS - 1) {
-            await sleep(400 * Math.pow(2, attempt));
-            continue;
-          }
-          throw new CmcError(res.status, `HTTP ${res.status} on ${endpoint}`, endpoint);
-        }
+    // Start from current non-exhausted active key
+    let startIdx = activeKeyIndex;
+    while (permanentlyExhausted.has(startIdx) && startIdx < keys.length - 1) {
+      startIdx++;
+    }
+    activeKeyIndex = startIdx;
 
-        const env = JSON.parse(rawText) as CmcEnvelope<T>;
-        const code = Number(env.status?.error_code ?? 0);
-        if (code !== 0) {
-          // Only HTTP-style 5xx is transient — custom codes like 1001/1006
-          // (bad key, plan restricted) are permanent, don't waste retries.
-          if (code >= 500 && code < 600 && attempt < MAX_ATTEMPTS - 1) {
-            await sleep(400 * Math.pow(2, attempt));
-            continue;
-          }
-          throw new CmcError(code, env.status?.error_message ?? "CMC error", endpoint);
-        }
+    for (let keyIdx = startIdx; keyIdx < keys.length; keyIdx++) {
+      if (permanentlyExhausted.has(keyIdx) && keyIdx < keys.length - 1) {
+        continue;
+      }
+      const currentKey = keys[keyIdx];
+      let fallbackTriggered = false;
 
-        receipt = {
-          endpoint,
-          params: sortObj(params),
-          ts: env.status?.timestamp ?? new Date().toISOString(),
-          credits: env.status?.credit_count ?? 0,
-          sha256: createHash("sha256").update(rawText).digest("hex"),
-          cached: false,
-        };
-        data = env.data as T;
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        try {
+          const res = await fetchImpl(url.toString(), {
+            headers: { "X-CMC_PRO_API_KEY": currentKey, Accept: "application/json" },
+            signal: AbortSignal.timeout(15_000),
+          });
+          const rawText = await res.text();
+
+          if (!res.ok) {
+            // Check if fallback to another key is available
+            const hasFallback = keyIdx < keys.length - 1;
+            if (res.status === 429 && hasFallback) {
+              console.warn(`[cmc-client] Key [${keyIdx}] hit HTTP 429 rate limit on ${endpoint}, falling back to next key...`);
+              activeKeyIndex = keyIdx + 1;
+              fallbackTriggered = true;
+              break;
+            }
+            if ((res.status === 401 || res.status === 403) && hasFallback) {
+              console.warn(`[cmc-client] Key [${keyIdx}] auth error (HTTP ${res.status}) on ${endpoint}, falling back to next key...`);
+              permanentlyExhausted.add(keyIdx);
+              activeKeyIndex = keyIdx + 1;
+              fallbackTriggered = true;
+              break;
+            }
+
+            if ((res.status >= 500 || res.status === 429) && attempt < MAX_ATTEMPTS - 1) {
+              await sleep(400 * Math.pow(2, attempt));
+              continue;
+            }
+            throw new CmcError(res.status, `HTTP ${res.status} on ${endpoint}`, endpoint);
+          }
+
+          const env = JSON.parse(rawText) as CmcEnvelope<T>;
+          const code = Number(env.status?.error_code ?? 0);
+          if (code !== 0) {
+            const hasFallback = keyIdx < keys.length - 1;
+            // 1008 = Credit limit reached / HTTP request limit reached
+            if (code === 1008 && hasFallback) {
+              console.warn(`[cmc-client] Key [${keyIdx}] credit limit reached (code 1008), falling back to next key...`);
+              permanentlyExhausted.add(keyIdx);
+              activeKeyIndex = keyIdx + 1;
+              fallbackTriggered = true;
+              break;
+            }
+            // 1001/1002/1006/1007 = Invalid key, bad format, plan restricted, missing
+            if ([1001, 1002, 1006, 1007].includes(code) && hasFallback) {
+              console.warn(`[cmc-client] Key [${keyIdx}] code ${code} (${env.status?.error_message}), falling back to next key...`);
+              permanentlyExhausted.add(keyIdx);
+              activeKeyIndex = keyIdx + 1;
+              fallbackTriggered = true;
+              break;
+            }
+
+            if (code >= 500 && code < 600 && attempt < MAX_ATTEMPTS - 1) {
+              await sleep(400 * Math.pow(2, attempt));
+              continue;
+            }
+            throw new CmcError(code, env.status?.error_message ?? "CMC error", endpoint);
+          }
+
+          // Special check for /v1/key/info to preemptively switch if credits are below floor
+          if (endpoint.includes("/v1/key/info")) {
+            const left = (env.data as { usage?: { current_month?: { credits_left?: unknown } } } | undefined)
+              ?.usage?.current_month?.credits_left;
+            const quotaFloor = opts.quotaFloor ?? 1000;
+            if (typeof left === "number" && left < quotaFloor && keyIdx < keys.length - 1) {
+              console.warn(`[cmc-client] Key [${keyIdx}] balance (${left}) below floor (${quotaFloor}), switching to fallback key...`);
+              permanentlyExhausted.add(keyIdx);
+              activeKeyIndex = keyIdx + 1;
+              fallbackTriggered = true;
+              break;
+            }
+          }
+
+          receipt = {
+            endpoint,
+            params: sortObj(params),
+            ts: env.status?.timestamp ?? new Date().toISOString(),
+            credits: env.status?.credit_count ?? 0,
+            sha256: createHash("sha256").update(rawText).digest("hex"),
+            cached: false,
+          };
+          data = env.data as T;
+          break;
+        } catch (e) {
+          if (e instanceof CmcError) {
+            lastErr = e;
+            const hasFallback = keyIdx < keys.length - 1;
+            if (([401, 403, 429, 1008, 1001, 1002, 1006, 1007].includes(e.code)) && hasFallback) {
+              fallbackTriggered = true;
+              activeKeyIndex = keyIdx + 1;
+              break;
+            }
+            throw e;
+          }
+          lastErr = e;
+          if (attempt < MAX_ATTEMPTS - 1) await sleep(400 * Math.pow(2, attempt));
+        }
+      }
+
+      if (fallbackTriggered) {
+        continue;
+      }
+
+      if (receipt && data !== undefined) {
         break;
-      } catch (e) {
-        if (e instanceof CmcError) throw e;
-        lastErr = e;
-        if (attempt < MAX_ATTEMPTS - 1) await sleep(400 * Math.pow(2, attempt));
       }
     }
+
     if (!receipt) throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
 
     appendFileSync(opts.logPath, JSON.stringify(receipt) + "\n");
@@ -130,5 +235,11 @@ export function createCmcClient(opts: CmcClientOpts) {
     return { data: data as T, receipt };
   }
 
-  return { get };
+  return {
+    get,
+    getActiveKeyIndex: () => activeKeyIndex,
+    getKeyCount: () => keys.length,
+    resetExhaustion: () => { permanentlyExhausted.clear(); activeKeyIndex = 0; },
+  };
 }
+
