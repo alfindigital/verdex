@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdtempSync, readFileSync, existsSync, rmSync } from "fs";
+import { mkdtempSync, readFileSync, existsSync, rmSync, readdirSync, writeFileSync } from "fs";
 import { tmpdir } from "os";
 import path from "path";
 import { createCmcClient, CmcError } from "@/lib/cmc-client";
@@ -65,6 +65,24 @@ describe("cmc-client", () => {
     const r2 = await c.get("/v1/x", { q: 1 }, { ttlMs: 60_000 });
     expect(n).toBe(1);
     expect(r2.receipt.cached).toBe(true);
+  });
+
+  it("discards a corrupted cache body and refetches", async () => {
+    let n = 0;
+    const counting = async (u: string, i?: RequestInit) => {
+      n++;
+      const { fn } = fakeFetchOk({ fresh: n });
+      return fn(u, i);
+    };
+    const cacheDir = path.join(dir, "cache-corrupt");
+    const c = createCmcClient({ apiKey: API_KEY, logPath: path.join(dir, "corrupt.jsonl"), cacheDir, fetchImpl: counting as typeof fetch });
+    await c.get("/v1/cache-corrupt", {}, { ttlMs: 60_000 });
+    const cacheFile = readdirSync(cacheDir).find((name) => name.endsWith(".json"));
+    expect(cacheFile).toBeTruthy();
+    writeFileSync(path.join(cacheDir, cacheFile!), "{not-json");
+    const second = await c.get<{ fresh: number }>("/v1/cache-corrupt", {}, { ttlMs: 60_000 });
+    expect(second.data.fresh).toBe(2);
+    expect(n).toBe(2);
   });
 
   it("throws CmcError on nonzero error_code", async () => {

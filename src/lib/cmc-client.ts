@@ -87,10 +87,14 @@ export function createCmcClient(opts: CmcClientOpts) {
     const key = cacheKey(endpoint, params);
     const cacheFile = path.join(opts.cacheDir, `${key}.json`);
     if (o?.ttlMs && existsSync(cacheFile)) {
-      const age = Date.now() - Number(readFileSync(cacheFile, "utf8").startsWith("{") ? JSON.parse(readFileSync(cacheFile, "utf8")).cachedAt : 0);
-      if (age < o.ttlMs) {
-        const raw = JSON.parse(readFileSync(cacheFile, "utf8"));
-        return { data: raw.data as T, receipt: { ...raw.receipt, cached: true } };
+      try {
+        const raw = JSON.parse(readFileSync(cacheFile, "utf8")) as { cachedAt?: unknown; data?: T; receipt?: Receipt };
+        const cachedAt = typeof raw.cachedAt === "number" ? raw.cachedAt : 0;
+        if (cachedAt > 0 && Date.now() - cachedAt < o.ttlMs && raw.receipt) {
+          return { data: raw.data as T, receipt: { ...raw.receipt, cached: true } };
+        }
+      } catch {
+        // Corrupt/partial cache is disposable; refetch from the provider.
       }
     }
 
