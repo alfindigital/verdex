@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { VerdictCard, type TokenRef, type VerdictRecord } from "@/components/verdict-card";
+import { makeScanRequestBody } from "@/lib/scan-request";
 
 type ApiResult =
   | VerdictRecord
@@ -62,21 +63,33 @@ export function Checker({ live }: { live: boolean }) {
   const [platform, setPlatform] = useState("");
   const [loading, setLoading] = useState(false);
   const [out, setOut] = useState<ApiResult | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
 
-  async function run(q: string, pick?: number, plat = platform) {
+  async function run(q: string, selection?: TokenRef, plat = platform) {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     setOut(null);
     try {
       const res = await fetch("/api/verdict", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ query: q, pick, platform: plat || undefined }),
+        body: JSON.stringify(makeScanRequestBody(q, plat, selection)),
+        signal: controller.signal,
       });
-      setOut((await res.json()) as ApiResult);
+      const next = (await res.json()) as ApiResult;
+      if (requestId === requestIdRef.current) setOut(next);
     } catch (e) {
-      setOut({ error: e instanceof Error ? e.message : "request failed" });
+      if (e instanceof DOMException && e.name === "AbortError") return;
+      if (requestId === requestIdRef.current) setOut({ error: e instanceof Error ? e.message : "request failed" });
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        abortRef.current = null;
+      }
     }
   }
 
@@ -143,7 +156,7 @@ export function Checker({ live }: { live: boolean }) {
               {out.snapshots.map((s) => (
                 <button
                   key={s.symbol + s.platform}
-                  onClick={() => run(s.address)}
+                  onClick={() => run(s.address, undefined, s.platform)}
                   className="rounded-sm border border-line px-2 py-0.5 font-data text-[10px] text-dim transition-colors hover:border-safe/60 hover:text-safe"
                 >
                   {s.symbol} · {s.platform}
@@ -177,14 +190,17 @@ export function Checker({ live }: { live: boolean }) {
                     key={`${c.platform}:${c.address}`}
                     role="button"
                     tabIndex={0}
-                    onClick={() => run(query, i)}
+                    onClick={() => {
+                      if (!loading) run(query, c, c.platform);
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        run(query, i);
+                        if (!loading) run(query, c, c.platform);
                       }
                     }}
-                    className="cursor-pointer border-b border-line/40 font-data text-xs last:border-b-0 hover:bg-panel focus-visible:bg-panel"
+                    aria-disabled={loading}
+                    className={`cursor-pointer border-b border-line/40 font-data text-xs last:border-b-0 hover:bg-panel focus-visible:bg-panel ${loading ? "pointer-events-none opacity-50" : ""}`}
                   >
                     <td className="px-4 py-2.5 font-bold text-text">{c.symbol}</td>
                     <td className="px-4 py-2.5 text-dim">{c.name}</td>

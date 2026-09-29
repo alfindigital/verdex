@@ -22,6 +22,7 @@ export function createLiveGuard(opts: LiveGuardOpts = {}) {
   const hits = new Map<string, { day: string; n: number }>();
   let global = { day: "", n: 0 };
   let quota: { checkedAt: number; left: number | null } = { checkedAt: 0, left: null };
+  let quotaProbe: Promise<boolean> | null = null;
 
   function allowIp(ip: string): boolean {
     const day = new Date().toISOString().slice(0, 10);
@@ -45,22 +46,32 @@ export function createLiveGuard(opts: LiveGuardOpts = {}) {
 
   // Credits probe: /v1/key/info costs 1 credit but is the only authoritative
   // monthly-balance signal — cached per instance, re-probed at most every
-  // PROBE_EVERY ms. Probe failure fails OPEN (the global cap still bounds
-  // damage); a real low-balance answer fails CLOSED (snapshot mode survives).
+  // PROBE_EVERY ms. Unknown quota state fails CLOSED so a probe outage cannot
+  // silently spend live API credits. A real low-balance answer also fails
+  // CLOSED (snapshot mode survives).
   async function quotaOk(client: QuotaClient): Promise<boolean> {
     if (Date.now() - quota.checkedAt < PROBE_EVERY) {
-      return quota.left === null || quota.left >= QUOTA_FLOOR;
+      return quota.left !== null && quota.left >= QUOTA_FLOOR;
     }
-    quota.checkedAt = Date.now();
+    if (quotaProbe) return quotaProbe;
+    quotaProbe = (async () => {
+      try {
+        const { data } = await client.get("/v1/key/info");
+        const left = (data as { usage?: { current_month?: { credits_left?: unknown } } } | undefined)?.usage
+          ?.current_month?.credits_left;
+        quota.left = typeof left === "number" ? left : null;
+      } catch {
+        quota.left = null;
+      } finally {
+        quota.checkedAt = Date.now();
+      }
+      return quota.left !== null && quota.left >= QUOTA_FLOOR;
+    })();
     try {
-      const { data } = await client.get("/v1/key/info");
-      const left = (data as { usage?: { current_month?: { credits_left?: unknown } } } | undefined)?.usage
-        ?.current_month?.credits_left;
-      quota.left = typeof left === "number" ? left : null;
-    } catch {
-      quota.left = null;
+      return await quotaProbe;
+    } finally {
+      quotaProbe = null;
     }
-    return quota.left === null || quota.left >= QUOTA_FLOOR;
   }
 
   return { allowIp, quotaOk, PER_IP, GLOBAL, QUOTA_FLOOR };

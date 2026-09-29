@@ -24,7 +24,7 @@ describe("live-guard", () => {
     expect(g.allowIp("10.0.0.9")).toBe(false); // 6th distinct IP → global ceiling
   });
 
-  it("quotaOk: healthy balance allows, low balance blocks, probe error fails open", async () => {
+  it("quotaOk: healthy balance allows, low balance blocks, probe error fails closed", async () => {
     const g = createLiveGuard({ quotaFloor: 1000 });
     const ok = quotaClient(5000);
     expect(await g.quotaOk(ok)).toBe(true);
@@ -36,7 +36,20 @@ describe("live-guard", () => {
     expect(await g2.quotaOk(quotaClient(500))).toBe(false); // below floor → block
 
     const g3 = createLiveGuard({ quotaFloor: 1000 });
-    expect(await g3.quotaOk(quotaClient(new Error("key/info down")))).toBe(true); // fail open
-    expect(await g3.quotaOk(quotaClient(null))).toBe(true); // unknown balance → allow
+    expect(await g3.quotaOk(quotaClient(new Error("key/info down")))).toBe(false); // fail closed
+    expect(await g3.quotaOk(quotaClient(null))).toBe(false); // unknown balance → block
+  });
+
+  it("shares one in-flight quota probe across concurrent callers", async () => {
+    let calls = 0;
+    let release!: () => void;
+    const pending = new Promise<void>((resolve) => { release = resolve; });
+    const client = { get: async () => { calls++; await pending; return { data: { usage: { current_month: { credits_left: 2000 } } } }; } };
+    const g = createLiveGuard({ quotaProbeEveryMs: 0 });
+    const first = g.quotaOk(client);
+    const second = g.quotaOk(client);
+    release();
+    await expect(Promise.all([first, second])).resolves.toEqual([true, true]);
+    expect(calls).toBe(1);
   });
 });

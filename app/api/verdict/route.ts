@@ -6,6 +6,8 @@ import { analyze } from "@/engine/analyze";
 import { CmcError } from "@/lib/cmc-client";
 import { listSnapshotIds, loadVerdict } from "@/lib/verdict-store";
 import { createLiveGuard } from "@/lib/live-guard";
+import { matchReplayRecords } from "@/lib/replay-match";
+import { parseScanBody, resolveScanMode } from "@/lib/scan-policy";
 
 export const runtime = "nodejs";
 
@@ -43,45 +45,37 @@ function persist(record: unknown & { id?: string }) {
 const guard = createLiveGuard();
 
 export async function POST(req: NextRequest) {
-  const body = (await req.json().catch(() => null)) as { query?: unknown; platform?: unknown; pick?: unknown } | null;
-  if (typeof body?.query !== "string" || !body.query.trim()) {
-    return NextResponse.json({ error: "query required (token address or name/ticker)" }, { status: 400 });
+  const rawBytes = await req.arrayBuffer().catch(() => new ArrayBuffer(0));
+  if (rawBytes.byteLength > 4096) {
+    return NextResponse.json({ error: "request body exceeds 4096 bytes" }, { status: 400 });
   }
-  if (body.platform !== undefined && typeof body.platform !== "string") {
-    return NextResponse.json({ error: "platform must be a string" }, { status: 400 });
+  let raw: unknown;
+  try {
+    raw = JSON.parse(new TextDecoder().decode(rawBytes));
+  } catch {
+    return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
   }
-  if (body.pick !== undefined && (typeof body.pick !== "number" || !Number.isInteger(body.pick) || body.pick < 0 || body.pick > 49)) {
-    return NextResponse.json({ error: "pick must be an integer 0..49" }, { status: 400 });
-  }
-  const platform = body.platform as string | undefined;
-  const pick = body.pick as number | undefined;
+  const parsed = parseScanBody(raw, rawBytes.byteLength);
+  if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
+  const body = parsed.value;
+  const mode = resolveScanMode(process.env);
 
-  // Demo mode (VERDEX_LIVE unset): serve committed snapshots only — the demo
-  // can never fail on a judge's machine or burn API credits.
-  if (process.env.VERDEX_LIVE !== "1") {
-    const q = body.query.trim().toLowerCase();
-    const plat = platform?.trim().toLowerCase();
-    const match = listSnapshotIds()
-      .map((id) => loadVerdict(id))
-      .find(
-        (v) =>
-          v &&
-          (!plat || v.token.platform.toLowerCase() === plat) &&
-          (v.token.address.toLowerCase() === q ||
-            v.token.symbol.toLowerCase() === q ||
-            v.token.symbol.toLowerCase() === q.replace(/^\$/, "") ||
-            v.token.name.toLowerCase() === q),
-      );
-    if (match) return NextResponse.json({ ...match, replayed: true });
+  // Replay is the safe default and remains available when live flags or
+  // credentials are absent. Candidate order is stable by exact record id.
+  if (mode === "replay") {
+    const records = listSnapshotIds().map((id) => loadVerdict(id)).filter((v): v is NonNullable<typeof v> => Boolean(v));
+    const matches = matchReplayRecords(records, body);
+    if (matches.length === 1) return NextResponse.json({ ...matches[0], replayed: true, mode: "replay" });
+    if (matches.length > 1) {
+      return NextResponse.json({ kind: "ambiguous", query: body.query, candidates: matches.map((v) => v.token) });
+    }
     return NextResponse.json(
       {
-        error: "demo mode: live API disabled (VERDEX_LIVE=0). Try a showcased token:",
-        snapshots: listSnapshotIds()
-          .map((id) => loadVerdict(id))
-          .filter(Boolean)
-          .map((v) => ({ id: v!.id, symbol: v!.token.symbol, platform: v!.token.platform, address: v!.token.address, verdict: v!.result.verdict })),
+        kind: "notFound",
+        query: body.query,
+        snapshots: records.map((v) => ({ id: v.id, symbol: v.token.symbol, platform: v.token.platform, address: v.token.address, verdict: v.result.verdict })),
       },
-      { status: 403 },
+      { status: 404 },
     );
   }
 
@@ -103,12 +97,15 @@ export async function POST(req: NextRequest) {
         { status: 429 },
       );
     }
-    const r = await analyze(cmc, { query: body.query, platform, pick });
+    const r = await analyze(cmc, { query: body.query, platform: body.platform, selection: body.selection });
     if (r.kind === "verdict") persist(r);
     return NextResponse.json(r, { status: r.kind === "notFound" ? 404 : 200 });
   } catch (e) {
     if (e instanceof CmcError) return NextResponse.json({ error: `cmc ${e.code}: ${e.message}` }, { status: 502 });
-    return NextResponse.json({ error: e instanceof Error ? e.message : "internal" }, { status: 500 });
+    if (e instanceof Error && /API_KEY|createCmcClient/.test(e.message)) {
+      return NextResponse.json({ error: "live scan unavailable; use a recorded example" }, { status: 503 });
+    }
+    return NextResponse.json({ error: "internal" }, { status: 500 });
   }
 }
 

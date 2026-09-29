@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mkdtempSync, readFileSync, existsSync, rmSync } from "fs";
 import { tmpdir } from "os";
 import path from "path";
@@ -84,6 +84,24 @@ describe("cmc-client", () => {
     const fn = async () => ({ ok: false, status: 403, json: async () => ({}), text: async () => "forbidden" }) as Response;
     const c = createCmcClient({ apiKey: API_KEY, logPath: path.join(dir, "l.jsonl"), cacheDir: dir, fetchImpl: fn as typeof fetch });
     await expect(c.get("/v1/x")).rejects.toThrow();
+  });
+
+  it("uses a 6 second attempt deadline and at most one transport retry", async () => {
+    const timeouts: number[] = [];
+    const timeoutSpy = vi.spyOn(AbortSignal, "timeout").mockImplementation((ms: number) => {
+      timeouts.push(ms);
+      return new AbortController().signal;
+    });
+    let calls = 0;
+    const fn = async () => {
+      calls++;
+      return { ok: false, status: 503, text: async () => "upstream unavailable" } as Response;
+    };
+    const c = createCmcClient({ apiKey: API_KEY, logPath: path.join(dir, "l.jsonl"), cacheDir: dir, fetchImpl: fn as typeof fetch });
+    await expect(c.get("/v1/slow")).rejects.toBeInstanceOf(CmcError);
+    expect(calls).toBe(2);
+    expect(timeouts.every((ms) => ms <= 6_000)).toBe(true);
+    timeoutSpy.mockRestore();
   });
 
   it("appends one jsonl line per live call", async () => {

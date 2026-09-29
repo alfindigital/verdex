@@ -69,3 +69,13 @@ export function listSnapshotIds(): string[] {
     .filter((f) => /^[a-f0-9]{12}\.json$/.test(f))
     .map((f) => f.replace(".json", ""));
 }
+
+/**
+ * Return a public URL only for a committed snapshot id. Runtime verdicts are
+ * ephemeral and must not be presented as durable share links.
+ */
+export function snapshotPath(recordId: string): string | null {
+  return /^[a-f0-9]{12}$/.test(recordId) && listSnapshotIds().includes(recordId)
+    ? `/verdict/${recordId}`
+    : null;
+}

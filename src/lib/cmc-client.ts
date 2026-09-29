@@ -97,8 +97,12 @@ export function createCmcClient(opts: CmcClientOpts) {
     const url = new URL(baseUrl + endpoint);
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
 
-    const MAX_ATTEMPTS = 3;
+    const MAX_ATTEMPTS = 2;
+    const REQUEST_DEADLINE_MS = 15_000;
+    const ATTEMPT_TIMEOUT_MS = 6_000;
+    const deadlineAt = Date.now() + REQUEST_DEADLINE_MS;
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const retryWithinBudget = () => Date.now() + 2_000 <= deadlineAt;
     let lastErr: unknown;
     let receipt: Receipt | undefined;
     let data: T | undefined;
@@ -111,6 +115,7 @@ export function createCmcClient(opts: CmcClientOpts) {
     activeKeyIndex = startIdx;
 
     for (let keyIdx = startIdx; keyIdx < keys.length; keyIdx++) {
+      if (Date.now() >= deadlineAt) break;
       if (permanentlyExhausted.has(keyIdx) && keyIdx < keys.length - 1) {
         continue;
       }
@@ -119,9 +124,11 @@ export function createCmcClient(opts: CmcClientOpts) {
 
       for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
         try {
+          const remainingMs = deadlineAt - Date.now();
+          if (remainingMs <= 0) throw new CmcError(408, `request deadline exceeded on ${endpoint}`, endpoint);
           const res = await fetchImpl(url.toString(), {
             headers: { "X-CMC_PRO_API_KEY": currentKey, Accept: "application/json" },
-            signal: AbortSignal.timeout(15_000),
+            signal: AbortSignal.timeout(Math.min(ATTEMPT_TIMEOUT_MS, remainingMs)),
           });
           const rawText = await res.text();
 
@@ -142,7 +149,7 @@ export function createCmcClient(opts: CmcClientOpts) {
               break;
             }
 
-            if ((res.status >= 500 || res.status === 429) && attempt < MAX_ATTEMPTS - 1) {
+            if ((res.status >= 500 || res.status === 429) && attempt < MAX_ATTEMPTS - 1 && retryWithinBudget()) {
               await sleep(400 * Math.pow(2, attempt));
               continue;
             }
@@ -170,7 +177,7 @@ export function createCmcClient(opts: CmcClientOpts) {
               break;
             }
 
-            if (code >= 500 && code < 600 && attempt < MAX_ATTEMPTS - 1) {
+            if (code >= 500 && code < 600 && attempt < MAX_ATTEMPTS - 1 && retryWithinBudget()) {
               await sleep(400 * Math.pow(2, attempt));
               continue;
             }
@@ -213,7 +220,7 @@ export function createCmcClient(opts: CmcClientOpts) {
             throw e;
           }
           lastErr = e;
-          if (attempt < MAX_ATTEMPTS - 1) await sleep(400 * Math.pow(2, attempt));
+          if (attempt < MAX_ATTEMPTS - 1 && retryWithinBudget()) await sleep(400 * Math.pow(2, attempt));
         }
       }
 
