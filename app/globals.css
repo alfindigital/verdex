@@ -6,30 +6,30 @@
    demo-shots/dir-b-* for the record). */
 
 @theme {
-  --color-ink: #0b0c0a;
-  --color-panel: #13160f;
-  --color-raised: #1a1e15;
-  --color-line: #2a2f25;
-  --color-line-bright: #404739;
-  --color-text: #eef1e7;
-  --color-dim: #a7b09d;
-  --color-faint: #8b947f;
-  --color-paper: #eae8da;
+  --color-ink: #060807;
+  --color-panel: #12170e;
+  --color-raised: #1b2213;
+  --color-line: #303a26;
+  --color-line-bright: #4c5a3d;
+  --color-text: #f1f5e9;
+  --color-dim: #b1bba2;
+  --color-faint: #96a086;
+  --color-paper: #eee9d6;
   --color-paper-ink: #1b1d16;
 
-  --color-safe: #3dd68c;
+  --color-safe: #2be384;
   --color-warn: #f0b23c;
   --color-danger: #f2555a;
   --color-unknown: #9aa392;
-  --color-accent: #3dd68c;
+  --color-accent: #2be384;
 
   --font-display: var(--font-archivo), system-ui, sans-serif;
   --font-data: var(--font-plex-mono), ui-monospace, monospace;
   --font-deco: var(--font-fraunces), Georgia, serif;
 
-  --deco-weight: 600;
+  --deco-weight: 750;
   --deco-stretch: 100%;
-  --deco-tracking: -0.015em;
+  --deco-tracking: -0.022em;
   --deco-transform: none;
 
   --radius-sm: 4px;
@@ -81,8 +81,15 @@ body::before {
   text-transform: var(--deco-transform);
 }
 
-/* Fraunces WONK axis — quirky terminals on the one word that deserves it */
-.wonk { font-variation-settings: "WONK" 1, "opsz" 144; }
+/* Emerald brand glow — faint wash behind the page, reinforces the accent. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 90% 55% at 50% -8%, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 62%);
+}
 
 /* ——— Identity utilities ——— */
 
@@ -90,7 +97,7 @@ body::before {
 .stamp {
   display: inline-block;
   font-family: var(--font-deco);
-  font-weight: 640;
+  font-weight: 720;
   font-stretch: var(--deco-stretch);
   letter-spacing: 0.09em;
   text-transform: uppercase;

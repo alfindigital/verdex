@@ -121,7 +121,7 @@ export default function Home() {
             </span>
           </p>
           <h1 id="hero-title" className="deco mt-6 text-[clamp(2.9rem,7.5vw,5.4rem)] leading-[0.98]">
-            Don&apos;t be the <span className="wonk text-accent">exit liquidity</span>.
+            Don&apos;t be the <span className="text-accent">exit liquidity</span>.
           </h1>
           <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-dim sm:text-base">
             Paste a DEX token contract. Verdex returns an auditable verdict —{" "}
