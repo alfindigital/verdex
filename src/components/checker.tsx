@@ -141,8 +141,7 @@ export function Checker({ live }: { live: boolean }) {
       {!loading && !out && (
         <div className="mt-4">
           <p className="font-data text-[11px] leading-relaxed text-dim">
-            Exact identity only — tickers collide across chains, so an ambiguous query returns a candidate list,
-            never a guess. Or open a recorded exhibit below.
+            Exact identity only — an ambiguous ticker returns a candidate list, never a guess.
           </p>
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
             {["gmx", "jup", "sushi"].map((ex) => (

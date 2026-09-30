@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Checker } from "@/components/checker";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -11,18 +10,6 @@ import { resolveScanMode } from "@/lib/scan-policy";
 
 export const dynamic = "force-dynamic";
 
-const ENDPOINTS = [
-  "/v1/dex/search",
-  "/v1/dex/tokens/transactions",
-  "/v1/dex/token/pools",
-  "/v1/dex/token",
-  "/v1/dex/liquidity-change/list",
-  "/v1/dex/security/detail",
-  "/v1/global-metrics/quotes/latest",
-  "/v1/global-metrics/quotes/historical",
-  "/v3/fear-and-greed/latest",
-];
-
 const TEXT: Record<string, string> = {
   safe: "text-safe",
   warn: "text-warn",
@@ -31,11 +18,18 @@ const TEXT: Record<string, string> = {
 };
 
 const SHOWCASE_BLURB: Record<string, string> = {
-  LAYAK: "no flags observed in this recorded sample",
-  RAWAN: "concentration or warning observations on file",
-  JANGAN: "danger-level flags in the recorded window",
-  BELUM_CUKUP_BUKTI: "insufficient evidence in recorded sample",
+  LAYAK: "no flags observed",
+  RAWAN: "warning observations on file",
+  JANGAN: "danger-level flags on file",
+  BELUM_CUKUP_BUKTI: "insufficient evidence",
 };
+
+const FAQ: [string, string][] = [
+  ["What does a verdict mean?", "Deterministic rules read the tape: SAFETY, FLOW, LIQUIDITY, PUMP. DANGER anywhere stamps AVOID; all-clean plus score ≥70 stamps ENTRY-WORTHY. Published constants — every verdict reproduces from its committed bundle."],
+  ["Where does the data come from?", "9 CoinMarketCap endpoints per scan — swaps, pools, LP events, security detail, market meta, macro context. Every call is SHA-256 receipted and stored in the bundle."],
+  ["Live or replay?", "This archive replays committed CMC captures — dated evidence, not live quotes. The scanner runs live when the deployment carries an API key."],
+  ["What is Jev?", "An independent model opinion labeled on every case — consensus, lean, or contested. It never overrides the deterministic rules."],
+];
 
 export default function Home() {
   const live = resolveScanMode(process.env) === "v2-live";
@@ -46,10 +40,11 @@ export default function Home() {
   const totalSwaps = snapshots.reduce((a, v) => a + num(v.metrics.flow?.swapCount), 0);
   const totalReceipts = snapshots.reduce((a, v) => a + v.receipts.length, 0);
   const chainList = [...new Set(snapshots.map((v) => v.token.platform.toLowerCase()))];
+  const dist = { LAYAK: 0, RAWAN: 0, JANGAN: 0, BELUM_CUKUP_BUKTI: 0 } as Record<string, number>;
+  for (const v of snapshots) dist[v.result.verdict] = (dist[v.result.verdict] ?? 0) + 1;
 
   // Curated showcase — each card carries a story the jury can verify:
-  // a clean tape (LAYAK), a collapsed-but-liquid survivor (RAWAN), and a
-  // dead-tape/dust catch (JANGAN). Falls back to first-of-class coverage.
+  // a clean tape, a collapsed-but-liquid survivor, a dead-tape catch.
   const showcaseBySlug = ["brett-base", "ftx-token-ethereum", "titano-bsc"]
     .map((slug) => snapshots.find((v) => slugFor(v.token.symbol, v.token.platform) === slug))
     .filter((v): v is NonNullable<typeof v> => Boolean(v));
@@ -94,34 +89,29 @@ export default function Home() {
       </a>
 
       {/* ——— Top bar ——— */}
-      <header className="flex items-center justify-between gap-4 border-b border-line pb-4">
-        <Link href="/" className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Verdex" width={30} height={30} className="rounded-sm" />
-          <span className="deco text-xl leading-none">Verdex</span>
+      <header className="relative flex items-center justify-between gap-4 border-b border-line pb-4 pt-1">
+        <Link href="/" className="deco text-2xl leading-none tracking-tight">
+          Verdex<span className="text-accent">.</span>
         </Link>
-        <nav aria-label="Sections" className="hidden items-center gap-5 font-data text-[10px] uppercase tracking-[0.18em] text-dim md:flex">
+        <nav
+          aria-label="Sections"
+          className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 font-data text-[11px] font-medium uppercase tracking-[0.2em] text-dim md:flex"
+        >
           <a href="#scan" className="transition-colors hover:text-accent">scanner</a>
           <a href="#cases" className="transition-colors hover:text-accent">cases</a>
           <a href="#files" className="transition-colors hover:text-accent">files</a>
           <a href="#method" className="transition-colors hover:text-accent">method</a>
         </nav>
-        <div className="flex items-center gap-3 sm:gap-4">
-          <span
-            className="chip"
-            title={live ? "live mode — every scan calls the CMC API now" : "replay archive — verdicts replayed from committed real CMC captures; no live API calls"}
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-safe" : "bg-warn"}`} aria-hidden="true" />
-            {live ? "live scan" : "replay archive"}
-          </span>
+        <div className="flex items-center gap-2.5">
           <a
             href="https://github.com/alfindigital/verdex"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Verdex on GitHub"
             title="Verdex on GitHub"
-            className="flex h-7 w-7 items-center justify-center rounded-sm border border-line text-dim transition-colors hover:border-line-bright hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
+            className="icon-btn"
           >
-            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" className="h-3.5 w-3.5">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" className="h-[18px] w-[18px]">
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
             </svg>
           </a>
@@ -129,72 +119,69 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ——— Hero: one focal point, real numbers ——— */}
-      <section aria-labelledby="hero-title" className="grid gap-10 border-b border-line py-10 sm:py-14 lg:grid-cols-[1.55fr_1fr] lg:items-end">
-        <div>
-          <p className="flex flex-wrap items-center gap-3">
-            <span className="paper-tag">CMC DEX forensics</span>
-            <span className="font-data text-[11px] uppercase tracking-[0.16em] text-dim">
-              {snapshots.length} recorded exhibits · {chainList.length} chains
-            </span>
-          </p>
-          <h1 id="hero-title" className="deco mt-6 text-[clamp(2.9rem,7.5vw,5.4rem)] leading-[0.98]">
-            Don&apos;t be the <span className="text-accent">exit liquidity</span>.
-          </h1>
-          <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-dim sm:text-base">
-            Paste a DEX token contract. Verdex returns an auditable verdict —{" "}
-            <span className="text-safe">entry-worthy</span>, <span className="text-warn">caution</span>, or{" "}
-            <span className="text-danger">avoid</span> — where every claim traces to a hashed CoinMarketCap
-            receipt and a named falsifier.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+      {/* ——— Stat band: the page leads with numbers, not words ——— */}
+      <section aria-label="Archive at a glance" className="border-b border-line py-8">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-4">
           <Stat k="verdicts on file" v={String(snapshots.length)} sub="committed snapshots" />
           <Stat k="CMC receipts" v={fmtNum(totalReceipts)} sub="SHA-256 per call" />
           <Stat k="swaps analyzed" v={fmtNum(totalSwaps)} sub="across all cases" />
           <Stat k="chains" v={String(chainList.length)} sub={chainList.slice(0, 4).join(" · ")} />
         </div>
+        {/* verdict distribution — one honest bar */}
+        <div className="mt-8" aria-label="Verdict distribution">
+          <div className="flex h-2.5 w-full overflow-hidden rounded-full border border-line">
+            {dist.LAYAK > 0 && <div className="bg-safe" style={{ width: `${(dist.LAYAK / snapshots.length) * 100}%` }} />}
+            {dist.RAWAN > 0 && <div className="bg-warn" style={{ width: `${(dist.RAWAN / snapshots.length) * 100}%` }} />}
+            {dist.JANGAN > 0 && <div className="bg-danger" style={{ width: `${(dist.JANGAN / snapshots.length) * 100}%` }} />}
+            {dist.BELUM_CUKUP_BUKTI > 0 && (
+              <div className="bg-unknown" style={{ width: `${(dist.BELUM_CUKUP_BUKTI / snapshots.length) * 100}%` }} />
+            )}
+          </div>
+          <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1 font-data text-[10px] uppercase tracking-widest text-dim">
+            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-safe not-italic" />entry-worthy {dist.LAYAK}</span>
+            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-warn not-italic" />caution {dist.RAWAN}</span>
+            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-danger not-italic" />avoid {dist.JANGAN}</span>
+            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-unknown not-italic" />insufficient {dist.BELUM_CUKUP_BUKTI}</span>
+          </div>
+        </div>
       </section>
 
-      {/* ——— Scanner instrument ——— */}
-      <section id="scan" aria-labelledby="scan-title" className="mt-12 grid gap-5 lg:grid-cols-[1fr_320px]">
-        <div className="rounded-md border border-line bg-panel">
+      {/* ——— Scanner is the hero ——— */}
+      <section id="scan" aria-labelledby="scan-title" className="mt-10">
+        <div className="scan-hero rounded-md border border-line-bright bg-panel">
           <div className="panel-head">
-            <span id="scan-title">Scanner</span>
+            <span id="scan-title" className="text-text">Scanner</span>
             <span className={live ? "text-safe" : "text-warn"}>
               {live ? "live · calls the CMC API now" : "replay · archived CMC evidence"}
             </span>
           </div>
-          <div className="p-4 sm:p-6">
+          <div className="p-5 sm:p-8">
+            <p className="mb-5 max-w-xl text-sm leading-relaxed text-dim">
+              Paste a contract or ticker — get a verdict where every claim traces to a hashed CMC receipt.
+            </p>
             <Checker live={live} />
           </div>
         </div>
 
-        <aside className="rounded-md border border-line bg-panel">
-          <div className="panel-head">Verdict logic</div>
-          <ul className="space-y-3 p-4 sm:p-5">
-            <li className="flex items-baseline gap-3">
-              <span className="stamp stamp-sm shrink-0 text-danger">Avoid</span>
-              <span className="text-xs leading-relaxed text-dim">DANGER in SAFETY/FLOW, or liquidity under $1k (untradeable)</span>
-            </li>
-            <li className="flex items-baseline gap-3">
-              <span className="stamp stamp-sm shrink-0 text-warn">Caution</span>
-              <span className="text-xs leading-relaxed text-dim">DANGER elsewhere, or any WARN-level flag</span>
-            </li>
-            <li className="flex items-baseline gap-3">
-              <span className="stamp stamp-sm shrink-0 text-safe">Entry</span>
-              <span className="text-xs leading-relaxed text-dim">all four dimensions CLEAN and score ≥ 70</span>
-            </li>
-            <li className="flex items-baseline gap-3">
-              <span className="stamp stamp-sm shrink-0 text-unknown">Insuf.</span>
-              <span className="text-xs leading-relaxed text-dim">data missing, no DANGER, under 2 WARN</span>
-            </li>
-          </ul>
-          <div className="border-t border-line p-4 font-data text-[10px] leading-relaxed text-dim sm:px-5">
-            Thresholds are published constants in the rules engine — every verdict is reproducible from its
-            committed evidence bundle.
-          </div>
-        </aside>
+        {/* verdict logic — horizontal strip, always visible under the instrument */}
+        <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <li className="rounded-md border border-line bg-panel px-4 py-3.5">
+            <span className="stamp stamp-sm text-danger">Avoid</span>
+            <p className="mt-2.5 text-xs leading-relaxed text-dim">DANGER in SAFETY/FLOW, or liquidity under $1k</p>
+          </li>
+          <li className="rounded-md border border-line bg-panel px-4 py-3.5">
+            <span className="stamp stamp-sm text-warn">Caution</span>
+            <p className="mt-2.5 text-xs leading-relaxed text-dim">DANGER elsewhere, or any WARN flag</p>
+          </li>
+          <li className="rounded-md border border-line bg-panel px-4 py-3.5">
+            <span className="stamp stamp-sm text-safe">Entry</span>
+            <p className="mt-2.5 text-xs leading-relaxed text-dim">all four dimensions CLEAN, score ≥ 70</p>
+          </li>
+          <li className="rounded-md border border-line bg-panel px-4 py-3.5">
+            <span className="stamp stamp-sm text-unknown">Insuf.</span>
+            <p className="mt-2.5 text-xs leading-relaxed text-dim">evidence missing — unknown, not zero</p>
+          </li>
+        </ul>
       </section>
 
       {/* ——— Recorded cases ——— */}
@@ -224,7 +211,7 @@ export default function Home() {
                     {v.token.address.slice(0, 14)}<b>…</b>{v.token.address.slice(-6)}
                   </div>
                   <p className="mt-4 text-sm leading-relaxed text-dim">
-                    {SHOWCASE_BLURB[v.result.verdict] ?? SHOWCASE_BLURB.BELUM_CUKUP_BUKTI} · captured{" "}
+                    {SHOWCASE_BLURB[v.result.verdict] ?? SHOWCASE_BLURB.BELUM_CUKUP_BUKTI} ·{" "}
                     {new Date(v.ts).toISOString().slice(0, 10)}
                   </p>
                   <div className="mt-5 font-data text-[10px] uppercase tracking-[0.16em] text-accent">open case file →</div>
@@ -249,55 +236,52 @@ export default function Home() {
         </section>
       )}
 
-      {/* ——— Method ——— */}
+      {/* ——— Method: FAQ, not a manifesto ——— */}
       <section id="method" className="mt-14" aria-labelledby="method-title">
         <div className="exhibit">
           <h2 id="method-title" className="exhibit-title">Method</h2>
           <span className="exhibit-rule" aria-hidden="true" />
         </div>
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <div className="rounded-md border border-line bg-panel">
-            <div className="panel-head">Pipeline</div>
-            <ol>
-              {[
-                ["resolve", "dex/search — address, ticker, or ranked ambiguity list"],
-                ["evidence", "swaps ×100 · pools · LP deltas · security detail"],
-                ["score", "SAFETY · FLOW · LIQUIDITY · PUMP on published thresholds"],
-                ["audit", "independent model opinion — consensus, lean, or contested"],
-                ["publish", "named falsifier + SHA-256 receipt per CMC call"],
-              ].map(([step, desc], i) => (
-                <li key={step} className="flex items-baseline gap-4 border-b border-line/50 px-4 py-3.5 last:border-b-0 sm:px-5">
-                  <span className="font-data text-[11px] text-accent">{String(i + 1).padStart(2, "0")}</span>
-                  <div>
-                    <span className="text-sm font-semibold uppercase tracking-wide">{step}</span>
-                    <span className="mt-0.5 block text-xs leading-relaxed text-dim">{desc}</span>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-          <div className="rounded-md border border-line bg-panel">
-            <div className="panel-head">CMC endpoints</div>
-            <div className="flex flex-wrap content-start gap-1.5 p-4 sm:p-5">
-              {ENDPOINTS.map((e) => (
-                <code key={e} className="rounded-sm border border-line bg-raised px-2 py-1 font-data text-[10px] text-dim">
-                  {e}
-                </code>
-              ))}
-              <p className="mt-4 w-full text-xs leading-relaxed text-dim">
-                Deterministic rules produce the verdict; the model opinion is labeled and never overrides them.
-                <span className="mt-1 block font-data text-[10px] uppercase tracking-widest text-dim">
-                  not financial advice · recorded samples are dated evidence, not live quotes
-                </span>
-              </p>
+        <dl className="mt-6 grid gap-x-8 gap-y-6 md:grid-cols-2">
+          {FAQ.map(([q, a]) => (
+            <div key={q}>
+              <dt className="text-sm font-semibold">{q}</dt>
+              <dd className="mt-1.5 text-sm leading-relaxed text-dim">{a}</dd>
             </div>
-          </div>
-        </div>
+          ))}
+        </dl>
       </section>
 
-      <footer className="mt-16 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 font-data text-[10px] uppercase tracking-widest text-dim">
-        <span>evidence over vibes</span>
-        <span>not financial advice</span>
+      <footer className="mt-16 flex flex-col items-center gap-4 border-t border-line pt-8">
+        <div className="flex items-center gap-3">
+          <a
+            href="https://github.com/alfindigital/verdex"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Verdex on GitHub"
+            title="Source on GitHub"
+            className="icon-btn"
+          >
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" className="h-[18px] w-[18px]">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+            </svg>
+          </a>
+          <a
+            href="https://coinmarketcap.com/api/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="CoinMarketCap API"
+            title="Data: CoinMarketCap API"
+            className="icon-btn"
+          >
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" className="h-[18px] w-[18px]">
+              <path d="M11.9 9.05c-.35 0-.64.29-.64.64v.79c0 .35.29.64.64.64h.64c.35 0 .64-.29.64-.64v-.79c0-.35-.29-.64-.64-.64h-.64Zm2.56-3.2c.7 0 1.28-.58 1.28-1.28 0-.71-.58-1.28-1.28-1.28-.71 0-1.28.57-1.28 1.28 0 .7.57 1.28 1.28 1.28ZM8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8Zm3.89 11.23c0 .35-.28.64-.63.64H4.73a.63.63 0 0 1-.63-.64V4.77c0-.35.28-.64.63-.64h6.53c.35 0 .63.29.63.64v6.46ZM5.38 9.41v1.9c0 .12.1.22.22.22h4.8c.12 0 .22-.1.22-.22v-1.9c0-.12-.1-.22-.22-.22h-1.14a.22.22 0 0 1-.22-.22V6.6c0-.12.1-.22.22-.22h1.14c.12 0 .22-.1.22-.22V4.7c0-.12-.1-.22-.22-.22h-4.8a.22.22 0 0 0-.22.22v1.45c0 .12.1.22.22.22h1.13c.12 0 .22.1.22.22v2.38c0 .12-.1.22-.22.22H5.6a.22.22 0 0 0-.22.22Z" />
+            </svg>
+          </a>
+        </div>
+        <p className="font-data text-[10px] uppercase tracking-widest text-dim">
+          evidence over vibes · not financial advice
+        </p>
       </footer>
     </main>
   );

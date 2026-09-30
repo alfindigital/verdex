@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { VerdictCard } from "@/components/verdict-card";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -40,9 +39,8 @@ export default async function VerdictPage({ params }: { params: Promise<{ id: st
   return (
     <main className="relative z-[1] mx-auto max-w-7xl px-4 py-5 sm:px-6">
       <header className="mb-6 flex items-center justify-between gap-4 border-b border-line pb-4">
-        <Link href="/" className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Verdex" width={26} height={26} className="rounded-sm" />
-          <span className="deco text-lg leading-none">Verdex</span>
+        <Link href="/" className="deco text-2xl leading-none tracking-tight">
+          Verdex<span className="text-accent">.</span>
         </Link>
         <div className="flex items-center gap-3 sm:gap-4">
           <span className="hidden font-data text-[10px] uppercase tracking-widest text-dim sm:inline">

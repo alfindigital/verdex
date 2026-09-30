@@ -1,6 +1,6 @@
 "use client";
 
-// Case-files table — the whole recorded corpus, filterable and sortable.
+// Case-files table — the whole recorded corpus, filterable, sortable, paginated.
 // Desktop = dense table; mobile = stacked dossier rows.
 
 import { useMemo, useState } from "react";
@@ -15,12 +15,35 @@ const TEXT: Record<string, string> = {
   unknown: "text-unknown",
 };
 
+const PAGE_SIZE = 20;
+
+// Metric filters — one-tap evidence thresholds on top of verdict/chain facets.
+const METRIC_FILTERS = [
+  { key: "mcap1m", label: "mcap ≥ $1M", ok: (r: CaseRow) => (r.mcapUsd ?? 0) >= 1_000_000 },
+  { key: "liq50k", label: "liq ≥ $50k", ok: (r: CaseRow) => r.liqUsd >= 50_000 },
+  { key: "inflow", label: "net inflow", ok: (r: CaseRow) => r.netUsd > 0 },
+  { key: "outflow", label: "net outflow", ok: (r: CaseRow) => r.netUsd < 0 },
+  { key: "sells", label: "sells observed", ok: (r: CaseRow) => r.sells > 0 },
+] as const;
+
+type MetricKey = (typeof METRIC_FILTERS)[number]["key"];
+
+function FunnelIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true" className="h-3.5 w-3.5">
+      <path d="M2 2.5h12l-4.6 5.4v4.6l-2.8 1.4V7.9L2 2.5Z" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function CaseTable({ rows }: { rows: CaseRow[] }) {
   const [verdicts, setVerdicts] = useState<Set<string>>(new Set());
   const [chains, setChains] = useState<Set<string>>(new Set());
+  const [metrics, setMetrics] = useState<Set<MetricKey>>(new Set());
   const [q, setQ] = useState("");
   const [sortKey, setSortKey] = useState<CaseSortKey>("score");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [page, setPage] = useState(0);
 
   const verdictFacets = useMemo(() => {
     const m = new Map<string, { label: string; tone: string; n: number }>();
@@ -33,16 +56,32 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
 
   const chainFacets = useMemo(() => [...new Set(rows.map((r) => r.platform.toLowerCase()))].sort(), [rows]);
 
-  const filtered = useMemo(
-    () => sortCaseRows(filterCaseRows(rows, { verdicts, chains, q }), sortKey, sortDir),
-    [rows, verdicts, chains, q, sortKey, sortDir],
-  );
+  const filtered = useMemo(() => {
+    const base = filterCaseRows(rows, { verdicts, chains, q });
+    const withMetrics = metrics.size === 0
+      ? base
+      : base.filter((r) => METRIC_FILTERS.filter((f) => metrics.has(f.key)).every((f) => f.ok(r)));
+    return sortCaseRows(withMetrics, sortKey, sortDir);
+  }, [rows, verdicts, chains, metrics, q, sortKey, sortDir]);
 
-  const toggle = (set: Set<string>, key: string, apply: (s: Set<string>) => void) => {
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const cur = Math.min(page, pageCount - 1);
+  const paged = filtered.slice(cur * PAGE_SIZE, cur * PAGE_SIZE + PAGE_SIZE);
+
+  const toggle = <K extends string>(set: Set<K>, key: K, apply: (s: Set<K>) => void) => {
     const next = new Set(set);
     if (next.has(key)) next.delete(key);
     else next.add(key);
     apply(next);
+    setPage(0);
+  };
+
+  const clearAll = () => {
+    setVerdicts(new Set());
+    setChains(new Set());
+    setMetrics(new Set());
+    setQ("");
+    setPage(0);
   };
 
   const thClick = (key: CaseSortKey) => {
@@ -70,12 +109,15 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
   );
 
   const filteredEmpty = filtered.length === 0;
-  const hasFilters = verdicts.size > 0 || chains.size > 0 || q.trim().length > 0;
+  const hasFilters = verdicts.size > 0 || chains.size > 0 || metrics.size > 0 || q.trim().length > 0;
 
   return (
     <div className="overflow-hidden rounded-md border border-line bg-panel">
       {/* ——— Filter bar ——— */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5 border-b border-line px-4 py-3">
+        <span className="flex items-center gap-1.5 font-data text-[10px] uppercase tracking-widest text-dim">
+          <FunnelIcon /> filter
+        </span>
         <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter by verdict">
           {verdictFacets.map(([key, f]) => (
             <button
@@ -87,6 +129,19 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
             >
               <span className={`h-1.5 w-1.5 rounded-full bg-current ${TEXT[f.tone]}`} aria-hidden="true" />
               {f.label} <span className="opacity-60">{f.n}</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter by metric">
+          {METRIC_FILTERS.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              aria-pressed={metrics.has(f.key)}
+              onClick={() => toggle(metrics, f.key, setMetrics)}
+              className={`chip ${metrics.has(f.key) ? "on" : ""}`}
+            >
+              {f.label}
             </button>
           ))}
         </div>
@@ -105,8 +160,11 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
         </div>
         <input
           value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="filter…"
+          onChange={(e) => {
+            setQ(e.target.value);
+            setPage(0);
+          }}
+          placeholder="search…"
           aria-label="Filter records"
           className="ml-auto w-32 min-w-32 rounded-sm border border-line bg-ink px-2.5 py-1.5 font-data text-[11px] text-text caret-accent placeholder:text-dim focus:w-44 focus:border-accent focus:outline-none transition-[width]"
         />
@@ -130,7 +188,7 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((r) => {
+            {paged.map((r) => {
               const tone = TEXT[r.tone] ?? TEXT.unknown;
               return (
                 <tr key={r.id} className="group border-b border-line/50 transition-colors last:border-b-0 hover:bg-raised">
@@ -152,7 +210,7 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
                   </td>
                   <td className="num px-4 py-3 text-right font-data text-xs">{fmtNum(r.sells)}</td>
                   <td className="px-4 py-3 text-right">
-                    <span className={`num font-data text-base font-bold ${tone}`}>{r.score}</span>
+                    <span className={`num font-data text-base font-bold ${tone} ${r.tone === "unknown" ? "opacity-55" : ""}`}>{r.score}</span>
                   </td>
                   <td className="px-4 py-3 font-data text-[10px] text-dim">
                     {r.jevProb != null ? `P=${r.jevProb.toFixed(2)}` : "—"}
@@ -172,15 +230,7 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
               <tr>
                 <td colSpan={10} className="px-4 py-10 text-center">
                   <p className="font-data text-xs text-dim">no records match these filters</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setVerdicts(new Set());
-                      setChains(new Set());
-                      setQ("");
-                    }}
-                    className="btn-ghost mt-3"
-                  >
+                  <button type="button" onClick={clearAll} className="btn-ghost mt-3">
                     clear filters
                   </button>
                 </td>
@@ -192,14 +242,14 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
 
       {/* ——— Mobile dossier rows ——— */}
       <ul className="divide-y divide-line md:hidden">
-        {filtered.map((r) => {
+        {paged.map((r) => {
           const tone = TEXT[r.tone] ?? TEXT.unknown;
           return (
             <li key={r.id}>
               <Link href={`/verdict/${r.slug}`} className="block px-4 py-4 transition-colors hover:bg-raised">
                 <div className="flex items-center justify-between gap-3">
                   <span className={`stamp stamp-sm ${tone}`}>{r.label}</span>
-                  <span className={`num font-data text-xl font-bold ${tone}`}>{r.score}</span>
+                  <span className={`num font-data text-xl font-bold ${tone} ${r.tone === "unknown" ? "opacity-55" : ""}`}>{r.score}</span>
                 </div>
                 <div className="mt-2.5 flex items-baseline justify-between gap-3">
                   <span className="text-base font-semibold">{r.symbol.replace(/^\$/, "")}</span>
@@ -217,23 +267,41 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
         {filteredEmpty && (
           <li className="px-4 py-10 text-center">
             <p className="font-data text-xs text-dim">no records match these filters</p>
-            <button
-              type="button"
-              onClick={() => {
-                setVerdicts(new Set());
-                setChains(new Set());
-                setQ("");
-              }}
-              className="btn-ghost mt-3"
-            >
+            <button type="button" onClick={clearAll} className="btn-ghost mt-3">
               clear filters
             </button>
           </li>
         )}
       </ul>
 
-      <div className="border-t border-line px-4 py-2.5 font-data text-[10px] text-dim">
-        {filtered.length} of {rows.length} records · every row = committed evidence · SHA-256 receipts per CMC call
+      {/* ——— Footer: pagination + evidence note ——— */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line px-4 py-2.5 font-data text-[10px] text-dim">
+        <span>
+          {filtered.length} of {rows.length} records · committed evidence · SHA-256 receipts
+        </span>
+        {pageCount > 1 && (
+          <nav aria-label="Case pages" className="ml-auto flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={cur === 0}
+              onClick={() => setPage(cur - 1)}
+              className="chip disabled:opacity-40"
+            >
+              ← prev
+            </button>
+            <span className="px-1.5 tabular-nums">
+              {cur + 1} / {pageCount}
+            </span>
+            <button
+              type="button"
+              disabled={cur >= pageCount - 1}
+              onClick={() => setPage(cur + 1)}
+              className="chip disabled:opacity-40"
+            >
+              next →
+            </button>
+          </nav>
+        )}
       </div>
     </div>
   );
