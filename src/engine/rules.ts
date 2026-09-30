@@ -58,6 +58,11 @@ export const THRESHOLDS = {
   makersPer100k: { warn: 5, danger: 1 },
   netBuyRatio: { warn: -0.1, danger: -0.3 },
   thirdPartySellsClean: 3,
+  // Tape vitality: a market that needs >6 days to accumulate 100 swaps is a
+  // dead tape — exit liquidity is nominal regardless of pool depth. Dead
+  // (danger) <15/day; thin (warn) <50/day. Corpus evidence: dead/zombie
+  // tokens sit at 4–70/day while live majors run 1,300–170,000/day.
+  tapeVitality: { warn: 50, danger: 15 },
   // Assets ≥$100M mcap trade across CEX+DEX — their on-chain window is
   // dominated by arbitrage infrastructure, so concentration/direction
   // signals are weakly probative there and cap at WARN (published rule).
@@ -117,6 +122,7 @@ export function evalFlow(f: FlowMetrics, mature = false): SubVerdict {
     lvl("thirdPartySells", f.thirdPartySells, "≥3 (0 sells w/ buys = hidden honeypot)",
       f.thirdPartySells === 0 && f.buyCount >= 20 ? "DANGER" : f.thirdPartySells >= THRESHOLDS.thirdPartySellsClean ? "CLEAN" : "WARN"),
     lvl("uniqueMakers", f.uniqueMakers, "≥20", f.uniqueMakers < 5 ? "DANGER" : f.uniqueMakers < 20 ? "WARN" : "CLEAN"),
+    lvl("swapsPerDay", round2(f.swapsPerDay), "≥50/day (<15/day = dead tape, danger)", cap(f.swapsPerDay < THRESHOLDS.tapeVitality.danger ? "DANGER" : f.swapsPerDay < THRESHOLDS.tapeVitality.warn ? "WARN" : "CLEAN")),
     lvl("top5MakerShare", round2(f.top5MakerShare), "<0.50 (>0.70 & <20 makers = danger)", cap(f.top5MakerShare > THRESHOLDS.top5MakerShare.danger && f.uniqueMakers < THRESHOLDS.top5DangerMakersCap ? "DANGER" : f.top5MakerShare >= THRESHOLDS.top5MakerShare.warn ? "WARN" : "CLEAN")),
     lvl("netBuyRatio", round2(f.netBuyRatio), "≥ -0.10", cap(f.netBuyRatio < THRESHOLDS.netBuyRatio.danger ? "DANGER" : f.netBuyRatio < THRESHOLDS.netBuyRatio.warn ? "WARN" : "CLEAN")),
   ];

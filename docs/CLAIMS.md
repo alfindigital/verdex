@@ -11,7 +11,7 @@ gray zone selalu menghasilkan `BELUM_CUKUP_BUKTI`, bukan tebakan.
 ## V2 evidence contract (2026-09-29)
 
 The legacy rules below remain attached to historical v1 snapshots. New V2
-records use `schemaVersion: 2` and `rulesVersion: 2.2.0`:
+records use `schemaVersion: 2` and `rulesVersion: 2.3.0`:
 
 - `observedSellMakers` means distinct maker identities observed in valid sell
   rows after pool/creator/owner exclusions. It is not a claim of independent
@@ -53,6 +53,7 @@ address pool juga dikecualikan dari statistik maker.
 | `thirdPartySellCount` (sell oleh ≥3 maker unik non-pool & non-creator) | ≥3 sells | 1–2 | **0 sells dengan ≥20 buys** |
 | `uniqueMakers` (distinct `ma`) | ≥20 | 5–19 | <5 |
 | `top5MakerShare` (share volume USD 5 maker terbesar) | <0.50 | 0.50–0.70 | >0.70 **dan** uniqueMakers <20 |
+| `swapsPerDay` (tape vitality — swaps ÷ span hari window) | ≥50/hari | 15–50/hari | <15/hari (**dead tape** — pasar butuh >6 hari untuk 100 swap; exit nominal meski depth terlihat) |
 | `netBuyRatio` = (buyUSD − sellUSD)/totalUSD | ≥ −0.10 | −0.3..−0.1 | <−0.3 |
 
 Kalibrasi `rulesVersion 2.1.0` (2026-10-01): konsentrasi top-5 pada window
@@ -66,12 +67,15 @@ baru berlaku saat outflow material (<−0.10), DANGER saat <−0.30.
 `scripts/eval-verdicts.ts` menguji corpus terhadap ground truth publik —
 **59 label dalam 3 kelas**: 6 dead (harus JANGAN), 7 faded/zombie (tidak
 boleh LAYAK — stamp hijau pada zombie adalah miss terburuk), dan 46 majors
-mapan (tidak boleh JANGAN). Hasil pada `rulesVersion 2.2.0`:
+mapan (tidak boleh JANGAN). Hasil pada `rulesVersion 2.3.0`:
 
-- Dead tertangkap JANGAN: **3/6** (TITANO $0, VGX $2, NORMIE exploit).
-- Dead soft-flag RAWAN: **3/6** — FTT ($127k), CEL ($66k), FEI masih punya
-  likuiditas nyata; collapse ≠ untradeable. Batas jujur: rules mengukur
-  tape sekarang, bukan reputasi proyek.
+- Dead tertangkap JANGAN: **4/6** (TITANO $0, VGX $2, NORMIE exploit, CEL
+  dead-tape 13 swap/hari).
+- Dead soft-flag RAWAN: **2/6** — FTT ($127k liq, 67 swap/hari) dan FEI
+  ($965k total liq, 17 swap/hari) masih punya tape yang hidup dan exit yang
+  nyata; collapse ≠ untradeable. Batas jujur: rules mengukur tape sekarang,
+  bukan reputasi proyek — RAWAN pada token mati-yang-masih-likuid adalah
+  jawaban evidence yang benar, bukan bug.
 - Faded flagged (tidak hijau): **7/7** — HOGE, DFYN, MBOX, CHEEMS, BODEN,
   MICHI, WEN semuanya RAWAN; nol zombie dapat ENTRY-WORTHY.
 - Major false-positive (AVOID): **3/46** — SNX-Optimism, COW-Gnosis,
@@ -91,6 +95,16 @@ WARN ke DANGER dan dieskalasikan ke JANGAN — pool yang ada tapi berkedalaman
 nol membuat exit mustahil apa pun status kontraknya (kasus: TITANO $0,
 VGX $2). LP-pull dan net-outflow DANGER tetap RAWAN: itu risiko potensial,
 bukan ketidakmungkinan exit saat ini.
+
+Kalibrasi `rulesVersion 2.3.0` (2026-10-01): `swapsPerDay` ditambahkan ke
+FLOW — **tape vitality**. Pasar yang butuh >6 hari untuk mengumpulkan 100
+swap adalah tape mati: kedalaman pool bisa terlihat tapi exit nyata tidak
+ada (kasus: CEL 13/hari → JANGAN, HOGE 4/hari → JANGAN). Threshold dipilih
+dari pemisahan empiris di corpus: token dead/zombie duduk di 4–70 swap/hari,
+major aktif di 1.300–170.000/hari — jarak ~20×. Di mature tier (≥$100M mcap)
+dead tape di-cap WARN karena aset CEX-listed wajar punya DEX footprint kecil.
+Efek samping yang diakui: JONES turun LAYAK→RAWAN (20 swap/hari — tape
+memang tipis) dan LAYAK corpus menjadi 5.
 
 Dimensi = worst-of metrics; `swaps < 50` → INSUFFICIENT.
 
@@ -157,10 +171,10 @@ Badge akhir: contested jika salah satu jalur contested, consensus hanya jika
 kedua jalur sepakat. Jev tidak pernah mengubah verdict rules — ia second
 opinion yang ditampilkan berdampingan.
 
-Hasil aktual di corpus 130 record (rules 2.2.0): **6 consensus · 15 lean ·
+Hasil aktual di corpus 130 record (rules 2.3.0): **5 consensus · 16 lean ·
 109 contested**. Polanya konsisten dan dilaporkan apa adanya: Jev setuju
 keras pada dimensi SAFETY (P 0.64–0.72 tepat di token yang rules flag
-danger) dan pada keenam LAYAK (P 0.07–0.11), tetapi sistematis menilai
+danger) dan pada kelima LAYAK (P 0.07–0.10), tetapi sistematis menilai
 konsentrasi maker FLOW dan likuiditas dust lebih rendah risikonya daripada
 rules. Kedua lensa berdiri berdampingan — contested bukan kegagalan, tapi
 bukti bahwa rules memang sengaja lebih strict pada tape/exit-risk.

@@ -13,6 +13,7 @@ export interface FlowMetrics {
   top5MakerShare: number; // share of total USD by top-5 makers
   thirdPartySells: number; // distinct non-creator, non-pool makers with ≥1 sell
   observedSellMakers?: number;
+  swapsPerDay: number; // tape vitality — observed swaps/day across the window span
 }
 
 export interface LiquidityMetrics {
@@ -49,8 +50,12 @@ export function flowMetrics(swaps: Swap[], poolAddrs: string[] = [], excluded: s
   let sellCount = 0;
   const makerUsd = new Map<string, number>();
   const sellers = new Set<string>();
+  let minTs = Infinity;
+  let maxTs = 0;
 
   for (const s of swaps) {
+    if (s.ts < minTs) minTs = s.ts;
+    if (s.ts > maxTs) maxTs = s.ts;
     const m = walletIdentity(chain, s.maker);
     if (s.side === "buy") {
       buyUsd += s.usd;
@@ -68,6 +73,11 @@ export function flowMetrics(swaps: Swap[], poolAddrs: string[] = [], excluded: s
   const eligibleUsd = [...makerUsd.values()].reduce((a, b) => a + b, 0);
   const top5 = [...makerUsd.values()].sort((a, b) => b - a).slice(0, 5).reduce((a, b) => a + b, 0);
   const totalUsd = buyUsd + sellUsd;
+  // A market that needs days to fill the 100-swap window is a dead tape —
+  // exit capacity is nominal even when pool depth reports a real number.
+  // Span of zero (dense burst) reads as maximally alive, not thin.
+  const spanDays = (maxTs - minTs) / 86_400_000;
+  const swapsPerDay = swaps.length > 1 && spanDays > 0 ? swaps.length / spanDays : swaps.length;
 
   return {
     swapCount: swaps.length,
@@ -81,6 +91,7 @@ export function flowMetrics(swaps: Swap[], poolAddrs: string[] = [], excluded: s
     top5MakerShare: eligibleUsd > 0 ? top5 / eligibleUsd : 1,
     thirdPartySells: sellers.size,
     observedSellMakers: sellers.size,
+    swapsPerDay,
   };
 }
 

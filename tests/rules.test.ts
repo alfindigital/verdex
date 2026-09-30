@@ -4,7 +4,7 @@ import type { FlowMetrics, LiquidityMetrics, PumpMetrics, SafetyMetrics } from "
 
 const fm = (o: Partial<FlowMetrics>): FlowMetrics => ({
   swapCount: 100, buyCount: 60, sellCount: 40, buyUsd: 1000, sellUsd: 800,
-  netBuyUsd: 200, netBuyRatio: 0.11, uniqueMakers: 30, top5MakerShare: 0.4, thirdPartySells: 8, ...o,
+  netBuyUsd: 200, netBuyRatio: 0.11, uniqueMakers: 30, top5MakerShare: 0.4, thirdPartySells: 8, swapsPerDay: 500, ...o,
 });
 const lm = (o: Partial<LiquidityMetrics>): LiquidityMetrics => ({
   poolCount: 1, totalLiqUsd: 10000, netLpDeltaUsd: 500, maxSinglePullPct: 0.05, addCount: 4, removeCount: 1, ...o,
@@ -92,6 +92,18 @@ describe("evalFlow", () => {
     expect(evalFlow(fm({ uniqueMakers: 10 })).level).toBe("WARN");
     expect(evalFlow(fm({ thirdPartySells: 1 })).level).toBe("WARN");
   });
+  it("danger: dead tape — <15 swaps/day means exit is nominal even with liquidity", () => {
+    // Collapsed-project tokens (CEL 13/day, HOGE 4/day) trade dust forever;
+    // live majors run ≥1,300/day. Vitality is venue-independent evidence.
+    expect(evalFlow(fm({ swapsPerDay: 10 })).level).toBe("DANGER");
+    const row = evalFlow(fm({ swapsPerDay: 10 })).metrics.find((m) => m.name === "swapsPerDay");
+    expect(row?.level).toBe("DANGER");
+    expect(evalFlow(fm({ swapsPerDay: 30 })).metrics.find((m) => m.name === "swapsPerDay")?.level).toBe("WARN");
+    expect(evalFlow(fm({ swapsPerDay: 200 })).metrics.find((m) => m.name === "swapsPerDay")?.level).toBe("CLEAN");
+  });
+  it("mature tier: dead tape caps at WARN (CEX flow absorbs vitality)", () => {
+    expect(evalFlow(fm({ swapsPerDay: 5 }), true).metrics.find((m) => m.name === "swapsPerDay")?.level).toBe("WARN");
+  });
   it("clean: distributed flow", () => {
     expect(evalFlow(fm({})).level).toBe("CLEAN");
   });
@@ -173,6 +185,10 @@ describe("composite", () => {
   it("JANGAN when SAFETY or FLOW is DANGER (danger dominates insufficient)", () => {
     expect(composite(input({ safety: sm({ hits: ["honeypot"] }), pump: pm({ volMcapRatio: null }) })).verdict).toBe("JANGAN");
     expect(composite(input({ flow: fm({ thirdPartySells: 0 }) })).verdict).toBe("JANGAN");
+  });
+  it("JANGAN on dead tape — FLOW danger via swapsPerDay escalates (CEL-class)", () => {
+    const c = composite(input({ flow: fm({ swapsPerDay: 12 }) }));
+    expect(c.verdict).toBe("JANGAN");
   });
   it("JANGAN on dust liquidity — untradeable is honeypot-class severity", () => {
     // TITANO regression: $0 depth across pools must not read as mere CAUTION.
