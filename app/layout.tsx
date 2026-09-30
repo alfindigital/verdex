@@ -23,7 +23,7 @@ const plexMono = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://verdex-alpha.vercel.app"),
+  metadataBase: new URL("https://verdex.web.id"),
   title: "Verdex — Don't be the exit liquidity",
   description:
     "Paste a DEX token. Get an auditable verdict — entry-worthy, caution, or avoid — computed from CoinMarketCap evidence and cross-examined by an independent decision model.",
@@ -39,16 +39,9 @@ export const viewport: Viewport = {
   themeColor: "#0b0c0a",
 };
 
-// Read the design direction before first paint (no flash).
-// ?dir=a|b in the URL wins, then localStorage, then default "a".
-const DIR_SCRIPT = `try{var q=new URLSearchParams(location.search).get("dir");var d=q==="a"||q==="b"?q:localStorage.getItem("vdx-dir");if(d==="a"||d==="b"){document.documentElement.dataset.dir=d;localStorage.setItem("vdx-dir",d)}}catch(e){}`;
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-dir="a" suppressHydrationWarning className={`${archivo.variable} ${fraunces.variable} ${plexMono.variable}`}>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: DIR_SCRIPT }} />
-      </head>
+    <html lang="en" className={`${archivo.variable} ${fraunces.variable} ${plexMono.variable}`}>
       <body className="relative min-h-screen bg-ink font-display text-text">
         {children}
       </body>
