@@ -256,10 +256,10 @@ export const TL_ZETA = {
   s06: { from: 1480, dur: 204 },
   s07: { from: 1684, dur: 272 },
   s08: { from: 1956, dur: 250 },
-  s09: { from: 2206, dur: 285 },
-  s10: { from: 2491, dur: 250 },
+  s09: { from: 2206, dur: 290 },
+  s10: { from: 2496, dur: 250 },
 } as const;
-export const TL_ZETA_TOTAL = 2741;
+export const TL_ZETA_TOTAL = 2746;
 
 const VO = 'vo-zeta';
 const scenes = [Z01, Z02, Z03, Z04, Z05, Z06, Z07, Z08, Z09, Z10];

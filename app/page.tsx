@@ -3,7 +3,7 @@ import { Checker } from "@/components/checker";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CaseTable } from "@/components/case-table";
 import type { CaseRow } from "@/lib/case-table";
-import { listSnapshotIds, loadVerdict, slugFor } from "@/lib/verdict-store";
+import { buildSlugMap, listSnapshotIds, loadVerdict } from "@/lib/verdict-store";
 import { displayFor } from "@/lib/verdict-display";
 import { fmtNum, fmtUsd, num, Stat } from "@/components/viz";
 import { resolveScanMode } from "@/lib/scan-policy";
@@ -25,7 +25,7 @@ const SHOWCASE_BLURB: Record<string, string> = {
 };
 
 const FAQ: [string, string][] = [
-  ["What does a verdict mean?", "Deterministic rules read the tape: SAFETY, FLOW, LIQUIDITY, PUMP. DANGER anywhere stamps AVOID; all-clean plus score ≥70 stamps ENTRY-WORTHY. Published constants — every verdict reproduces from its committed bundle."],
+  ["What does a verdict mean?", "Deterministic rules read the tape: SAFETY, FLOW, LIQUIDITY, PUMP. DANGER anywhere stamps HIGH RISK FLAGS; all-clean plus score ≥70 stamps NO FLAGS OBSERVED. Published constants — every verdict reproduces from its committed bundle."],
   ["Where does the data come from?", "9 CoinMarketCap endpoints per scan — swaps, pools, LP events, security detail, market meta, macro context. Every call is SHA-256 receipted and stored in the bundle."],
   ["Live or replay?", "This archive replays committed CMC captures — dated evidence, not live quotes. The scanner runs live when the deployment carries an API key."],
   ["What is Jev?", "An independent model opinion labeled on every case — consensus, lean, or contested. It never overrides the deterministic rules."],
@@ -40,13 +40,23 @@ export default function Home() {
   const totalSwaps = snapshots.reduce((a, v) => a + num(v.metrics.flow?.swapCount), 0);
   const totalReceipts = snapshots.reduce((a, v) => a + v.receipts.length, 0);
   const chainList = [...new Set(snapshots.map((v) => v.token.platform.toLowerCase()))];
-  const dist = { LAYAK: 0, RAWAN: 0, JANGAN: 0, BELUM_CUKUP_BUKTI: 0 } as Record<string, number>;
-  for (const v of snapshots) dist[v.result.verdict] = (dist[v.result.verdict] ?? 0) + 1;
+  const slugMap = buildSlugMap(snapshots);
+
+  // Distribution counts the *displayed* stamp (v2 label wins over the rules
+  // verdict) so the bar always matches the case table below it.
+  const dist = { noFlags: 0, caution: 0, highRisk: 0, insuf: 0 };
+  for (const v of snapshots) {
+    const l = displayFor(v).label;
+    if (l === "NO FLAGS OBSERVED") dist.noFlags++;
+    else if (l === "CAUTION") dist.caution++;
+    else if (l === "HIGH RISK FLAGS") dist.highRisk++;
+    else dist.insuf++;
+  }
 
   // Curated showcase — each card carries a story the jury can verify:
   // a clean tape, a collapsed-but-liquid survivor, a dead-tape catch.
   const showcaseBySlug = ["brett-base", "ftx-token-ethereum", "titano-bsc"]
-    .map((slug) => snapshots.find((v) => slugFor(v.token.symbol, v.token.platform) === slug))
+    .map((slug) => snapshots.find((v) => slugMap.get(v.id) === slug))
     .filter((v): v is NonNullable<typeof v> => Boolean(v));
   const showcase = [
     ...showcaseBySlug,
@@ -59,7 +69,7 @@ export default function Home() {
   const rows: CaseRow[] = snapshots.map((v) => {
     const st = displayFor(v);
     return {
-      slug: slugFor(v.token.symbol, v.token.platform),
+      slug: slugMap.get(v.id) ?? v.id,
       id: v.id,
       symbol: v.token.symbol,
       name: v.token.name,
@@ -130,18 +140,18 @@ export default function Home() {
         {/* verdict distribution — one honest bar */}
         <div className="mt-8" aria-label="Verdict distribution">
           <div className="flex h-2.5 w-full overflow-hidden rounded-full border border-line">
-            {dist.LAYAK > 0 && <div className="bg-safe" style={{ width: `${(dist.LAYAK / snapshots.length) * 100}%` }} />}
-            {dist.RAWAN > 0 && <div className="bg-warn" style={{ width: `${(dist.RAWAN / snapshots.length) * 100}%` }} />}
-            {dist.JANGAN > 0 && <div className="bg-danger" style={{ width: `${(dist.JANGAN / snapshots.length) * 100}%` }} />}
-            {dist.BELUM_CUKUP_BUKTI > 0 && (
-              <div className="bg-unknown" style={{ width: `${(dist.BELUM_CUKUP_BUKTI / snapshots.length) * 100}%` }} />
+            {dist.noFlags > 0 && <div className="bg-safe" style={{ width: `${(dist.noFlags / snapshots.length) * 100}%` }} />}
+            {dist.caution > 0 && <div className="bg-warn" style={{ width: `${(dist.caution / snapshots.length) * 100}%` }} />}
+            {dist.highRisk > 0 && <div className="bg-danger" style={{ width: `${(dist.highRisk / snapshots.length) * 100}%` }} />}
+            {dist.insuf > 0 && (
+              <div className="bg-unknown" style={{ width: `${(dist.insuf / snapshots.length) * 100}%` }} />
             )}
           </div>
           <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1 font-data text-[10px] uppercase tracking-widest text-dim">
-            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-safe not-italic" />entry-worthy {dist.LAYAK}</span>
-            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-warn not-italic" />caution {dist.RAWAN}</span>
-            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-danger not-italic" />avoid {dist.JANGAN}</span>
-            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-unknown not-italic" />insufficient {dist.BELUM_CUKUP_BUKTI}</span>
+            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-safe not-italic" />no flags {dist.noFlags}</span>
+            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-warn not-italic" />caution {dist.caution}</span>
+            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-danger not-italic" />high risk {dist.highRisk}</span>
+            <span><i className="mr-1.5 inline-block h-2 w-2 rounded-full bg-unknown not-italic" />insufficient {dist.insuf}</span>
           </div>
         </div>
       </section>
@@ -166,7 +176,7 @@ export default function Home() {
         {/* verdict logic — horizontal strip, always visible under the instrument */}
         <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <li className="rounded-md border border-line bg-panel px-4 py-3.5">
-            <span className="stamp stamp-sm text-danger">Avoid</span>
+            <span className="stamp stamp-sm text-danger">High risk flags</span>
             <p className="mt-2.5 text-xs leading-relaxed text-dim">DANGER in SAFETY/FLOW, or liquidity under $1k</p>
           </li>
           <li className="rounded-md border border-line bg-panel px-4 py-3.5">
@@ -174,11 +184,11 @@ export default function Home() {
             <p className="mt-2.5 text-xs leading-relaxed text-dim">DANGER elsewhere, or any WARN flag</p>
           </li>
           <li className="rounded-md border border-line bg-panel px-4 py-3.5">
-            <span className="stamp stamp-sm text-safe">Entry</span>
+            <span className="stamp stamp-sm text-safe">No flags observed</span>
             <p className="mt-2.5 text-xs leading-relaxed text-dim">all four dimensions CLEAN, score ≥ 70</p>
           </li>
           <li className="rounded-md border border-line bg-panel px-4 py-3.5">
-            <span className="stamp stamp-sm text-unknown">Insuf.</span>
+            <span className="stamp stamp-sm text-unknown">Insufficient evidence</span>
             <p className="mt-2.5 text-xs leading-relaxed text-dim">evidence missing — unknown, not zero</p>
           </li>
         </ul>
@@ -196,7 +206,7 @@ export default function Home() {
             {showcase.map((v) => {
               const st = displayFor(v);
               return (
-                <Link key={v.id} href={`/verdict/${slugFor(v.token.symbol, v.token.platform)}`} className="dossier">
+                <Link key={v.id} href={`/verdict/${slugMap.get(v.id) ?? v.id}`} className="dossier">
                   <div className="flex items-start justify-between gap-3">
                     <span className={`stamp stamp-sm ${TEXT[st.tone]}`}>{st.label}</span>
                     <span className="paper-tag">{v.receipts.length} receipts</span>

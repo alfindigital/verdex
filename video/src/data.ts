@@ -97,10 +97,10 @@ export const RECEIPTS: [string, string, string][] = [
 ];
 
 export const STATS: [string, string][] = [
-  ["130", "recorded verdicts on file"],
+  ["301", "recorded verdicts on file"],
   ["9", "chains covered"],
-  ["1,170", "recorded API receipts"],
-  ["12,800", "swap events on file"],
+  ["2,709", "recorded API receipts"],
+  ["29,744", "swap events on file"],
 ];
 
 // Timeline windows (frames @30fps). Shared by every variant so the VO syncs identically.

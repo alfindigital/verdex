@@ -21,7 +21,7 @@ pnpm docs:verify
 pnpm build
 ```
 
-The committed synthetic bundle demonstrates a failed LP source beside healthy pool/swap payloads. It is labelled synthetic and is not a CoinMarketCap incident. Historical snapshots remain v1 archives with receipt hashes; their raw response bodies were not retained.
+The committed synthetic bundle demonstrates a failed LP source beside healthy pool/swap payloads. It is labelled synthetic and is not a CoinMarketCap incident. The 301 committed snapshots carry each source's raw response body (base64) beside its SHA-256, so every receipt can be re-hashed offline.
 
 ## Modes and request contract
 

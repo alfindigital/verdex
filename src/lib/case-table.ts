@@ -33,7 +33,7 @@ export interface CaseFilter {
 export function filterCaseRows(rows: CaseRow[], f: CaseFilter): CaseRow[] {
   const q = f.q?.trim().toLowerCase();
   return rows.filter((r) => {
-    if (f.verdicts && f.verdicts.size > 0 && !f.verdicts.has(r.verdictKey)) return false;
+    if (f.verdicts && f.verdicts.size > 0 && !f.verdicts.has(r.label)) return false;
     if (f.chains && f.chains.size > 0 && !f.chains.has(r.platform.toLowerCase())) return false;
     if (q) {
       const hay = `${r.symbol} ${r.name} ${r.address} ${r.platform}`.toLowerCase();

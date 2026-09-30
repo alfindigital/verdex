@@ -300,11 +300,11 @@ export const TL_EPSILON = {
   s05: { from: 1698, dur: 402 },
   s06: { from: 2100, dur: 416 },
   s07: { from: 2516, dur: 327 },
-  s08: { from: 2843, dur: 377 },
-  s09: { from: 3220, dur: 468 },
-  s10: { from: 3688, dur: 228 },
+  s08: { from: 2843, dur: 403 },
+  s09: { from: 3246, dur: 468 },
+  s10: { from: 3714, dur: 228 },
 } as const;
-export const TL_EPSILON_TOTAL = 3916;
+export const TL_EPSILON_TOTAL = 3942;
 
 const VO = 'vo-epsilon';
 const scenes = [E01, E02, E03, E04, E05, E06, E07, E08, E09, E10];

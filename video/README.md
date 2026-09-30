@@ -29,7 +29,7 @@ All numbers on screen come from the committed snapshot corpus (`video/src/data.t
 
 Earlier generations (`VerdexAlpha/Beta/Gamma`, `VerdexA–D`, `VerdexDemo`) remain registered for comparison; pick one final cut for submission.
 
-Note: all five variants were re-rendered on rules 2.3.0 data (2026-09-30) — corpus 130 records / 9 chains / 1,170 receipts / 12,800 swaps, CEL dead-tape exhibit replaces the retired SUSHI/GMX JANGAN case (both are CAUTION under 2.3.0). Delta moved from ElevenLabs/Charlie to edge-tts GuyNeural so every variant shares one VO pipeline (`scripts/gen-vo-new.py` → `scripts/probe-tl.py` regenerates TL_* windows from real durations).
+Note: all five variants were re-rendered on rules 2.3.0 data (2026-09-30) — corpus 301 records / 9 chains / 2,709 receipts / 29,744 swaps, CEL dead-tape exhibit replaces the retired SUSHI/GMX JANGAN case (both are CAUTION under 2.3.0). Delta moved from ElevenLabs/Charlie to edge-tts GuyNeural so every variant shares one VO pipeline (`scripts/gen-vo-new.py` → `scripts/probe-tl.py` regenerates TL_* windows from real durations).
 
 ## Commands
 

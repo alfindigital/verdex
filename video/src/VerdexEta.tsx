@@ -260,10 +260,10 @@ export const TL_ETA = {
   s05: { from: 1066, dur: 255 },
   s06: { from: 1321, dur: 335 },
   s07: { from: 1656, dur: 332 },
-  s08: { from: 1988, dur: 206 },
-  s09: { from: 2194, dur: 187 },
+  s08: { from: 1988, dur: 215 },
+  s09: { from: 2203, dur: 187 },
 } as const;
-export const TL_ETA_TOTAL = 2381;
+export const TL_ETA_TOTAL = 2390;
 
 const VO = 'vo-eta';
 const scenes = [T01, T02, T03, T04, T05, T06, T07, T08, T09];

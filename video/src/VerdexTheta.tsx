@@ -293,10 +293,10 @@ export const TL_THETA = {
   s05: { from: 1162, dur: 170 },
   s06: { from: 1332, dur: 237 },
   s07: { from: 1569, dur: 260 },
-  s08: { from: 1829, dur: 195 },
-  s09: { from: 2024, dur: 152 },
+  s08: { from: 1829, dur: 194 },
+  s09: { from: 2023, dur: 152 },
 } as const;
-export const TL_THETA_TOTAL = 2176;
+export const TL_THETA_TOTAL = 2175;
 
 const VO = 'vo-theta';
 const scenes = [H01, H02, H03, H04, H05, H06, H07, H08, H09];

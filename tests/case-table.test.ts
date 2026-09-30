@@ -9,9 +9,9 @@ const row = (over: Partial<CaseRow>): CaseRow => ({
 });
 
 const corpus: CaseRow[] = [
-  row({ symbol: "AAA", verdictKey: "LAYAK", score: 90, mcapUsd: 5_000_000, netUsd: 100 }),
-  row({ symbol: "BBB", name: "Beta", platform: "solana", verdictKey: "JANGAN", score: 30, mcapUsd: null, netUsd: -500 }),
-  row({ symbol: "CCC", name: "Gamma", platform: "base", verdictKey: "RAWAN", score: 60, mcapUsd: 800_000, netUsd: 0 }),
+  row({ symbol: "AAA", verdictKey: "LAYAK", label: "NO FLAGS OBSERVED", score: 90, mcapUsd: 5_000_000, netUsd: 100 }),
+  row({ symbol: "BBB", name: "Beta", platform: "solana", verdictKey: "JANGAN", label: "HIGH RISK FLAGS", tone: "danger", score: 30, mcapUsd: null, netUsd: -500 }),
+  row({ symbol: "CCC", name: "Gamma", platform: "base", verdictKey: "RAWAN", label: "CAUTION", tone: "warn", score: 60, mcapUsd: 800_000, netUsd: 0 }),
 ];
 
 describe("filterCaseRows", () => {
@@ -19,8 +19,8 @@ describe("filterCaseRows", () => {
     expect(filterCaseRows(corpus, {})).toHaveLength(3);
   });
 
-  it("filters by verdict keys", () => {
-    const out = filterCaseRows(corpus, { verdicts: new Set(["JANGAN"]) });
+  it("filters by displayed verdict labels", () => {
+    const out = filterCaseRows(corpus, { verdicts: new Set(["HIGH RISK FLAGS"]) });
     expect(out).toHaveLength(1);
     expect(out[0].symbol).toBe("BBB");
   });
@@ -39,7 +39,7 @@ describe("filterCaseRows", () => {
   });
 
   it("combines filters as AND", () => {
-    const out = filterCaseRows(corpus, { verdicts: new Set(["RAWAN", "JANGAN"]), chains: new Set(["solana"]) });
+    const out = filterCaseRows(corpus, { verdicts: new Set(["CAUTION", "HIGH RISK FLAGS"]), chains: new Set(["solana"]) });
     expect(out).toHaveLength(1);
     expect(out[0].symbol).toBe("BBB");
   });

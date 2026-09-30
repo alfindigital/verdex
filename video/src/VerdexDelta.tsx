@@ -342,7 +342,7 @@ const D08: React.FC = () => {
           ))}
         </div>
       </Tape>
-      <HashTicker text="130verdicts1170receipts9chains12800swaps" />
+      <HashTicker text="301verdicts2709receipts9chains29744swaps" />
     </Base>
   );
 };
@@ -378,10 +378,10 @@ export const TL_DELTA = {
   s05: { from: 960, dur: 288 },
   s06: { from: 1248, dur: 423 },
   s07: { from: 1671, dur: 363 },
-  s08: { from: 2034, dur: 331 },
-  s09: { from: 2365, dur: 193 },
+  s08: { from: 2034, dur: 332 },
+  s09: { from: 2366, dur: 193 },
 } as const;
-export const TL_DELTA_TOTAL = 2558;
+export const TL_DELTA_TOTAL = 2559;
 
 const VO = 'vo-delta';
 const VOTimes: [number, number][] = [

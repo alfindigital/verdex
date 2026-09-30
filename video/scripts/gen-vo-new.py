@@ -2,8 +2,8 @@
 """Generate VO for all 5 Remotion variants via edge-tts.
 
 Refresh 2026-09-30 (rules 2.3.0): every number below is re-derived from the
-current committed snapshot corpus — 130 records, 9 chains, 1,170 receipts,
-12,800 swap events, label dist 86 caution / 33 high-risk / 9 insufficient / 2
+current committed snapshot corpus — 301 records, 9 chains, 2,709 receipts,
+29,744 swap events, label dist 190 caution / 103 high-risk / 6 insufficient / 2
 clean. SUSHI/GMX are no longer JANGAN under 2.3.0, so the JANGAN exhibit is
 now CEL (dead tape, 13.1 swaps/day) and TITANO (dust liquidity, score 0).
 
@@ -24,7 +24,7 @@ SCRIPTS = {
         "Exhibit one: RAY on Solana. Score eighty-five. But five wallets hold ninety-two percent of the tape — the stamp reads caution.",
         "Exhibit two: CEL — a collapsed lender's token that still trades. Thirteen swaps a day across an eight-day window. Dead tape. Score forty-five. The stamp reads high-risk flags.",
         "The honesty line: missing shows as unknown — never zero. Truncated downgrades coverage. Replays are labeled. The AI is a second voice, never the rules.",
-        "The ledger so far: a hundred thirty verdicts. Nine chains. Eleven hundred seventy receipts. Twelve thousand eight hundred swaps on file.",
+        "The ledger so far: three hundred one verdicts. Nine chains. Over twenty-seven hundred receipts. Nearly thirty thousand swaps on file.",
         "If you can't hash it, it didn't happen. Verdex — don't be the exit liquidity.",
     ]),
     "vo-epsilon": ("en-US-ChristopherNeural", "+8%", [
@@ -35,7 +35,7 @@ SCRIPTS = {
         "Exhibit B: CEL. A collapsed lender's token, still listed. Thirteen swaps a day — a hundred percent of the tape in five wallets. The stamp reads high-risk flags.",
         "Exhibit C: TITANO on BSC. Zero dollars of pool depth. Zero swaps observed. An exit that does not exist. High-risk flags — score zero.",
         "Chain of custody, on paper: nine endpoints, nine bodies, nine SHA-256 hashes. You can re-verify every byte yourself.",
-        "On the record: a hundred thirty verdicts. Nine chains. Eleven hundred seventy receipts. Eighty-six cautions, thirty-three high-risk, nine insufficient.",
+        "On the record: three hundred one verdicts. Nine chains. Over twenty-seven hundred receipts. One hundred ninety cautions, one hundred three high-risk, six insufficient.",
         "Disclosures, before you trust it: missing data shows as unknown — never zero. Truncated windows downgrade coverage. A replayed verdict is labeled a replay. The AI is a second voice — never the rulebook.",
         "Verdicts you can audit. Not vibes you can buy. Verdex — don't be the exit liquidity.",
     ]),
@@ -48,7 +48,7 @@ SCRIPTS = {
         "The stamp: caution. Coverage is limited — the hundred-row swap cap is disclosed, not hidden.",
         "CEL — a different answer from the same instrument. A collapsed lender's token: thirteen swaps a day, five wallets holding the whole tape.",
         "High-risk flags. Score forty-five. The second opinion leaned risky too — and that agreement is printed.",
-        "A hundred thirty verdicts on file. Nine chains. Eleven hundred seventy receipts. A ledger, not a blog post.",
+        "Three hundred one verdicts on file. Nine chains. Over twenty-seven hundred receipts. A ledger, not a blog post.",
         "The machine doesn't guess. It measures, hashes, and labels. Verdex — don't be the exit liquidity.",
     ]),
     "vo-eta": ("en-US-AriaNeural", "+10%", [
@@ -59,7 +59,7 @@ SCRIPTS = {
         "That row: twenty-three makers, ninety-two percent of the tape. When five wallets own the flow, your exit is their decision.",
         "CEL stamps high-risk flags. Score forty-five. A collapsed lender's token — thirteen swaps a day. The tape was already dead.",
         "The tape rules: missing shows as unknown. Truncated downgrades coverage. Replayed is labeled. The second opinion never writes the rules.",
-        "The ledger so far: a hundred thirty verdicts, nine chains, eleven hundred seventy receipts on file.",
+        "The ledger so far: three hundred one verdicts, nine chains, over twenty-seven hundred receipts on file.",
         "Read the tape before the tape reads you. Verdex — don't be the exit liquidity.",
     ]),
     "vo-theta": ("en-US-AndrewNeural", "+9%", [
@@ -70,7 +70,7 @@ SCRIPTS = {
         "High-risk flags. Score forty-five. The brand didn't save it — the dead tape sank it.",
         "The honest version matters just as much: missing data shows unknown, thin windows show limited, replays show replayed.",
         "The method, flat out: resolve the identity. Pull nine endpoints. Measure four dimensions. Stamp the verdict with a named falsifier.",
-        "A hundred thirty verdicts. Nine chains. Eleven hundred seventy receipts. Every number on file.",
+        "Three hundred one verdicts. Nine chains. Over twenty-seven hundred receipts. Every number on file.",
         "Trust the badge — or check the record. Verdex — don't be the exit liquidity.",
     ]),
 }

@@ -48,10 +48,11 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
   const verdictFacets = useMemo(() => {
     const m = new Map<string, { label: string; tone: string; n: number }>();
     for (const r of rows) {
-      const cur = m.get(r.verdictKey);
-      m.set(r.verdictKey, { label: r.label, tone: r.tone, n: (cur?.n ?? 0) + 1 });
+      const cur = m.get(r.label);
+      m.set(r.label, { label: r.label, tone: r.tone, n: (cur?.n ?? 0) + 1 });
     }
-    return [...m.entries()];
+    const order = { safe: 0, warn: 1, danger: 2, unknown: 3 } as Record<string, number>;
+    return [...m.entries()].sort((a, b) => (order[a[1].tone] ?? 9) - (order[b[1].tone] ?? 9));
   }, [rows]);
 
   const chainFacets = useMemo(() => [...new Set(rows.map((r) => r.platform.toLowerCase()))].sort(), [rows]);

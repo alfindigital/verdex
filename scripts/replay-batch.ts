@@ -13,7 +13,7 @@ import { sourceEvidenceFromBody, verifyBundle, type EvidenceBundle } from "../sr
 import { CmcError } from "../src/lib/cmc-client";
 import { tokenIdentity } from "../src/lib/address";
 import type { DexClient } from "../src/lib/dex";
-import { slugFor } from "../src/lib/verdict-store";
+import { buildSlugMap } from "../src/lib/verdict-store";
 import type { SourceEvidence } from "../src/lib/verdict-types";
 
 interface CapturedSource {
@@ -165,9 +165,14 @@ async function main() {
   for (const f of readdirSync(snapDir)) {
     if (/^[a-f0-9]{12}\.json$/.test(f) && !keep.has(f)) rmSync(path.join(snapDir, f));
   }
-  // Rebuild slug index.
+  // Rebuild slug index — collision-aware: same symbol+platform on different
+  // addresses keeps the clean slug for the highest-mcap record only.
   const index: Record<string, string> = {};
-  for (const { rec } of best.values()) index[slugFor(rec.token.symbol, rec.token.platform)] = rec.id;
+  const slugMap = buildSlugMap([...best.values()].map((b) => b.rec));
+  for (const { rec } of best.values()) {
+    const slug = slugMap.get(rec.id);
+    if (slug) index[slug] = rec.id;
+  }
   writeFileSync(path.join(snapDir, "index.json"), JSON.stringify(index, null, 2) + "\n");
   const byChain = new Map<string, number>();
   const byVerdict = new Map<string, number>();

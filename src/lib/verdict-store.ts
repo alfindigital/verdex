@@ -20,6 +20,34 @@ export function slugFor(symbol: string, platform: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+/**
+ * Collision-aware slug assignment over a set of verdict records. Two distinct
+ * token identities can share a base slug (e.g. "WIF" and "$WIF" on Solana) —
+ * the highest-mcap record keeps the clean slug, the others get a
+ * `-<addr6>` suffix so every row links to its own verdict.
+ */
+export function buildSlugMap(records: VerdictRecord[]): Map<string, string> {
+  const groups = new Map<string, VerdictRecord[]>();
+  for (const r of records) {
+    const base = slugFor(r.token.symbol ?? "", r.token.platform ?? "");
+    if (!base) continue;
+    const g = groups.get(base) ?? [];
+    g.push(r);
+    groups.set(base, g);
+  }
+  const map = new Map<string, string>();
+  for (const [base, rs] of groups) {
+    const sorted = [...rs].sort(
+      (a, b) => (b.token.mcapUsd ?? 0) - (a.token.mcapUsd ?? 0) || a.id.localeCompare(b.id),
+    );
+    map.set(sorted[0].id, base);
+    for (const r of sorted.slice(1)) {
+      map.set(r.id, `${base}-${(r.token.address ?? r.id).slice(0, 6).toLowerCase()}`);
+    }
+  }
+  return map;
+}
+
 function slugToId(slug: string): string | null {
   const file = path.join(snapshotDir, "index.json");
   if (!existsSync(file)) return null;
