@@ -106,9 +106,9 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="filter symbol / name / address…"
+          placeholder="filter…"
           aria-label="Filter records"
-          className="ml-auto min-w-44 rounded-sm border border-line bg-ink px-2.5 py-1.5 font-data text-[11px] text-text caret-accent placeholder:text-dim focus:border-accent focus:outline-none"
+          className="ml-auto w-32 min-w-32 rounded-sm border border-line bg-ink px-2.5 py-1.5 font-data text-[11px] text-text caret-accent placeholder:text-dim focus:w-44 focus:border-accent focus:outline-none transition-[width]"
         />
       </div>
 
