@@ -63,18 +63,26 @@ baru berlaku saat outflow material (<−0.10), DANGER saat <−0.30.
 
 ## Labeled-set evaluation (jujur, kecil — indikasi bukan bukti statistik)
 
-`scripts/eval-verdicts.ts` menguji corpus terhadap ground truth publik:
-4 token kolaps/mati (TITANO, VGX, FTT, CEL) harus gagal; 12 token major
-(AAVE, UNI, LINK, MKR, COMP, SNX, CRV, LDO, OP, ARB, GRT, ENS) tidak boleh
-AVOID. Hasil pada `rulesVersion 2.2.0`:
+`scripts/eval-verdicts.ts` menguji corpus terhadap ground truth publik —
+**59 label dalam 3 kelas**: 6 dead (harus JANGAN), 7 faded/zombie (tidak
+boleh LAYAK — stamp hijau pada zombie adalah miss terburuk), dan 46 majors
+mapan (tidak boleh JANGAN). Hasil pada `rulesVersion 2.2.0`:
 
-- Token mati tertangkap JANGAN: **2/4** (TITANO liq $0, VGX liq $2 — keduanya
-  lewat dust-depth rule baru, score 0).
-- Soft-flag RAWAN: **2/4** — FTT ($140k) dan CEL ($66k) masih punya
-  likuiditas nyata; collapse ≠ untradeable, jadi CAUTION dipertahankan.
-  Ini batas jujur: rules mengukur tape sekarang, bukan reputasi proyek.
-- False-positive pada majors: **0/12** — tidak ada AVOID pada token sehat;
-  majors terlihat RAWAN/BELUM karena tape DEX mereka padat-arsip, bukan scam.
+- Dead tertangkap JANGAN: **3/6** (TITANO $0, VGX $2, NORMIE exploit).
+- Dead soft-flag RAWAN: **3/6** — FTT ($127k), CEL ($66k), FEI masih punya
+  likuiditas nyata; collapse ≠ untradeable. Batas jujur: rules mengukur
+  tape sekarang, bukan reputasi proyek.
+- Faded flagged (tidak hijau): **7/7** — HOGE, DFYN, MBOX, CHEEMS, BODEN,
+  MICHI, WEN semuanya RAWAN; nol zombie dapat ENTRY-WORTHY.
+- Major false-positive (AVOID): **3/46** — SNX-Optimism, COW-Gnosis,
+  VELO-Optimism ketembak FLOW-DANGER (insider-tape: top5>0.7 + makers<20).
+  Polanya jelas: venue L2/sidechain tipis di mana tape memang terkonsentrasi
+  pada sedikit maker secara struktural — konsentrasi di chain tipis ≠
+  manipulasi. Tercatat sebagai miss nyata, bukan disembunyikan.
+- Majors ENTRY-WORTHY: **0/46** — gate LAYAK sangat strict (semua dim bersih);
+  majors mendapat RAWAN karena tape DEX padat-arsip mereka menembak
+  threshold FLOW, bukan karena scam. Trade-off disengaja; sensitivitas
+  masih bisa dinaikkan tapi presisi menurun.
 - Receipt membuktikan reproduksibilitas, bukan kebenaran prediksi — belum
   ada outcome follow-up 24h/7d (semua capture 30 Sep 2026).
 
