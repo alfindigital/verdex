@@ -136,6 +136,10 @@ describe("evalLiquidity", () => {
   it("clean otherwise", () => {
     expect(evalLiquidity(lm({})).level).toBe("CLEAN");
   });
+  it("dust depth (<$1k) is DANGER — pools exist but exit is impossible", () => {
+    expect(evalLiquidity(lm({ totalLiqUsd: 500 })).level).toBe("DANGER");
+    expect(evalLiquidityV2(lm({ totalLiqUsd: 0 })).level).toBe("DANGER");
+  });
   it("V2 leaves unknown pool mapping unavailable", () => {
     const l = lm({ maxSinglePullPct: 0, removalVsCurrentDepth: null });
     expect(evalLiquidityV2(l).metrics.find((row) => row.name === "removalVsCurrentDepth")?.level).toBe("INSUFFICIENT");
@@ -169,6 +173,12 @@ describe("composite", () => {
   it("JANGAN when SAFETY or FLOW is DANGER (danger dominates insufficient)", () => {
     expect(composite(input({ safety: sm({ hits: ["honeypot"] }), pump: pm({ volMcapRatio: null }) })).verdict).toBe("JANGAN");
     expect(composite(input({ flow: fm({ thirdPartySells: 0 }) })).verdict).toBe("JANGAN");
+  });
+  it("JANGAN on dust liquidity — untradeable is honeypot-class severity", () => {
+    // TITANO regression: $0 depth across pools must not read as mere CAUTION.
+    const r = composite(input({ liq: lm({ totalLiqUsd: 0 }) }));
+    expect(r.verdict).toBe("JANGAN");
+    expect(composite(input({ liq: lm({ totalLiqUsd: 999 }) })).verdict).toBe("JANGAN");
   });
   it("RAWAN when LIQ/PUMP danger or ≥2 WARN", () => {
     expect(composite(input({ liq: lm({ maxSinglePullPct: 0.6 }) })).verdict).toBe("RAWAN");

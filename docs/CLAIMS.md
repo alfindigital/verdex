@@ -11,7 +11,7 @@ gray zone selalu menghasilkan `BELUM_CUKUP_BUKTI`, bukan tebakan.
 ## V2 evidence contract (2026-09-29)
 
 The legacy rules below remain attached to historical v1 snapshots. New V2
-records use `schemaVersion: 2` and `rulesVersion: 2.1.0`:
+records use `schemaVersion: 2` and `rulesVersion: 2.2.0`:
 
 - `observedSellMakers` means distinct maker identities observed in valid sell
   rows after pool/creator/owner exclusions. It is not a claim of independent
@@ -61,6 +61,29 @@ share besar dengan banyak maker unik lebih tepat dibaca whale/MM flow, bukan
 insider tape. `netBuyRatio` di bawah nol tipis adalah hari merah biasa; WARN
 baru berlaku saat outflow material (<−0.10), DANGER saat <−0.30.
 
+## Labeled-set evaluation (jujur, kecil — indikasi bukan bukti statistik)
+
+`scripts/eval-verdicts.ts` menguji corpus terhadap ground truth publik:
+4 token kolaps/mati (TITANO, VGX, FTT, CEL) harus gagal; 12 token major
+(AAVE, UNI, LINK, MKR, COMP, SNX, CRV, LDO, OP, ARB, GRT, ENS) tidak boleh
+AVOID. Hasil pada `rulesVersion 2.2.0`:
+
+- Token mati tertangkap JANGAN: **2/4** (TITANO liq $0, VGX liq $2 — keduanya
+  lewat dust-depth rule baru, score 0).
+- Soft-flag RAWAN: **2/4** — FTT ($140k) dan CEL ($66k) masih punya
+  likuiditas nyata; collapse ≠ untradeable, jadi CAUTION dipertahankan.
+  Ini batas jujur: rules mengukur tape sekarang, bukan reputasi proyek.
+- False-positive pada majors: **0/12** — tidak ada AVOID pada token sehat;
+  majors terlihat RAWAN/BELUM karena tape DEX mereka padat-arsip, bukan scam.
+- Receipt membuktikan reproduksibilitas, bukan kebenaran prediksi — belum
+  ada outcome follow-up 24h/7d (semua capture 30 Sep 2026).
+
+Kalibrasi `rulesVersion 2.2.0` (2026-09-30): `totalLiqUsd <$1k` naik dari
+WARN ke DANGER dan dieskalasikan ke JANGAN — pool yang ada tapi berkedalaman
+nol membuat exit mustahil apa pun status kontraknya (kasus: TITANO $0,
+VGX $2). LP-pull dan net-outflow DANGER tetap RAWAN: itu risiko potensial,
+bukan ketidakmungkinan exit saat ini.
+
 Dimensi = worst-of metrics; `swaps < 50` → INSUFFICIENT.
 
 **Mature-asset tier (published):** token dengan `mcapUsd ≥ $100M` diperdagangkan
@@ -78,7 +101,7 @@ continuum.
 |---|---|---|---|
 | `netLpDelta` (adds − removes, USD) | ≥0 | −10%..0 | <−10% total liq |
 | `maxSinglePullPct` (remove terbesar vs **pool yang ditarik**; pool tak dikenal → total liq) | <15% | 15–50% | >50% |
-| `totalLiqUsd` | ≥$10k | <$10k | — |
+| `totalLiqUsd` | ≥$10k | <$10k | **<$1k dust** (exit mustahil — pools ada tapi kosong) |
 | `poolCount` | ≥1 valid pool | — | 0 → INSUFFICIENT |
 
 ## PUMP (sumber: `dex/search` stats + `dex/tokens/transactions` + market ctx)
@@ -96,8 +119,8 @@ Dievaluasi **berurutan** (proven red flag mengalahkan data yang hilang —
 
 | Kondisi | Verdict |
 |---|---|
-| Ada `DANGER` di SAFETY atau FLOW | **JANGAN** |
-| Ada `DANGER` di LIQUIDITY/PUMP, atau ≥2 WARN | **RAWAN** |
+| Ada `DANGER` di SAFETY atau FLOW, **atau LIQUIDITY `totalLiqUsd` DANGER** (`<$1k` — token secara praktis tidak bisa dijual, sekelas outcome honeypot) | **JANGAN** |
+| Ada `DANGER` di LIQUIDITY/PUMP (selain dust depth), atau ≥2 WARN | **RAWAN** |
 | Salah satu dimensi `INSUFFICIENT` (tanpa DANGER & <2 WARN) | **BELUM_CUKUP_BUKTI** |
 | Semua CLEAN (`warns=0`) dan score ≥70 | **LAYAK** |
 | Lainnya (mis. tepat 1 WARN) | **RAWAN** |

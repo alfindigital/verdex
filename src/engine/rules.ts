@@ -51,6 +51,9 @@ export const THRESHOLDS = {
   top5DangerMakersCap: 20,
   maxSinglePullPct: { warn: 0.15, danger: 0.5 },
   netLpDeltaPct: { warn: 0, danger: -0.1 },
+  // Depth under this is de-facto untradeable — exit impossible regardless of
+  // contract flags, so it escalates to AVOID like a honeypot outcome.
+  dustLiqUsd: 1_000,
   volMcapRatio: { warn: 0.5, danger: 1.0 },
   makersPer100k: { warn: 5, danger: 1 },
   netBuyRatio: { warn: -0.1, danger: -0.3 },
@@ -133,7 +136,7 @@ export function evalLiquidity(l: LiquidityMetrics): SubVerdict {
   const rows: MetricRow[] = [
     lvl("maxSinglePullPct", round2(l.maxSinglePullPct), "<15%", l.maxSinglePullPct > THRESHOLDS.maxSinglePullPct.danger ? "DANGER" : l.maxSinglePullPct >= THRESHOLDS.maxSinglePullPct.warn ? "WARN" : "CLEAN"),
     lvl("netLpDeltaPct", round2(lpDeltaPct), "≥0", lpDeltaPct < THRESHOLDS.netLpDeltaPct.danger ? "DANGER" : lpDeltaPct < THRESHOLDS.netLpDeltaPct.warn ? "WARN" : "CLEAN"),
-    lvl("totalLiqUsd", Math.round(l.totalLiqUsd), "≥$10k", l.totalLiqUsd < 10_000 ? "WARN" : "CLEAN"),
+    lvl("totalLiqUsd", Math.round(l.totalLiqUsd), "≥$10k (<$1k dust = danger)", l.totalLiqUsd < THRESHOLDS.dustLiqUsd ? "DANGER" : l.totalLiqUsd < 10_000 ? "WARN" : "CLEAN"),
   ];
   return { dim: "LIQUIDITY", level: worst(rows), metrics: rows };
 }
@@ -145,7 +148,7 @@ export function evalLiquidityV2(l: LiquidityMetrics): SubVerdict {
   const rows: MetricRow[] = [
     lvl("removalVsCurrentDepth", removal === null ? "unknown" : round2(removal), "<15% of mapped pool depth", removal === null ? "INSUFFICIENT" : removal > THRESHOLDS.maxSinglePullPct.danger ? "DANGER" : removal >= THRESHOLDS.maxSinglePullPct.warn ? "WARN" : "CLEAN"),
     lvl("netLpDeltaPct", lpDeltaPct === null ? "unknown" : round2(lpDeltaPct), "≥0", lpDeltaPct === null ? "INSUFFICIENT" : lpDeltaPct < THRESHOLDS.netLpDeltaPct.danger ? "DANGER" : lpDeltaPct < THRESHOLDS.netLpDeltaPct.warn ? "WARN" : "CLEAN"),
-    lvl("totalLiqUsd", Math.round(l.totalLiqUsd), "≥$10k", l.totalLiqUsd < 10_000 ? "WARN" : "CLEAN"),
+    lvl("totalLiqUsd", Math.round(l.totalLiqUsd), "≥$10k (<$1k dust = danger)", l.totalLiqUsd < THRESHOLDS.dustLiqUsd ? "DANGER" : l.totalLiqUsd < 10_000 ? "WARN" : "CLEAN"),
   ];
   return { dim: "LIQUIDITY", level: worst(rows), metrics: rows };
 }
@@ -173,11 +176,15 @@ export function composite(i: EngineInput): CompositeResult {
   const insuf = levels.filter((l) => l === "INSUFFICIENT").length;
 
   const safetyOrFlowDanger = subs.filter((s) => (s.dim === "SAFETY" || s.dim === "FLOW") && s.level === "DANGER").length;
+  // Dust-depth liquidity is an exit-impossibility signal — same severity class
+  // as a honeypot outcome even when the contract itself reports clean.
+  const untradeable =
+    subs.find((s) => s.dim === "LIQUIDITY")?.metrics.some((m) => m.name === "totalLiqUsd" && m.level === "DANGER") ?? false;
 
   const score = Math.max(0, Math.min(100, 100 - dangers * 40 - warns * 15 - insuf * 25));
 
   let verdict: VerdictLevel;
-  if (safetyOrFlowDanger > 0) verdict = "JANGAN";
+  if (safetyOrFlowDanger > 0 || untradeable) verdict = "JANGAN";
   else if (dangers > 0 || warns >= 2) verdict = "RAWAN";
   else if (insuf > 0) verdict = "BELUM_CUKUP_BUKTI";
   else if (warns === 0 && score >= 70) verdict = "LAYAK"; // CLAIMS: all CLEAN

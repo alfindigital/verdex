@@ -170,7 +170,7 @@ export default function Home() {
           <ul className="space-y-3 p-4 sm:p-5">
             <li className="flex items-baseline gap-3">
               <span className="stamp stamp-sm shrink-0 text-danger">Avoid</span>
-              <span className="text-xs leading-relaxed text-dim">DANGER-level evidence in SAFETY or FLOW</span>
+              <span className="text-xs leading-relaxed text-dim">DANGER in SAFETY/FLOW, or liquidity under $1k (untradeable)</span>
             </li>
             <li className="flex items-baseline gap-3">
               <span className="stamp stamp-sm shrink-0 text-warn">Caution</span>

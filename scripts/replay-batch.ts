@@ -8,6 +8,7 @@ import { createHash } from "crypto";
 import { mkdirSync, readFileSync, writeFileSync, readdirSync, existsSync } from "fs";
 import path from "path";
 import { analyze } from "../src/engine/analyze";
+import { jevCrossExamine } from "../src/lib/jev";
 import { sourceEvidenceFromBody, verifyBundle, type EvidenceBundle } from "../src/engine/evidence";
 import { CmcError } from "../src/lib/cmc-client";
 import { tokenIdentity } from "../src/lib/address";
@@ -68,6 +69,18 @@ function better(a: any, b: any): boolean {
 }
 
 async function main() {
+  // .env.local — never logs values; only fills keys that are absent.
+  try {
+    for (const line of readFileSync(path.join(process.cwd(), ".env.local"), "utf8").split(/\r?\n/)) {
+      const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
+      if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim();
+    }
+  } catch { /* no .env.local — jev stays stubbed unless key is in env */ }
+
+  const FORCE = process.argv.includes("--force");
+  const JEV = process.argv.includes("--jev") && Boolean(process.env.GROQ_API_KEY);
+  if (process.argv.includes("--jev") && !JEV) console.log("note: --jev given but GROQ_API_KEY unset — jev stays stubbed");
+
   const capDir = path.resolve("data/captures");
   const bundleDir = path.resolve("data/bundles");
   const snapDir = path.resolve("snapshots");
@@ -78,14 +91,14 @@ async function main() {
   let replayed = 0, skippedBundle = 0, failed = 0;
   for (const file of captures) {
     const bundlePath = path.join(bundleDir, file);
-    if (existsSync(bundlePath)) { skippedBundle++; continue; }
+    if (!FORCE && existsSync(bundlePath)) { skippedBundle++; continue; }
     try {
       const capture = JSON.parse(readFileSync(path.join(capDir, file), "utf8")) as CaptureFile;
       if (capture.schemaVersion !== 1 || !Array.isArray(capture.sources)) throw new Error("bad capture schema");
       const capturedMs = Date.parse(capture.capturedAt);
       const result = await analyze(replayClient(capture), { query: capture.address, platform: capture.platform }, {
         now: () => capturedMs,
-        jev: async () => ({ available: false, riskyProb: null }),
+        jev: JEV ? jevCrossExamine : async () => ({ available: false, riskyProb: null }),
         narrate: async () => undefined,
       });
       if (result.kind !== "verdict") { console.log(`[skip] ${file}: kind=${result.kind}`); failed++; continue; }
