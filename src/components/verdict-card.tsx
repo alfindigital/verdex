@@ -352,7 +352,7 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
         <span className={`chip ${coverage === "sufficient" ? "" : "on"}`} style={coverage === "sufficient" ? { borderColor: "var(--color-safe)", color: "var(--color-safe)" } : { borderColor: "var(--color-warn)", color: "var(--color-warn)" }}>
           coverage: {coverage}
         </span>
-        <span>captured {new Date(v.computedAt ?? v.ts).toISOString().slice(0, 16).replace("T", " ")}Z · {age(v.computedAt ?? v.ts)}</span>
+        <span suppressHydrationWarning>captured {new Date(v.computedAt ?? v.ts).toISOString().slice(0, 16).replace("T", " ")}Z · {age(v.computedAt ?? v.ts)}</span>
         <span className="ml-auto">{rawEvidence ? "raw bodies available" : <span className="redact px-2">raw source bodies not retained</span>}</span>
       </div>
 
