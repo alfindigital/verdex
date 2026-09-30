@@ -63,7 +63,7 @@ export default async function VerdictPage({ params }: { params: Promise<{ id: st
       </header>
       <VerdictCard v={v} />
       <p className="mt-6 text-center font-data text-[10px] uppercase tracking-widest text-dim">
-        deterministic rules · second opinion labeled · not financial advice
+        deterministic verdict · not financial advice
       </p>
     </main>
   );

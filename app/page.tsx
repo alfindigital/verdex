@@ -279,8 +279,8 @@ export default function Home() {
       </section>
 
       <footer className="mt-16 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 font-data text-[10px] uppercase tracking-widest text-dim">
-        <span>deterministic rules · second-opinion model · not financial advice</span>
-        <span>build with cmc hackathon · markets &amp; trading tools</span>
+        <span>evidence over vibes</span>
+        <span>not financial advice</span>
       </footer>
     </main>
   );
