@@ -11,20 +11,22 @@ This file is a truthful copy pack. URLs that require a user action remain explic
 | Category | Markets and Trading Tools |
 | GitHub | `https://github.com/alfindigital/verdex` — verify public visibility before submitting |
 | Project website | **`https://verdex.web.id`** — live HTTPS 200, canonical (Cloudflare DNS → Vercel); `verdex-alpha.vercel.app` remains working alias |
-| Demo video | **not published** — 5 new rendered candidates in `video/out/`: `verdex-delta-receipt-ticker.mp4` (~105s), `verdex-epsilon-case-file.mp4` (~128s), `verdex-zeta-the-scan.mp4` (~89s), `verdex-eta-market-tape.mp4` (~78s), `verdex-theta-before-after.mp4` (~70s); pick one, owner uploads to YouTube. Legacy: `verdex-B-evidencetape.mp4` (90s) + `verdex-alpha/beta/gamma-*.mp4` |
+| Demo video | **not published** — 5 re-rendered candidates in `video/out/` (rules 2.3.0 data, fresh VO): `verdex-delta-receipt-ticker.mp4` (~85s, flagship receipt-tape), `verdex-theta-before-after.mp4` (~73s, contract-check vs behavior split-screen), `verdex-eta-market-tape.mp4` (~79s), `verdex-zeta-the-scan.mp4` (~91s), `verdex-epsilon-case-file.mp4` (~131s); pick one, owner uploads to YouTube. Legacy renders retained for comparison |
 | Social link | **not published** — post only after the BUIDL URL and video URL exist |
 | Logo | `public/logo.png` — concept **A "Verdict Scanner"** chosen (teal geometric V on paper); verify PNG/JPEG size is under 2 MB in the DoraHacks form; 7 alternates preserved in `public/logo-concepts/` |
 | Track | Markets and Trading Tools |
 
 ## Paste-ready description
 
-Verdex is a pre-trade DEX evidence reader. A trader enters a token ticker or address and chooses the exact chain when search is ambiguous. CoinMarketCap DEX responses are parsed into four dimensions: SAFETY, FLOW, LIQUIDITY, and PUMP. The result shows observed maker concentration, observed sell makers, provider-reported security fields, LP evidence status, coverage age, three next checks, and the receipts needed to review the calculation.
+Verdex is a pre-trade DEX evidence desk. A trader enters a ticker or address and chooses the exact chain when the ticker is ambiguous. Nine CoinMarketCap endpoints are pulled per scan — search, transactions, pools, LP changes, security detail, token metadata, and macro context — and every raw response body is frozen with a SHA-256 receipt.
 
-Verdex uses deterministic rules for the verdict. Jev and narration are optional secondary context; they never override the rules. A clean label means no known flag in the reviewed sample, not a recommendation or proof that a token is safe. Missing or failed inputs are unknown and lower coverage. A synthetic LP-outage fixture demonstrates this behavior and is labelled synthetic, not presented as a live incident.
+A deterministic rules engine (v2.3.0) evaluates four dimensions — SAFETY, FLOW, LIQUIDITY, PUMP — plus a fifth signal most checkers miss: tape vitality (how fast the last 100 swaps accumulated). That is how it catches what contract-scanners cannot: CEL still lists $65K of nominal pool depth, but the tape records ~13 swaps a day — a dead market wearing a live ticker. The stamp reads HIGH RISK FLAGS.
 
-Replay is the judging path: committed snapshots open without a key or API credit. V2 live requires both `VERDEX_V2=1` and `VERDEX_LIVE=1`, a server-only CMC key, and a fresh successful quota check. Live results are transient and do not receive a permanent share link; archived snapshot ids do.
+Every verdict ships with its named falsifier ("this flips if swapsPerDay recovers above 50/day"), the exact threshold each row failed, and a coverage badge. Missing evidence shows as unknown — never zero. Replays are labelled replays. The AI second opinion (Jev, a probability classifier over the same four dimensions) is printed alongside its agreement — 130/130 records examined; the model never writes the rules, and the product is fully functional without it.
 
-The CMC integration is essential because it supplies the current DEX token search, swap rows, pools, LP changes, security report, and macro context that the rules inspect. The repository does not claim current tier entitlement, universal pagination, fraud-detection accuracy, user adoption, or a prize without separate evidence.
+The archived corpus holds 130 verdicts across 9 chains, 1,170 receipts, 12,800 swap events. Against a 59-label hand-checked set the rules catch 4/6 collapsed tokens with zero zombie/faded tokens stamped clean — while a security-flags-only baseline stamps 5/7 of them entry-safe. Three false positives on thin L2 tapes are disclosed, not hidden.
+
+Replay is the judging path: committed snapshots open without a key. V2 live requires `VERDEX_V2=1` + `VERDEX_LIVE=1`, a server-only CMC key, and a fresh quota check; live results are transient — only archived snapshots get permanent links.
 
 ## Endpoint list
 

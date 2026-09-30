@@ -2,7 +2,7 @@
 // Reason (R-31 / R-17): nothing in the video may be invented.
 import { C } from "./brand";
 
-export type DimLevel = "CLEAN" | "WARN" | "DANGER";
+export type DimLevel = "CLEAN" | "WARN" | "DANGER" | "INSUFFICIENT";
 
 export interface CaseData {
   token: string;
@@ -26,81 +26,81 @@ export const CASES: CaseData[] = [
     score: 85,
     rows: [
       ["SAFETY", "CLEAN"],
-      ["top5MakerShare 0.92 vs <0.50", "DANGER"],
+      ["top5MakerShare 0.92 vs <0.50", "WARN"],
       ["LIQUIDITY", "CLEAN"],
       ["PUMP", "CLEAN"],
     ],
-    foot: "Recorded archive (2026-09-30): one failing row, named. Jev:",
-    footAccent: "unavailable in replay — labeled",
+    foot: "Recorded archive (2026-09-30): one warning row, named. Jev:",
+    footAccent: "contested · P(risky) 0.21",
   },
   {
-    token: "SUSHI",
+    token: "CEL",
     chain: "ethereum",
     verdict: "JANGAN",
-    label: "AVOID",
+    label: "HIGH RISK FLAGS",
     color: C.danger,
     score: 45,
     rows: [
-      ["top5MakerShare 0.73 vs <0.50", "DANGER"],
-      ["centralizationFlags: mintable", "WARN"],
-      ["netBuyRatio -0.03 vs >0", "WARN"],
+      ["swapsPerDay 13.1 vs ≥50/day", "DANGER"],
+      ["top5MakerShare 1.00 vs <0.50", "WARN"],
+      ["unclassifiedFlags: pausable,unrenounced", "WARN"],
       ["LIQUIDITY / PUMP", "CLEAN"],
     ],
-    foot: "Recorded archive (2026-09-26): every failing row is named. Jev:",
-    footAccent: "contested",
+    foot: "Recorded archive (2026-09-30): collapsed lender, dead tape. Jev:",
+    footAccent: "lean · P(risky) 0.43",
   },
   {
-    token: "GMX",
-    chain: "arbitrum",
+    token: "TITANO",
+    chain: "bsc",
     verdict: "JANGAN",
-    label: "AVOID",
+    label: "HIGH RISK FLAGS",
     color: C.danger,
-    score: 60,
+    score: 0,
     rows: [
-      ["SAFETY", "CLEAN"],
-      ["top5MakerShare 0.81 vs <0.50", "DANGER"],
-      ["netBuyRatio -0.28 vs >0", "WARN"],
-      ["LIQUIDITY / PUMP", "CLEAN"],
+      ["totalLiqUsd $0 vs ≥$10k", "DANGER"],
+      ["swapCount 0 observed", "INSUFFICIENT"],
+      ["securityLevel highRisk", "WARN"],
+      ["PUMP", "CLEAN"],
     ],
-    foot: "Recorded archive (2026-09-30): FLOW danger on blue-chip governance token",
-    footAccent: "coverage limited — truncation disclosed",
+    foot: "Recorded archive (2026-09-30): dust liquidity — no exit exists. Jev:",
+    footAccent: "lean · P(risky) 0.64",
   },
   {
-    token: "AAVE",
-    chain: "ethereum · mcap $2.4B",
-    verdict: "RAWAN",
-    label: "CAUTION",
-    color: C.warn,
-    score: 70,
+    token: "BRETT",
+    chain: "base",
+    verdict: "LAYAK",
+    label: "NO FLAGS OBSERVED",
+    color: C.safe,
+    score: 100,
     rows: [
-      ["centralizationFlags: upgradeable", "WARN"],
-      ["top5MakerShare 0.87 vs <0.50", "DANGER"],
+      ["SAFETY / FLOW", "CLEAN"],
       ["LIQUIDITY / PUMP", "CLEAN"],
+      ["swapsPerDay healthy", "CLEAN"],
       ["", "CLEAN"],
     ],
-    foot: "Recorded archive (2026-09-30): rules caution",
-    footAccent: "failing rows named, not hidden",
+    foot: "Recorded archive (2026-09-30): zero failing rows. Jev:",
+    footAccent: "consensus · P(risky) 0.10",
   },
 ];
 
-// Recorded SHA-256 prefixes from verdict 0153cafc32e5 (RAY archive, 2026-09-30).
+// Recorded SHA-256 prefixes from verdict 8bf023dc978a (CEL archive, 2026-09-30).
 export const RECEIPTS: [string, string, string][] = [
-  ["/v1/dex/search", "RAY · Solana", "f7b472e6"],
-  ["/v1/dex/tokens/transactions", "100 swaps", "df85aafc"],
-  ["/v1/dex/token/pools", "pool depth", "8a05ca4d"],
-  ["/v1/dex/liquidity-change/list", "LP events", "42186ccf"],
-  ["/v1/dex/security/detail", "risk flags", "8eff059e"],
-  ["/v1/dex/token", "creator meta", "fbbaf934"],
-  ["/v1/global-metrics/quotes/latest", "market ctx", "2aaae67d"],
-  ["/v1/global-metrics/quotes/historical", "market ctx", "d6e5def9"],
-  ["/v3/fear-and-greed/latest", "market ctx", "fd47e326"],
+  ["/v1/dex/search", "CEL · Ethereum", "61476889"],
+  ["/v1/dex/tokens/transactions", "100 swaps", "7687d4f5"],
+  ["/v1/dex/token/pools", "pool depth", "07b73013"],
+  ["/v1/dex/liquidity-change/list", "LP events", "82b5b88b"],
+  ["/v1/dex/security/detail", "risk flags", "546347ad"],
+  ["/v1/dex/token", "creator meta", "6b2903ec"],
+  ["/v1/global-metrics/quotes/latest", "market ctx", "ec4887cd"],
+  ["/v1/global-metrics/quotes/historical", "market ctx", "a7b5e8b4"],
+  ["/v3/fear-and-greed/latest", "market ctx", "6246986a"],
 ];
 
 export const STATS: [string, string][] = [
-  ["41", "recorded verdicts on file"],
-  ["8", "chains covered"],
-  ["369", "recorded API receipts"],
-  ["31 · 4 · 6", "recorded caution · avoid · insufficient"],
+  ["130", "recorded verdicts on file"],
+  ["9", "chains covered"],
+  ["1,170", "recorded API receipts"],
+  ["12,800", "swap events on file"],
 ];
 
 // Timeline windows (frames @30fps). Shared by every variant so the VO syncs identically.

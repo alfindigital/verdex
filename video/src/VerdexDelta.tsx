@@ -194,7 +194,7 @@ const D02: React.FC = () => {
         <HR />
         <Typed at={110} text="one token · one scan · nine receipts" size={20} color={C.paperInk + 'aa'} />
       </Tape>
-      <HashTicker text="0153cafc32e5RAYSOLANAFLOWDANGER" />
+      <HashTicker text="8bf023dc978aCELETHEREUMFLOWDANGER" />
     </Base>
   );
 };
@@ -215,7 +215,7 @@ const D03: React.FC = () => {
           </div>
         ))}
       </Tape>
-      <HashTicker text="f7b472e6df85aafc8a05ca4d42186ccf8eff059efbbaf934" />
+      <HashTicker text="614768897687d4f507b7301382b5b88b546347ad6b2903ec" />
     </Base>
   );
 };
@@ -238,7 +238,7 @@ const D04: React.FC = () => {
         <HR />
         <Typed at={90} text="VERIFY EACH HASH YOURSELF." size={26} />
       </Tape>
-      <HashTicker text="2aaae67dd6e5def9fd47e326" />
+      <HashTicker text="ec4887cda7b5e8b46246986a" />
     </Base>
   );
 };
@@ -258,7 +258,7 @@ const D05: React.FC = () => {
         {c.rows.filter(([t]) => t).map(([t, lv], i) => (
           <div key={t + i} style={{ ...rise(frame, 40 + i * 18), display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
             <Mono size={19}>{t}</Mono>
-            <Mono size={19} weight={700} color={lv === 'DANGER' ? '#b3261e' : lv === 'WARN' ? '#9a6a00' : '#1d7a4f'}>
+            <Mono size={19} weight={700} color={lv === 'DANGER' ? '#b3261e' : lv === 'WARN' ? '#9a6a00' : lv === 'INSUFFICIENT' ? '#8a8f83' : '#1d7a4f'}>
               {lv}
             </Mono>
           </div>
@@ -267,7 +267,7 @@ const D05: React.FC = () => {
           <Stamp text={c.label} at={120} color="#9a6a00" size={64} />
         </div>
       </Tape>
-      <HashTicker text="RAYFLOWtop5MakerShare0.92vs<0.50" />
+      <HashTicker text="RAYFLOWtop5MakerShare0.92WARN" />
     </Base>
   );
 };
@@ -287,7 +287,7 @@ const D06: React.FC = () => {
         {c.rows.map(([t, lv], i) => (
           <div key={t + i} style={{ ...rise(frame, 40 + i * 16), display: 'flex', justifyContent: 'space-between', marginTop: 18 }}>
             <Mono size={18}>{t}</Mono>
-            <Mono size={18} weight={700} color={lv === 'DANGER' ? '#b3261e' : lv === 'WARN' ? '#9a6a00' : '#1d7a4f'}>
+            <Mono size={18} weight={700} color={lv === 'DANGER' ? '#b3261e' : lv === 'WARN' ? '#9a6a00' : lv === 'INSUFFICIENT' ? '#8a8f83' : '#1d7a4f'}>
               {lv}
             </Mono>
           </div>
@@ -296,7 +296,7 @@ const D06: React.FC = () => {
           <Stamp text={c.label} at={115} color="#b3261e" size={64} />
         </div>
       </Tape>
-      <HashTicker text="SUSHIFLOWDANGERtop5MakerShare0.73" />
+      <HashTicker text="CELFLOWswapsPerDay13.1DANGER" />
     </Base>
   );
 };
@@ -342,7 +342,7 @@ const D08: React.FC = () => {
           ))}
         </div>
       </Tape>
-      <HashTicker text="41verdicts369receipts8chains3902swaps" />
+      <HashTicker text="130verdicts1170receipts9chains12800swaps" />
     </Base>
   );
 };
@@ -371,17 +371,17 @@ const D09: React.FC = () => {
 };
 
 export const TL_DELTA = {
-  s01: { from: 0, dur: 291 },
-  s02: { from: 291, dur: 296 },
-  s03: { from: 587, dur: 334 },
-  s04: { from: 921, dur: 322 },
-  s05: { from: 1243, dur: 406 },
-  s06: { from: 1649, dur: 394 },
-  s07: { from: 2043, dur: 545 },
-  s08: { from: 2588, dur: 286 },
-  s09: { from: 2874, dur: 274 },
+  s01: { from: 0, dur: 215 },
+  s02: { from: 215, dur: 260 },
+  s03: { from: 475, dur: 244 },
+  s04: { from: 719, dur: 241 },
+  s05: { from: 960, dur: 288 },
+  s06: { from: 1248, dur: 423 },
+  s07: { from: 1671, dur: 363 },
+  s08: { from: 2034, dur: 331 },
+  s09: { from: 2365, dur: 193 },
 } as const;
-export const TL_DELTA_TOTAL = 3148;
+export const TL_DELTA_TOTAL = 2558;
 
 const VO = 'vo-delta';
 const VOTimes: [number, number][] = [

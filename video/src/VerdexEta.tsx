@@ -23,10 +23,10 @@ const rise = (frame: number, at: number, span = 14) => ({
 
 // Real dossier rows — the tape content (from ray/pepe captures).
 const TAPE = [
-  'RAY ◆ top5 0.92 DANGER', 'PEPE ◆ 569 traders 24h', 'AAVE ◆ upgradeable WARN',
-  'SUSHI ◆ netBuy −0.03', 'GMX ◆ top5 0.81 DANGER', 'RAY ◆ score 85 CAUTION',
-  'UNI ◆ INSUFFICIENT', 'PEPE ◆ 147 cex listings', 'SUSHI ◆ score 45 AVOID',
-  'AAVE ◆ top5 0.87 DANGER', 'GMX ◆ netBuy −0.28', 'BONK ◆ score 85 CAUTION',
+  'RAY ◆ top5 0.92 WARN', 'PEPE ◆ 569 traders 24h', 'AAVE ◆ upgradeable WARN',
+  'SUSHI ◆ top5 0.64 WARN', 'GMX ◆ top5 0.81 WARN', 'RAY ◆ score 85 CAUTION',
+  'UNI ◆ INSUFFICIENT', 'JUP ◆ 5475 traders 24h', 'CEL ◆ 13 swaps/day DANGER',
+  'AAVE ◆ top5 0.87 WARN', 'GMX ◆ netBuy −0.28', 'Bonk ◆ score 85 CAUTION',
 ];
 
 const TapeRow: React.FC<{ y: number; items: string[]; speed?: number; color?: string; size?: number; dir?: 1 | -1 }> = ({
@@ -108,10 +108,10 @@ const T02: React.FC = () => {
 const T03: React.FC = () => {
   const frame = useCurrentFrame();
   const rows = [
-    ['5m', '$15.1K', '10 tx', '+0.10%'],
-    ['1h', '$36.0K', '48 tx', '+0.39%'],
-    ['4h', '$167.0K', '196 tx', '+0.08%'],
-    ['24h', '$1.55M', '1,438 tx', '+3.32%'],
+    ['5m', '$11.3K', '87 tx', '+0.13%'],
+    ['1h', '$195.2K', '1,920 tx', '+0.44%'],
+    ['4h', '$1.36M', '10,293 tx', '−1.14%'],
+    ['24h', '$11.68M', '80,165 tx', '+0.81%'],
   ];
   return (
     <Base>
@@ -123,7 +123,7 @@ const T03: React.FC = () => {
               <span style={{ color: C.faint }}>{w}</span>
               <span style={{ fontWeight: 700 }}>{v}</span>
               <span>{tx}</span>
-              <span style={{ color: C.safe, fontWeight: 700, textAlign: 'right' }}>{d}</span>
+              <span style={{ color: d.startsWith('−') || d.startsWith('-') ? C.danger : C.safe, fontWeight: 700, textAlign: 'right' }}>{d}</span>
             </div>
           ))}
         </div>
@@ -188,10 +188,10 @@ const T06: React.FC = () => {
       <TapeRow y={40} items={TAPE.slice(0, 8)} speed={3.2} />
       <TapeRow y={940} items={TAPE.slice(4, 12)} speed={2.6} dir={-1} />
       <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ transform: `scale(${p}) rotate(5deg)`, border: `8px solid ${C.danger}`, borderRadius: 10, padding: '12px 44px', color: C.danger, fontFamily: F.serif, fontSize: 108, fontWeight: 800, background: `${C.ink}ee`, opacity: p > 1.7 ? 0 : 1 }}>
-          AVOID
+        <div style={{ transform: `scale(${p}) rotate(5deg)`, border: `8px solid ${C.danger}`, borderRadius: 10, padding: '12px 44px', color: C.danger, fontFamily: F.serif, fontSize: 74, fontWeight: 800, background: `${C.ink}ee`, opacity: p > 1.7 ? 0 : 1 }}>
+          HIGH RISK FLAGS
         </div>
-        <div style={{ ...rise(frame, 56), fontSize: 19, color: C.text, marginTop: 40, background: `${C.ink}dd`, padding: '6px 14px' }}>SUSHI — score 45 · Jev contested · disclosed</div>
+        <div style={{ ...rise(frame, 56), fontSize: 19, color: C.text, marginTop: 40, background: `${C.ink}dd`, padding: '6px 14px' }}>CEL — score 45 · dead tape · Jev lean · disclosed</div>
       </AbsoluteFill>
     </Base>
   );
@@ -253,17 +253,17 @@ const T09: React.FC = () => {
 };
 
 export const TL_ETA = {
-  s01: { from: 0, dur: 191 },
-  s02: { from: 191, dur: 316 },
-  s03: { from: 507, dur: 367 },
-  s04: { from: 874, dur: 219 },
-  s05: { from: 1093, dur: 252 },
-  s06: { from: 1345, dur: 254 },
-  s07: { from: 1599, dur: 329 },
-  s08: { from: 1928, dur: 233 },
-  s09: { from: 2161, dur: 184 },
+  s01: { from: 0, dur: 194 },
+  s02: { from: 194, dur: 319 },
+  s03: { from: 513, dur: 370 },
+  s04: { from: 883, dur: 183 },
+  s05: { from: 1066, dur: 255 },
+  s06: { from: 1321, dur: 335 },
+  s07: { from: 1656, dur: 332 },
+  s08: { from: 1988, dur: 206 },
+  s09: { from: 2194, dur: 187 },
 } as const;
-export const TL_ETA_TOTAL = 2345;
+export const TL_ETA_TOTAL = 2381;
 
 const VO = 'vo-eta';
 const scenes = [T01, T02, T03, T04, T05, T06, T07, T08, T09];

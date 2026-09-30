@@ -133,7 +133,7 @@ const Z04: React.FC = () => {
         <div style={{ ...rise(frame, 4), fontSize: 15, letterSpacing: '0.24em', color: C.faint, marginBottom: 26 }}>DIMENSION SWEEP — RAY</div>
         <Panel style={{ display: 'flex', flexDirection: 'column', gap: 34, padding: '38px 44px' }}>
           <Gauge label="SAFETY" level="CLEAN" at={8} />
-          <Gauge label="FLOW" level="DANGER" at={44} />
+          <Gauge label="FLOW" level="WARN" at={44} />
           <Gauge label="LIQUIDITY" level="CLEAN" at={80} />
           <Gauge label="PUMP" level="CLEAN" at={116} />
         </Panel>
@@ -153,7 +153,7 @@ const Z05: React.FC = () => {
             <div>
               <div style={{ fontSize: 15, letterSpacing: '0.24em', color: C.faint }}>SCORE SETTLED</div>
               <div style={{ fontSize: 30, fontWeight: 700, marginTop: 12 }}>RAY · Solana</div>
-              <div style={{ ...rise(frame, 60), fontSize: 18, color: C.faint, marginTop: 14 }}>FLOW danger — top-5 makers hold 92% of the tape</div>
+              <div style={{ ...rise(frame, 60), fontSize: 18, color: C.faint, marginTop: 14 }}>FLOW warning — top-5 makers hold 92% of the tape</div>
             </div>
             <div style={{ position: 'relative', width: 190, height: 190 }}>
               <svg viewBox="0 0 100 100" width="190" height="190">
@@ -189,11 +189,11 @@ const Z07: React.FC = () => {
   return (
     <Base>
       <AbsoluteFill style={{ justifyContent: 'center', padding: '0 170px' }}>
-        <div style={{ ...rise(frame, 4), fontSize: 15, letterSpacing: '0.24em', color: C.faint, marginBottom: 26 }}>SUSHI — DIFFERENT ANSWER, SAME INSTRUMENT</div>
+        <div style={{ ...rise(frame, 4), fontSize: 15, letterSpacing: '0.24em', color: C.faint, marginBottom: 26 }}>CEL — DIFFERENT ANSWER, SAME INSTRUMENT</div>
         <Panel style={{ display: 'flex', flexDirection: 'column', gap: 30, padding: '36px 42px' }}>
-          <Gauge label="SAFETY — mintable flag" level="WARN" at={8} />
-          <Gauge label="FLOW — top-5 at 73%" level="DANGER" at={40} />
-          <Gauge label="FLOW — net buy ratio −0.03" level="WARN" at={72} />
+          <Gauge label="SAFETY — pausable, unrenounced" level="WARN" at={8} />
+          <Gauge label="FLOW — 13 swaps/day" level="DANGER" at={40} />
+          <Gauge label="FLOW — top-5 at 100%" level="WARN" at={72} />
           <Gauge label="LIQUIDITY / PUMP" level="CLEAN" at={104} />
         </Panel>
       </AbsoluteFill>
@@ -207,10 +207,10 @@ const Z08: React.FC = () => {
   return (
     <Base>
       <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ transform: `scale(${p}) rotate(5deg)`, border: `8px solid ${C.danger}`, borderRadius: 10, padding: '10px 44px', color: C.danger, fontFamily: F.serif, fontSize: 110, fontWeight: 800, opacity: p > 1.6 ? 0 : 1 }}>
-          AVOID
+        <div style={{ transform: `scale(${p}) rotate(5deg)`, border: `8px solid ${C.danger}`, borderRadius: 10, padding: '10px 44px', color: C.danger, fontFamily: F.serif, fontSize: 76, fontWeight: 800, opacity: p > 1.6 ? 0 : 1 }}>
+          HIGH RISK FLAGS
         </div>
-        <div style={{ ...rise(frame, 46), fontSize: 18, color: C.faint, marginTop: 40 }}>score 45 · Jev second opinion: contested — shown, not hidden</div>
+        <div style={{ ...rise(frame, 46), fontSize: 18, color: C.faint, marginTop: 40 }}>score 45 · dead tape — 13 swaps/day · Jev second opinion: lean, shown not hidden</div>
       </AbsoluteFill>
     </Base>
   );
@@ -248,18 +248,18 @@ const Z10: React.FC = () => {
 };
 
 export const TL_ZETA = {
-  s01: { from: 0, dur: 205 },
-  s02: { from: 205, dur: 249 },
-  s03: { from: 454, dur: 382 },
-  s04: { from: 836, dur: 376 },
-  s05: { from: 1212, dur: 254 },
-  s06: { from: 1466, dur: 201 },
-  s07: { from: 1667, dur: 250 },
-  s08: { from: 1917, dur: 239 },
-  s09: { from: 2156, dur: 277 },
-  s10: { from: 2433, dur: 247 },
+  s01: { from: 0, dur: 208 },
+  s02: { from: 208, dur: 252 },
+  s03: { from: 460, dur: 385 },
+  s04: { from: 845, dur: 378 },
+  s05: { from: 1223, dur: 257 },
+  s06: { from: 1480, dur: 204 },
+  s07: { from: 1684, dur: 272 },
+  s08: { from: 1956, dur: 250 },
+  s09: { from: 2206, dur: 285 },
+  s10: { from: 2491, dur: 250 },
 } as const;
-export const TL_ZETA_TOTAL = 2680;
+export const TL_ZETA_TOTAL = 2741;
 
 const VO = 'vo-zeta';
 const scenes = [Z01, Z02, Z03, Z04, Z05, Z06, Z07, Z08, Z09, Z10];

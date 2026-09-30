@@ -116,6 +116,7 @@ const LEVEL_COLOR: Record<DimLevel, string> = {
   CLEAN: C.safe,
   WARN: C.warn,
   DANGER: C.danger,
+  INSUFFICIENT: C.faint,
 };
 
 export const DimBar: React.FC<DimBarProps> = ({ name, level, frame, at, mono = false }) => {

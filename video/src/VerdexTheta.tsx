@@ -62,7 +62,7 @@ const BigCheck: React.FC<{ text: string; at: number; ok?: boolean }> = ({ text, 
 
 const EvidenceRow: React.FC<{ text: string; level: string; at: number }> = ({ text, level, at }) => {
   const frame = useCurrentFrame();
-  const color = level === 'DANGER' ? C.danger : level === 'WARN' ? C.warn : C.safe;
+  const color = level === 'DANGER' ? C.danger : level === 'WARN' ? C.warn : level === 'INSUFFICIENT' ? C.faint : C.safe;
   return (
     <div style={{ ...rise(frame, at), display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22, padding: '12px 18px', border: `1px solid ${C.lineBright}`, borderRadius: 6, background: `${C.panel}dd` }}>
       <span style={{ fontSize: 22, color: C.text }}>{text}</span>
@@ -114,7 +114,7 @@ const H02: React.FC = () => {
         <AbsoluteFill style={{ justifyContent: 'center', padding: '0 80px', alignItems: 'flex-end' }}>
           <RightTag />
           <div style={{ width: '48%' }}>
-            <EvidenceRow text="top-5 makers: 92% of tape" level="DANGER" at={12} />
+            <EvidenceRow text="top-5 makers: 92% of tape" level="WARN" at={12} />
             <EvidenceRow text="third-party sells observed: 12" level="WARN" at={34} />
             <EvidenceRow text="net buy ratio: +0.84" level="WARN" at={56} />
           </div>
@@ -162,18 +162,18 @@ const H04: React.FC = () => {
       left={
         <AbsoluteFill style={{ justifyContent: 'center', padding: '0 80px', width: '52%' }}>
           <LeftTag />
-          <BigCheck text={`${c.token} contract audited`} at={8} />
-          <BigCheck text="blue-chip brand" at={30} />
-          <BigCheck text="years old, deep books" at={52} />
+          <BigCheck text={`${c.token} contract verified`} at={8} />
+          <BigCheck text="known brand, still listed" at={30} />
+          <BigCheck text="$65K nominal pool depth" at={52} />
         </AbsoluteFill>
       }
       right={
         <AbsoluteFill style={{ justifyContent: 'center', padding: '0 80px', alignItems: 'flex-end' }}>
           <RightTag />
           <div style={{ width: '48%' }}>
-            <EvidenceRow text="top-5 makers: 73%" level="DANGER" at={10} />
-            <EvidenceRow text="net buy ratio: −0.03" level="WARN" at={32} />
-            <EvidenceRow text="mintable flag present" level="WARN" at={54} />
+            <EvidenceRow text="13 swaps/day over 8 days" level="DANGER" at={10} />
+            <EvidenceRow text="top-5 makers: 100% of tape" level="WARN" at={32} />
+            <EvidenceRow text="pausable + unrenounced flags" level="WARN" at={54} />
           </div>
         </AbsoluteFill>
       }
@@ -186,10 +186,10 @@ const H05: React.FC = () => {
   const p = interpolate(frame, [20, 28], [1.8, 1], { ...clamp, easing: Easing.out(Easing.quad) });
   return (
     <AbsoluteFill style={{ background: '#0c100c', justifyContent: 'center', alignItems: 'center', fontFamily: F.data }}>
-      <div style={{ transform: `scale(${p}) rotate(4deg)`, border: `8px solid ${C.danger}`, borderRadius: 10, padding: '10px 46px', color: C.danger, fontFamily: F.serif, fontSize: 110, fontWeight: 800, opacity: p > 1.7 ? 0 : 1 }}>
-        AVOID
+      <div style={{ transform: `scale(${p}) rotate(4deg)`, border: `8px solid ${C.danger}`, borderRadius: 10, padding: '10px 46px', color: C.danger, fontFamily: F.serif, fontSize: 76, fontWeight: 800, opacity: p > 1.7 ? 0 : 1 }}>
+        HIGH RISK FLAGS
       </div>
-      <div style={{ ...rise(frame, 52), fontSize: 19, color: C.faint, marginTop: 38 }}>SUSHI · score 45 — the brand didn't save it</div>
+      <div style={{ ...rise(frame, 52), fontSize: 19, color: C.faint, marginTop: 38 }}>CEL · score 45 — the collapse didn't end the ticker; dead tape did</div>
     </AbsoluteFill>
   );
 };
@@ -286,17 +286,17 @@ const H09: React.FC = () => {
 };
 
 export const TL_THETA = {
-  s01: { from: 0, dur: 198 },
-  s02: { from: 198, dur: 392 },
-  s03: { from: 590, dur: 206 },
-  s04: { from: 796, dur: 315 },
-  s05: { from: 1111, dur: 156 },
-  s06: { from: 1267, dur: 234 },
-  s07: { from: 1501, dur: 257 },
-  s08: { from: 1758, dur: 179 },
-  s09: { from: 1937, dur: 149 },
+  s01: { from: 0, dur: 201 },
+  s02: { from: 201, dur: 395 },
+  s03: { from: 596, dur: 209 },
+  s04: { from: 805, dur: 357 },
+  s05: { from: 1162, dur: 170 },
+  s06: { from: 1332, dur: 237 },
+  s07: { from: 1569, dur: 260 },
+  s08: { from: 1829, dur: 195 },
+  s09: { from: 2024, dur: 152 },
 } as const;
-export const TL_THETA_TOTAL = 2086;
+export const TL_THETA_TOTAL = 2176;
 
 const VO = 'vo-theta';
 const scenes = [H01, H02, H03, H04, H05, H06, H07, H08, H09];

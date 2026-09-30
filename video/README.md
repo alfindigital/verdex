@@ -17,19 +17,19 @@ Do not call a synthetic fixture a live incident, a clean sample safe, a heuristi
 
 ## Variants
 
-All numbers on screen come from the committed snapshot corpus (`video/src/data.ts`, recomputed from `tests/fixtures/cmc/snapshots`). VO lives in `video/public/vo-<variant>/sNN.mp3`; scene timing (`TL_*`) is regenerated from real audio durations via `scripts/gen-vo-new.py` + the probe step that rewrote the `TL_*` constants, so narration never gets cut by a Sequence boundary.
+All numbers on screen come from the committed snapshot corpus (`video/src/data.ts`, recomputed from `snapshots/` under rules 2.3.0). VO lives in `video/public/vo-<variant>/sNN.mp3`; scene timing (`TL_*`) is regenerated from real audio durations via `scripts/gen-vo-new.py` + the probe step that rewrote the `TL_*` constants, so narration never gets cut by a Sequence boundary.
 
 | Composition ID | Angle | Voice | Length | File |
 |---|---|---|---|---|
-| `VerdexDelta-ReceiptTicker` | teleprinter evidence receipt, perforated stock, hash tape, bottom market ticker | ElevenLabs **Charlie** | ~105 s | `verdex-delta-receipt-ticker.mp4` |
-| `VerdexEpsilon-CaseFile` | evidence folder, custody lines, disclosures stamped on paper | edge-tts `en-US-ChristopherNeural` | ~128 s | `verdex-epsilon-case-file.mp4` |
-| `VerdexZeta-TheScan` | radar/instrument sweep over the four dimensions | edge-tts `en-US-JennyNeural` | ~89 s | `verdex-zeta-the-scan.mp4` |
-| `VerdexEta-MarketTape` | Bloomberg-style bottom tape, bars on maker concentration | edge-tts `en-US-AriaNeural` | ~78 s | `verdex-eta-market-tape.mp4` |
-| `VerdexTheta-BeforeAfter` | split screen: what a contract check sees vs what Verdex sees | edge-tts `en-US-AndrewNeural` | ~70 s | `verdex-theta-before-after.mp4` |
+| `VerdexDelta-ReceiptTicker` | teleprinter evidence receipt, perforated stock, hash tape, bottom market ticker | edge-tts `en-US-GuyNeural` | ~85 s | `verdex-delta-receipt-ticker.mp4` |
+| `VerdexEpsilon-CaseFile` | evidence folder, custody lines, disclosures stamped on paper | edge-tts `en-US-ChristopherNeural` | ~131 s | `verdex-epsilon-case-file.mp4` |
+| `VerdexZeta-TheScan` | radar/instrument sweep over the four dimensions | edge-tts `en-US-JennyNeural` | ~91 s | `verdex-zeta-the-scan.mp4` |
+| `VerdexEta-MarketTape` | Bloomberg-style bottom tape, bars on maker concentration | edge-tts `en-US-AriaNeural` | ~79 s | `verdex-eta-market-tape.mp4` |
+| `VerdexTheta-BeforeAfter` | split screen: what a contract check sees vs what Verdex sees | edge-tts `en-US-AndrewNeural` | ~73 s | `verdex-theta-before-after.mp4` |
 
 Earlier generations (`VerdexAlpha/Beta/Gamma`, `VerdexA–D`, `VerdexDemo`) remain registered for comparison; pick one final cut for submission.
 
-Note: ElevenLabs quota ran out mid-generation — Delta kept the ElevenLabs/Charlie master; the other four variants use edge-tts neural voices (regenerate with ElevenLabs later if preferred, then re-run the TL probe).
+Note: all five variants were re-rendered on rules 2.3.0 data (2026-09-30) — corpus 130 records / 9 chains / 1,170 receipts / 12,800 swaps, CEL dead-tape exhibit replaces the retired SUSHI/GMX JANGAN case (both are CAUTION under 2.3.0). Delta moved from ElevenLabs/Charlie to edge-tts GuyNeural so every variant shares one VO pipeline (`scripts/gen-vo-new.py` → `scripts/probe-tl.py` regenerates TL_* windows from real durations).
 
 ## Commands
 

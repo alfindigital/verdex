@@ -172,7 +172,7 @@ const ExhibitCard: React.FC<{ c: (typeof CASES)[number]; delay?: number }> = ({ 
         {c.rows.filter(([t]) => t).map(([t, lv], i) => (
           <div key={t + i} style={{ display: 'flex', justifyContent: 'space-between', fontFamily: F.data, fontSize: 17, ...rise(frame, delay + 30 + i * 14) }}>
             <span style={{ color: C.text }}>{t}</span>
-            <span style={{ fontWeight: 700, color: lv === 'DANGER' ? C.danger : lv === 'WARN' ? C.warn : C.safe }}>{lv}</span>
+            <span style={{ fontWeight: 700, color: lv === 'DANGER' ? C.danger : lv === 'WARN' ? C.warn : lv === 'INSUFFICIENT' ? C.faint : C.safe }}>{lv}</span>
           </div>
         ))}
       </div>
@@ -293,18 +293,18 @@ const E10: React.FC = () => {
 };
 
 export const TL_EPSILON = {
-  s01: { from: 0, dur: 298 },
-  s02: { from: 298, dur: 501 },
-  s03: { from: 799, dur: 545 },
-  s04: { from: 1344, dur: 342 },
-  s05: { from: 1686, dur: 407 },
-  s06: { from: 2093, dur: 393 },
-  s07: { from: 2486, dur: 324 },
-  s08: { from: 2810, dur: 353 },
-  s09: { from: 3163, dur: 465 },
-  s10: { from: 3628, dur: 225 },
+  s01: { from: 0, dur: 301 },
+  s02: { from: 301, dur: 504 },
+  s03: { from: 805, dur: 548 },
+  s04: { from: 1353, dur: 345 },
+  s05: { from: 1698, dur: 402 },
+  s06: { from: 2100, dur: 416 },
+  s07: { from: 2516, dur: 327 },
+  s08: { from: 2843, dur: 377 },
+  s09: { from: 3220, dur: 468 },
+  s10: { from: 3688, dur: 228 },
 } as const;
-export const TL_EPSILON_TOTAL = 3853;
+export const TL_EPSILON_TOTAL = 3916;
 
 const VO = 'vo-epsilon';
 const scenes = [E01, E02, E03, E04, E05, E06, E07, E08, E09, E10];
