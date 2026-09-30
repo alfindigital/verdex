@@ -87,5 +87,6 @@ async def main():
         for i, text in enumerate(lines, 1):
             await gen(folder, voice, rate, i, text)
 
-asyncio.run(main())
-print("VO DONE")
+if __name__ == "__main__":
+    asyncio.run(main())
+    print("VO DONE")

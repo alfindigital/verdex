@@ -29,7 +29,17 @@ All numbers on screen come from the committed snapshot corpus (`video/src/data.t
 
 Earlier generations (`VerdexAlpha/Beta/Gamma`, `VerdexA–D`, `VerdexDemo`) remain registered for comparison; pick one final cut for submission.
 
-Note: all five variants were re-rendered on rules 2.3.0 data (2026-09-30) — corpus 301 records / 9 chains / 2,709 receipts / 29,744 swaps, CEL dead-tape exhibit replaces the retired SUSHI/GMX JANGAN case (both are CAUTION under 2.3.0). Delta moved from ElevenLabs/Charlie to edge-tts GuyNeural so every variant shares one VO pipeline (`scripts/gen-vo-new.py` → `scripts/probe-tl.py` regenerates TL_* windows from real durations).
+**ElevenLabs two-voice cuts** — same scenes and script, narrated by Brian (male, setup + exhibits) and Sarah (female, honesty line + ledger + close) via `eleven_v4`. Each `-EL` composition takes `voDir`/`tl` props; `src/el-timing.ts` is regenerated from probed mp3 durations, so scene windows grow to fit the slower EL pace instead of speeding the audio up. Assets: `public/vo-<variant>-el/sNN.mp3`.
+
+| Composition ID | Length | File |
+|---|---|---|
+| `VerdexDelta-EL` | ~92 s | `verdex-delta-el.mp4` |
+| `VerdexEpsilon-EL` | ~129 s | `verdex-epsilon-el.mp4` |
+| `VerdexZeta-EL` | ~99 s | `verdex-zeta-el.mp4` |
+| `VerdexEta-EL` | ~84 s | `verdex-eta-el.mp4` |
+| `VerdexTheta-EL` | ~90 s | `verdex-theta-el.mp4` |
+
+Note: all variants were re-rendered on rules 2.3.0 data (2026-09-30) — corpus 301 records / 9 chains / 2,709 receipts / 29,744 swaps, CEL dead-tape exhibit replaces the retired SUSHI/GMX JANGAN case (both are CAUTION under 2.3.0). ElevenLabs keys are passed via env only (`ELEVENLABS_API_KEY[_N]`), never committed; `scripts/gen-vo-elevenlabs.py` rotates keys on `detected_unusual_activity`/quota errors.
 
 ## Commands
 

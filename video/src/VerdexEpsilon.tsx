@@ -306,12 +306,15 @@ export const TL_EPSILON = {
 } as const;
 export const TL_EPSILON_TOTAL = 3942;
 
-const VO = 'vo-epsilon';
 const scenes = [E01, E02, E03, E04, E05, E06, E07, E08, E09, E10];
-const tls = Object.values(TL_EPSILON);
 
 let fontsInit = false;
-export const VerdexEpsilon: React.FC = () => {
+type EpsilonTL = { [K in keyof typeof TL_EPSILON]: { from: number; dur: number } };
+export const VerdexEpsilon: React.FC<{ voDir?: string; tl?: EpsilonTL }> = ({
+  voDir = 'vo-epsilon',
+  tl = TL_EPSILON,
+}) => {
+  const tls = Object.values(tl);
   React.useEffect(() => {
     if (!fontsInit) {
       fontsInit = true;
@@ -327,7 +330,7 @@ export const VerdexEpsilon: React.FC = () => {
       ))}
       {tls.map((t, i) => (
         <Sequence key={`vo${i}`} from={t.from} durationInFrames={t.dur}>
-          <Audio src={staticFile(`${VO}/s${String(i + 1).padStart(2, '0')}.mp3`)} />
+          <Audio src={staticFile(`${voDir}/s${String(i + 1).padStart(2, '0')}.mp3`)} />
         </Sequence>
       ))}
     </>

@@ -298,12 +298,15 @@ export const TL_THETA = {
 } as const;
 export const TL_THETA_TOTAL = 2175;
 
-const VO = 'vo-theta';
 const scenes = [H01, H02, H03, H04, H05, H06, H07, H08, H09];
-const tls = Object.values(TL_THETA);
 
 let fontsInit = false;
-export const VerdexTheta: React.FC = () => {
+type ThetaTL = { [K in keyof typeof TL_THETA]: { from: number; dur: number } };
+export const VerdexTheta: React.FC<{ voDir?: string; tl?: ThetaTL }> = ({
+  voDir = 'vo-theta',
+  tl = TL_THETA,
+}) => {
+  const tls = Object.values(tl);
   React.useEffect(() => {
     if (!fontsInit) {
       fontsInit = true;
@@ -319,7 +322,7 @@ export const VerdexTheta: React.FC = () => {
       ))}
       {tls.map((t, i) => (
         <Sequence key={`vo${i}`} from={t.from} durationInFrames={t.dur}>
-          <Audio src={staticFile(`${VO}/s${String(i + 1).padStart(2, '0')}.mp3`)} />
+          <Audio src={staticFile(`${voDir}/s${String(i + 1).padStart(2, '0')}.mp3`)} />
         </Sequence>
       ))}
     </>

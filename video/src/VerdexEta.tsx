@@ -265,12 +265,15 @@ export const TL_ETA = {
 } as const;
 export const TL_ETA_TOTAL = 2390;
 
-const VO = 'vo-eta';
 const scenes = [T01, T02, T03, T04, T05, T06, T07, T08, T09];
-const tls = Object.values(TL_ETA);
 
 let fontsInit = false;
-export const VerdexEta: React.FC = () => {
+type EtaTL = { [K in keyof typeof TL_ETA]: { from: number; dur: number } };
+export const VerdexEta: React.FC<{ voDir?: string; tl?: EtaTL }> = ({
+  voDir = 'vo-eta',
+  tl = TL_ETA,
+}) => {
+  const tls = Object.values(tl);
   React.useEffect(() => {
     if (!fontsInit) {
       fontsInit = true;
@@ -286,7 +289,7 @@ export const VerdexEta: React.FC = () => {
       ))}
       {tls.map((t, i) => (
         <Sequence key={`vo${i}`} from={t.from} durationInFrames={t.dur}>
-          <Audio src={staticFile(`${VO}/s${String(i + 1).padStart(2, '0')}.mp3`)} />
+          <Audio src={staticFile(`${voDir}/s${String(i + 1).padStart(2, '0')}.mp3`)} />
         </Sequence>
       ))}
     </>

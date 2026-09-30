@@ -261,12 +261,15 @@ export const TL_ZETA = {
 } as const;
 export const TL_ZETA_TOTAL = 2746;
 
-const VO = 'vo-zeta';
 const scenes = [Z01, Z02, Z03, Z04, Z05, Z06, Z07, Z08, Z09, Z10];
-const tls = Object.values(TL_ZETA);
 
 let fontsInit = false;
-export const VerdexZeta: React.FC = () => {
+type ZetaTL = { [K in keyof typeof TL_ZETA]: { from: number; dur: number } };
+export const VerdexZeta: React.FC<{ voDir?: string; tl?: ZetaTL }> = ({
+  voDir = 'vo-zeta',
+  tl = TL_ZETA,
+}) => {
+  const tls = Object.values(tl);
   React.useEffect(() => {
     if (!fontsInit) {
       fontsInit = true;
@@ -282,7 +285,7 @@ export const VerdexZeta: React.FC = () => {
       ))}
       {tls.map((t, i) => (
         <Sequence key={`vo${i}`} from={t.from} durationInFrames={t.dur}>
-          <Audio src={staticFile(`${VO}/s${String(i + 1).padStart(2, '0')}.mp3`)} />
+          <Audio src={staticFile(`${voDir}/s${String(i + 1).padStart(2, '0')}.mp3`)} />
         </Sequence>
       ))}
     </>

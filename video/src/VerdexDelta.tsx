@@ -383,35 +383,27 @@ export const TL_DELTA = {
 } as const;
 export const TL_DELTA_TOTAL = 2559;
 
-const VO = 'vo-delta';
-const VOTimes: [number, number][] = [
-  [TL_DELTA.s01.from, TL_DELTA.s01.dur],
-  [TL_DELTA.s02.from, TL_DELTA.s02.dur],
-  [TL_DELTA.s03.from, TL_DELTA.s03.dur],
-  [TL_DELTA.s04.from, TL_DELTA.s04.dur],
-  [TL_DELTA.s05.from, TL_DELTA.s05.dur],
-  [TL_DELTA.s06.from, TL_DELTA.s06.dur],
-  [TL_DELTA.s07.from, TL_DELTA.s07.dur],
-  [TL_DELTA.s08.from, TL_DELTA.s08.dur],
-  [TL_DELTA.s09.from, TL_DELTA.s09.dur],
-];
-
-export const VerdexDelta: React.FC = () => {
+type DeltaTL = { [K in keyof typeof TL_DELTA]: { from: number; dur: number } };
+export const VerdexDelta: React.FC<{ voDir?: string; tl?: DeltaTL }> = ({
+  voDir = 'vo-delta',
+  tl = TL_DELTA,
+}) => {
   useFontsOnce();
+  const tls = Object.values(tl);
   return (
     <>
-      <Sequence {...TL_DELTA.s01}><D01 /></Sequence>
-      <Sequence {...TL_DELTA.s02}><D02 /></Sequence>
-      <Sequence {...TL_DELTA.s03}><D03 /></Sequence>
-      <Sequence {...TL_DELTA.s04}><D04 /></Sequence>
-      <Sequence {...TL_DELTA.s05}><D05 /></Sequence>
-      <Sequence {...TL_DELTA.s06}><D06 /></Sequence>
-      <Sequence {...TL_DELTA.s07}><D07 /></Sequence>
-      <Sequence {...TL_DELTA.s08}><D08 /></Sequence>
-      <Sequence {...TL_DELTA.s09}><D09 /></Sequence>
-      {VOTimes.map(([from, dur], i) => (
-        <Sequence key={i} from={from} durationInFrames={dur}>
-          <Audio src={staticFile(`${VO}/s${String(i + 1).padStart(2, '0')}.mp3`)} />
+      <Sequence {...tl.s01}><D01 /></Sequence>
+      <Sequence {...tl.s02}><D02 /></Sequence>
+      <Sequence {...tl.s03}><D03 /></Sequence>
+      <Sequence {...tl.s04}><D04 /></Sequence>
+      <Sequence {...tl.s05}><D05 /></Sequence>
+      <Sequence {...tl.s06}><D06 /></Sequence>
+      <Sequence {...tl.s07}><D07 /></Sequence>
+      <Sequence {...tl.s08}><D08 /></Sequence>
+      <Sequence {...tl.s09}><D09 /></Sequence>
+      {tls.map((t, i) => (
+        <Sequence key={i} from={t.from} durationInFrames={t.dur}>
+          <Audio src={staticFile(`${voDir}/s${String(i + 1).padStart(2, '0')}.mp3`)} />
         </Sequence>
       ))}
     </>
