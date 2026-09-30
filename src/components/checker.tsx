@@ -155,7 +155,7 @@ export function Checker({ live }: { live: boolean }) {
                 try {ex}
               </button>
             ))}
-            <a href="#ex2-title" className="chip font-data">
+            <a href="#files" className="chip font-data">
               recorded case files ↓
             </a>
           </div>

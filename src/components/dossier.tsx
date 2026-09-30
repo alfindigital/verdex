@@ -77,7 +77,7 @@ export function DossierSections({ d }: { d: TokenDossier }) {
           <Stat k="24h high" v={fmtPrice(market.high24hUsd)} tone="text-safe" />
           <Stat k="24h low" v={fmtPrice(market.low24hUsd)} tone="text-danger" />
           <Stat k="mcap" v={fmtUsd(market.mcapUsd)} />
-          <Stat k="liquidity" v={fmtUsd(market.liqUsd)} />
+          <Stat k="liquidity (token)" v={fmtUsd(market.liqUsd)} />
           <Stat k="vol 24h" v={fmtUsd(market.vol24hUsd)} />
           <Stat k="traders 24h" v={market.uniqueTraders24h != null ? fmtNum(market.uniqueTraders24h) : "—"} />
         </div>

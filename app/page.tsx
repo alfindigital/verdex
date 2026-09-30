@@ -47,11 +47,16 @@ export default function Home() {
   const totalReceipts = snapshots.reduce((a, v) => a + v.receipts.length, 0);
   const chainList = [...new Set(snapshots.map((v) => v.token.platform.toLowerCase()))];
 
+  // Curated showcase — each card carries a story the jury can verify:
+  // a clean tape (LAYAK), a collapsed-but-liquid survivor (RAWAN), and a
+  // dead-tape/dust catch (JANGAN). Falls back to first-of-class coverage.
+  const showcaseBySlug = ["brett-base", "ftx-token-ethereum", "titano-bsc"]
+    .map((slug) => snapshots.find((v) => slugFor(v.token.symbol, v.token.platform) === slug))
+    .filter((v): v is NonNullable<typeof v> => Boolean(v));
   const showcase = [
-    snapshots.find((v) => v.result.verdict === "LAYAK"),
-    snapshots.find((v) => v.result.verdict === "RAWAN"),
-    snapshots.find((v) => v.result.verdict === "JANGAN"),
-    snapshots.find((v) => v.result.verdict === "BELUM_CUKUP_BUKTI"),
+    ...showcaseBySlug,
+    ...(["LAYAK", "RAWAN", "JANGAN", "BELUM_CUKUP_BUKTI"] as const)
+      .map((v) => snapshots.find((s) => s.result.verdict === v && !showcaseBySlug.includes(s))),
   ]
     .filter((v): v is NonNullable<typeof v> => Boolean(v))
     .slice(0, 3);
@@ -194,9 +199,9 @@ export default function Home() {
 
       {/* ——— Recorded cases ——— */}
       {showcase.length > 0 && (
-        <section id="cases" className="mt-14" aria-labelledby="ex1-title">
+        <section id="cases" className="mt-14" aria-labelledby="cases-title">
           <div className="exhibit">
-            <h2 id="ex1-title" className="exhibit-title">Recorded cases</h2>
+            <h2 id="cases-title" className="exhibit-title">Recorded cases</h2>
             <span className="exhibit-rule" aria-hidden="true" />
             <span className="hidden font-data text-[10px] uppercase tracking-widest text-dim sm:inline">dated replay · shareable</span>
           </div>
@@ -232,9 +237,9 @@ export default function Home() {
 
       {/* ——— Case files ——— */}
       {rows.length > 0 && (
-        <section id="files" className="mt-14" aria-labelledby="ex2-title">
+        <section id="files" className="mt-14" aria-labelledby="files-title">
           <div className="exhibit">
-            <h2 id="ex2-title" className="exhibit-title">Case files</h2>
+            <h2 id="files-title" className="exhibit-title">Case files</h2>
             <span className="exhibit-rule" aria-hidden="true" />
             <span className="hidden font-data text-[10px] uppercase tracking-widest text-dim sm:inline">{rows.length} records</span>
           </div>
@@ -245,9 +250,9 @@ export default function Home() {
       )}
 
       {/* ——— Method ——— */}
-      <section id="method" className="mt-14" aria-labelledby="ex3-title">
+      <section id="method" className="mt-14" aria-labelledby="method-title">
         <div className="exhibit">
-          <h2 id="ex3-title" className="exhibit-title">Method</h2>
+          <h2 id="method-title" className="exhibit-title">Method</h2>
           <span className="exhibit-rule" aria-hidden="true" />
         </div>
         <div className="mt-6 grid gap-5 md:grid-cols-2">

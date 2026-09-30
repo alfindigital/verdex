@@ -184,7 +184,7 @@ function LiqViz({ m, unavailable }: { m: MetricsBag; unavailable?: boolean }) {
         <HBar value={unavailable ? 0 : pullPct} max={1} tone={unavailable ? "bg-line" : pullPct > THRESHOLDS.maxSinglePullPct.danger ? "bg-danger" : pullPct >= THRESHOLDS.maxSinglePullPct.warn ? "bg-warn" : "bg-safe"} />
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <Stat k="liquidity" v={fmtUsd(num(m.totalLiqUsd))} />
+        <Stat k="pool depth (Σ)" v={fmtUsd(num(m.totalLiqUsd))} />
         <Stat k="pools" v={fmtNum(num(m.poolCount))} />
         <Stat k="net LP Δ" v={m.removalVsCurrentDepth == null ? "—" : fmtUsd(num(m.netLpDeltaUsd))} tone={m.removalVsCurrentDepth == null ? "text-dim" : num(m.netLpDeltaUsd) < 0 ? "text-danger" : "text-safe"} />
       </div>
@@ -335,7 +335,7 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 lg:col-span-full lg:border-t lg:border-line lg:pt-5">
           <Stat k="mcap" v={fmtUsd(v.token.mcapUsd)} />
           <Stat k="vol 24h" v={fmtUsd(v.token.vol24hUsd)} />
-          <Stat k="liquidity" v={fmtUsd(num(v.metrics.liq?.totalLiqUsd))} />
+          <Stat k="pool depth" v={fmtUsd(num(v.metrics.liq?.totalLiqUsd))} />
           <Stat
             k="Δ 24h"
             v={chg == null ? "—" : `${chg >= 0 ? "+" : ""}${(chg * 100).toFixed(2)}%`}
