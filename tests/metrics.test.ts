@@ -134,6 +134,13 @@ describe("safetyMetrics", () => {
         { code: "honeypot", hit: true, level: "r" },
         { code: "wash_trading", hit: false, level: "g" },
       ],
+      allItems: [
+        { code: "honeypot", riskCode: "honeypot", hit: true, level: "r", description: null, group: null, order: null },
+        { code: "wash_trading", riskCode: "wash_trading", hit: false, level: "g", description: null, group: null, order: null },
+      ],
+      categoryLevel: null,
+      tags: [],
+      evmFlags: {},
       buyTax: 0, sellTax: 15, flaggedByVendor: false,
     };
     const m = safetyMetrics(sec);

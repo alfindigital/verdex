@@ -146,7 +146,6 @@ async function main() {
     }
     const live = createCmcClient({
       apiKey: process.env.CMC_API_KEY,
-      fallbackApiKey: process.env.CMC_FALLBACK_API_KEY || undefined,
       logPath: path.join(process.cwd(), "data", "api_log.jsonl"),
       cacheDir: path.join(process.cwd(), "data", "cache"),
     });

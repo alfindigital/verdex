@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Checker } from "@/components/checker";
-import { DirToggle } from "@/components/dir-toggle";
 import { CaseTable } from "@/components/case-table";
 import type { CaseRow } from "@/lib/case-table";
 import { listSnapshotIds, loadVerdict, slugFor } from "@/lib/verdict-store";
@@ -102,7 +101,6 @@ export default function Home() {
             <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-safe" : "bg-warn"}`} aria-hidden="true" />
             {live ? "live scan" : "recorded replay"}
           </span>
-          <DirToggle />
           <a
             href="https://github.com/alfindigital/verdex"
             rel="noopener noreferrer"

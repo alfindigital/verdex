@@ -34,15 +34,27 @@ export function evaluateCoverage(
 
   let flow: CoverageLevel = "sufficient";
   const swaps = required(sources, "swaps");
+  const spanMs =
+    window.firstSwapAt && window.lastSwapAt
+      ? Date.parse(window.lastSwapAt) - Date.parse(window.firstSwapAt)
+      : null;
   if (hasFailed(swaps) || window.validSwaps === 0 || !window.firstSwapAt || !window.lastSwapAt) flow = "insufficient";
   else if (window.validSwaps < 50) flow = "insufficient";
-  else if (window.rejectedSwaps > 0 || window.truncated || exclusionStatus !== "creator-owner-known") flow = "limited";
+  else if (window.rejectedSwaps > 0 || exclusionStatus !== "creator-owner-known") flow = "limited";
+  // A truncated sample is a scope fact, not automatically a defect: 100 rows
+  // spanning ≥15 min is a workable window; 100 rows spanning seconds is a
+  // sliver that can't bear a verdict. Only the thin case costs coverage.
+  else if (window.truncated && spanMs !== null && spanMs < 15 * 60_000) flow = "limited";
   const lastAge = window.lastSwapAt ? checkedMs - Date.parse(window.lastSwapAt) : null;
   if (lastAge === null || !Number.isFinite(lastAge) || lastAge > 15 * 60_000) {
     flow = "insufficient";
     reasons.push("swap window is missing or stale");
   }
   if (window.validSwaps < 50) reasons.push(`only ${window.validSwaps} valid swaps observed; 50 required for a sufficient window`);
+  if (window.truncated) {
+    const spanMin = spanMs !== null && spanMs >= 0 ? Math.round(spanMs / 60_000) : null;
+    reasons.push(`swap sample truncated at the ${window.requestedLimit}-row endpoint cap${spanMin !== null ? ` (observed span ~${spanMin}m)` : ""}`);
+  }
   if (window.rejectedSwaps > 0) reasons.push(`${window.rejectedSwaps} swap rows rejected`);
   if (exclusionStatus !== "creator-owner-known") reasons.push("creator/owner exclusion coverage is incomplete");
   if (hasFailed(swaps)) reasons.push("swap source failed or was not captured");

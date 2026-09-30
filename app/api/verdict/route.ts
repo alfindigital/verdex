@@ -14,12 +14,12 @@ export const runtime = "nodejs";
 const dataDir = process.env.VERCEL ? "/tmp/verdex" : path.join(process.cwd(), "data");
 
 function client() {
+  // Single primary key — per owner directive the live path deliberately wires
+  // one key only; CMC_FALLBACK_API_KEY is intentionally not read here.
   const apiKey = process.env.CMC_API_KEY;
-  const fallbackApiKey = process.env.CMC_FALLBACK_API_KEY;
-  if (!apiKey && !fallbackApiKey) throw new Error("CMC_API_KEY missing");
+  if (!apiKey) throw new Error("CMC_API_KEY missing");
   return createCmcClient({
-    apiKey: apiKey ?? "",
-    fallbackApiKey,
+    apiKey,
     logPath: path.join(dataDir, "api_log.jsonl"),
     cacheDir: path.join(dataDir, "cache"),
   });

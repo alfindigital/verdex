@@ -18,11 +18,13 @@ import {
   type DexClient,
   type TokenRef,
 } from "@/lib/dex";
-import { tokenIdentity } from "@/lib/address";
+import { tokenIdentity, walletIdentity, canonicalChain } from "@/lib/address";
 import { flowMetrics, liquidityMetrics, pumpMetrics, safetyMetrics, type FlowMetrics, type LiquidityMetrics, type PumpMetrics, type SafetyMetrics } from "@/engine/metrics";
 import { composite, evalFlowV2, evalLiquidityV2, evalPump, evalSafety, type CompositeResult, type SubVerdict } from "@/engine/rules";
 import { buildRecheck, evaluateCoverage, labelRisk } from "@/engine/coverage";
-import type { Coverage, EvidenceSummary, ObservationWindow, SourceEvidence, SourceKey } from "@/lib/verdict-types";
+import type { Coverage, EvidenceSummary, ObservationWindow, SourceEvidence, SourceKey, TokenDossier } from "@/lib/verdict-types";
+import type { MarketContext } from "@/lib/dex";
+import { buildDossier } from "@/engine/dossier";
 import { jevCrossExamine, agreement, type JevOpinion, type Agreement } from "@/lib/jev";
 import { narrate, type Narration } from "@/engine/narrator";
 
@@ -66,7 +68,8 @@ export type AnalyzeResult =
       window: ObservationWindow;
       sources: SourceEvidence[];
       evidence: EvidenceSummary[];
-      context: { btcDom: number | null; btcDomDelta7d: number | null; fearGreed: number | null };
+      context: MarketContext;
+      dossier?: TokenDossier;
       share: { kind: "snapshot" | "none"; path: string | null };
     };
 
@@ -175,7 +178,10 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     duplicateRows: swapsR?.duplicates ?? 0,
     requestedLimit: 100,
     fetchedPages: 1,
-    truncated: false,
+    // The endpoint hard-caps at 100 rows and ignores offset/page params
+    // (probed 2026-09). A full page means older rows may exist off-window —
+    // coverage must say so instead of claiming a complete sample.
+    truncated: swaps.length >= 100,
   };
 
   // --- metrics → rules ---
@@ -219,6 +225,19 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     narrateFn(token.symbol, token.platform, result).catch(() => undefined),
   ]);
 
+  // Dossier: every provider field worth displaying, carried through the
+  // normalizers — additive, never feeds the deterministic score.
+  const dossier = buildDossier({
+    token,
+    profile: metaR?.profile ?? null,
+    pools,
+    swaps,
+    events,
+    sec,
+    ctx,
+    nowMs: now(),
+  });
+
   const id = createHash("sha256").update(`${token.address}:${now()}:${randomUUID()}`).digest("hex").slice(0, 12);
   return {
     kind: "verdict",
@@ -242,6 +261,7 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     sources,
     evidence: [],
     context: ctx,
+    dossier,
     share: { kind: "none", path: null },
   };
 }

@@ -3,7 +3,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { VerdictCard } from "@/components/verdict-card";
-import { DirToggle } from "@/components/dir-toggle";
 import { listSnapshotIds, listSnapshotSlugs, loadVerdict, snapshotPath } from "@/lib/verdict-store";
 
 // Bake every committed snapshot (hex ids + stable slugs) into static pages at
@@ -48,7 +47,6 @@ export default async function VerdictPage({ params }: { params: Promise<{ id: st
           <span className="hidden font-data text-[10px] uppercase tracking-widest text-dim sm:inline">
             exhibit/{v.id} · {exactPath ? "recorded archive" : "transient live result"}
           </span>
-          <DirToggle />
           {tweet ? (
             <a
               href={tweet}

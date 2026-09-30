@@ -17,7 +17,7 @@ function queryMatches(record: ReplayRecordLike, query: string): boolean {
 export function matchReplayRecords<T extends ReplayRecordLike>(records: T[], body: ScanBody): T[] {
   const requestedChain = body.platform ? canonicalChain(body.platform) : null;
   const requestedIdentity = body.selection ? tokenIdentity(body.selection.platform, body.selection.address) : null;
-  return records
+  const matches = records
     .filter((record) => {
       if (!queryMatches(record, body.query)) return false;
       if (requestedChain && canonicalChain(record.token.platform) !== requestedChain) return false;
@@ -28,4 +28,17 @@ export function matchReplayRecords<T extends ReplayRecordLike>(records: T[], bod
       return true;
     })
     .sort((a, b) => a.id.localeCompare(b.id));
+  // Duplicate records of the SAME token identity (e.g. a v1 snapshot beside the
+  // newer v2 capture) are not ambiguity — serve the newest/best record.
+  // Ambiguity only means two DIFFERENT token identities matched.
+  const identities = new Set(matches.map((r) => tokenIdentity(r.token.platform, r.token.address)));
+  if (identities.size === 1 && matches.length > 1) {
+    const best = [...matches].sort(
+      (a, b) =>
+        ((b as { schemaVersion?: number }).schemaVersion ?? 0) - ((a as { schemaVersion?: number }).schemaVersion ?? 0) ||
+        ((b as { ts?: string }).ts ?? "").localeCompare((a as { ts?: string }).ts ?? ""),
+    );
+    return [best[0]];
+  }
+  return matches;
 }

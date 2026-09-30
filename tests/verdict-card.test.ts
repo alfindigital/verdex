@@ -5,9 +5,10 @@ import { readFileSync } from "fs";
 import { listSnapshotIds, loadVerdict } from "@/lib/verdict-store";
 import { VerdictCard, type VerdictRecord } from "@/components/verdict-card";
 
-const legacyFixture = loadVerdict(listSnapshotIds()[0]);
-if (!legacyFixture) throw new Error("snapshot corpus is empty");
-if (legacyFixture.schemaVersion) throw new Error("expected a v1 legacy fixture");
+const legacyFixture = listSnapshotIds()
+  .map((id) => loadVerdict(id))
+  .find((v): v is NonNullable<typeof v> => Boolean(v) && !v!.schemaVersion);
+if (!legacyFixture) throw new Error("no v1 legacy snapshot in corpus");
 const lpFailureFixture = (JSON.parse(readFileSync("tests/fixtures/cmc/synthetic-lp-outage-bundle.json", "utf8")) as { record: VerdictRecord }).record;
 
 describe("VerdictCard evidence framing", () => {

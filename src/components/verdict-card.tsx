@@ -4,9 +4,10 @@
 
 import { Donut, HBar, LevelMeter, NeedleGauge, ScoreGauge, SplitBar, Stat, fmtNum, fmtPct, fmtUsd } from "./viz";
 import { THRESHOLDS } from "@/engine/rules";
-import type { Coverage, EvidenceSummary, ObservationWindow, RecheckCondition, SourceEvidence } from "@/lib/verdict-types";
+import type { Coverage, EvidenceSummary, ObservationWindow, RecheckCondition, SourceEvidence, TokenDossier } from "@/lib/verdict-types";
 import { LEVEL_TONE, VERDICT_STYLE, RISK_STYLE, type ToneKey } from "@/lib/verdict-display";
 import { EvidencePanel } from "@/components/evidence-panel";
+import { DossierSections } from "@/components/dossier";
 
 export type TokenRef = { platform: string; address: string; name: string; symbol: string; mcapUsd?: number | null; vol24hUsd?: number | null };
 export type MetricRow = { name: string; value: number | string; threshold: string; level: string };
@@ -32,7 +33,13 @@ export type VerdictRecord = {
   window?: ObservationWindow;
   sources?: SourceEvidence[];
   evidence?: EvidenceSummary[];
-  context?: { btcDom: number | null; btcDomDelta7d: number | null; fearGreed: number | null };
+  context?: {
+    btcDom: number | null;
+    btcDomDelta7d: number | null;
+    fearGreed: number | null;
+    [key: string]: unknown;
+  };
+  dossier?: TokenDossier;
   share?: { kind: "snapshot" | "none"; path: string | null };
 };
 
@@ -434,6 +441,14 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
           )}
         </div>
       </div>
+
+      {v.dossier ? (
+        <DossierSections d={v.dossier} />
+      ) : (
+        <div className="border-t border-line px-5 py-3.5 font-data text-[11px] text-dim sm:px-6">
+          <span className="redact px-2">Extended dossier not retained for this record.</span>
+        </div>
+      )}
 
       {v.failures.length > 0 && (
         <div className="border-t border-line px-5 py-3.5 font-data text-[11px] text-dim sm:px-6">
