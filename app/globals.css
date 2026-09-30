@@ -1,25 +1,64 @@
 @import "tailwindcss";
 
+/* ═══ Verdex visual system — see DESIGN.md ═══
+   Two directions share one semantic token set; [data-dir] swaps the world.
+   a = "Evidence Desk" (editorial dossier, Fraunces)
+   b = "Instrument Panel" (expanded grotesk, squared, cyan accent) */
+
 @theme {
-  --color-ink: #0c0e0c;
-  --color-panel: #121512;
-  --color-raised: #171b17;
-  --color-line: #232823;
-  --color-line-bright: #3a423a;
-  --color-text: #eceee9;
-  --color-dim: #9aa39a;
-  --color-faint: #5c645c;
-  --color-safe: #34d399;
-  --color-warn: #fbbf24;
-  --color-danger: #f87171;
-  --color-unknown: #8a9189;
+  --color-ink: #0b0c0a;
+  --color-panel: #13160f;
+  --color-raised: #1a1e15;
+  --color-line: #2a2f25;
+  --color-line-bright: #404739;
+  --color-text: #eef1e7;
+  --color-dim: #a7b09d;
+  --color-faint: #8b947f;
+  --color-paper: #eae8da;
+  --color-paper-ink: #1b1d16;
+
+  --color-safe: #3dd68c;
+  --color-warn: #f0b23c;
+  --color-danger: #f2555a;
+  --color-unknown: #9aa392;
+  --color-accent: #3dd68c;
 
   --font-display: var(--font-archivo), system-ui, sans-serif;
   --font-data: var(--font-plex-mono), ui-monospace, monospace;
+  --font-deco: var(--font-fraunces), Georgia, serif;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --deco-weight: 600;
+  --deco-stretch: 100%;
+  --deco-tracking: -0.015em;
+  --deco-transform: none;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+html[data-dir="b"] {
+  --color-ink: #090d12;
+  --color-panel: #0f141b;
+  --color-raised: #161d27;
+  --color-line: #24303f;
+  --color-line-bright: #37475d;
+  --color-text: #eaeef5;
+  --color-dim: #a3adbe;
+  --color-faint: #8793a6;
+  --color-paper: #e8ecf1;
+  --color-paper-ink: #131920;
+  --color-accent: #2fd2f0;
+
+  --font-deco: var(--font-archivo), system-ui, sans-serif;
+  --deco-weight: 800;
+  --deco-stretch: 122%;
+  --deco-tracking: -0.03em;
+  --deco-transform: uppercase;
+
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
 }
 
 html {
@@ -34,7 +73,7 @@ body {
 }
 
 /* Film-grain overlay: subtle texture so the bg isn't a flat void.
-   SVG turbulence, ~2% opacity, fixed, non-interactive. */
+   SVG turbulence, ~3% opacity, fixed, non-interactive. */
 body::before {
   content: "";
   position: fixed;
@@ -46,32 +85,240 @@ body::before {
 }
 
 ::selection {
-  background: rgba(52, 211, 153, 0.25);
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
   color: var(--color-text);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-safe);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
 
-/* ——— Verdex identity utilities ——— */
+/* ——— Display typography (deco = the direction's display voice) ——— */
 
-/* Rubber-stamp verdict label */
+.deco {
+  font-family: var(--font-deco);
+  font-weight: var(--deco-weight);
+  font-stretch: var(--deco-stretch);
+  letter-spacing: var(--deco-tracking);
+  text-transform: var(--deco-transform);
+}
+
+/* Fraunces WONK axis — quirky terminals on the one word that deserves it */
+.wonk { font-variation-settings: "WONK" 1, "opsz" 144; }
+html[data-dir="b"] .wonk { font-variation-settings: normal; }
+
+/* ——— Identity utilities ——— */
+
+/* Ink stamp. A: rotated double-bordered Fraunces. B: square expanded slab. */
 .stamp {
   display: inline-block;
-  font-family: var(--font-data);
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  border: 2px solid currentColor;
-  border-radius: 4px;
-  padding: 0.35em 0.7em;
-  transform: rotate(-2.5deg);
+  font-family: var(--font-deco);
+  font-weight: 640;
+  font-stretch: var(--deco-stretch);
+  letter-spacing: 0.09em;
   text-transform: uppercase;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  padding: 0.4em 0.85em;
+  transform: rotate(-2.5deg);
   line-height: 1;
   white-space: nowrap;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 40%, transparent);
 }
+.stamp-sm { font-size: 0.66rem; }
+.stamp-md { font-size: 0.8rem; }
+.stamp-lg { font-size: clamp(1.5rem, 3.6vw, 2.6rem); border-width: 2.5px; padding: 0.42em 0.9em; }
+
+html[data-dir="b"] .stamp {
+  transform: none;
+  border-width: 2.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  box-shadow: none;
+}
+
+/* Stamp spring-in on verdict reveal (A: slams to -2.5deg; B: flat pop) */
+@keyframes vdx-stamp-a {
+  0% { opacity: 0; transform: rotate(-7deg) scale(1.45); }
+  60% { opacity: 1; transform: rotate(-2.2deg) scale(0.97); }
+  100% { opacity: 1; transform: rotate(-2.5deg) scale(1); }
+}
+@keyframes vdx-stamp-b {
+  0% { opacity: 0; transform: scale(1.3); }
+  60% { opacity: 1; transform: scale(0.97); }
+  100% { opacity: 1; transform: scale(1); }
+}
+html[data-dir="a"] .stamp-in { animation: vdx-stamp-a 400ms cubic-bezier(0.2, 1.5, 0.3, 1) 80ms both; }
+html[data-dir="b"] .stamp-in { animation: vdx-stamp-b 300ms cubic-bezier(0.2, 1.5, 0.3, 1) 60ms both; }
+
+/* Paper tag — small rotated paper chip for exhibit indices and archive marks.
+   Dark ink on paper = always high contrast, zero risk. */
+.paper-tag {
+  display: inline-block;
+  background: var(--color-paper);
+  color: var(--color-paper-ink);
+  font-family: var(--font-data);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.3em 0.7em;
+  border-radius: 2px;
+  transform: rotate(-1deg);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+}
+html[data-dir="b"] .paper-tag {
+  transform: none;
+  border-radius: 1px;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  box-shadow: none;
+}
+
+/* Exhibit section header: EX-nn + rule + title */
+.exhibit {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.exhibit-no {
+  font-family: var(--font-data);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+.exhibit-title {
+  font-family: var(--font-deco);
+  font-weight: var(--deco-weight);
+  font-stretch: var(--deco-stretch);
+  letter-spacing: var(--deco-tracking);
+  text-transform: var(--deco-transform);
+  font-size: clamp(1.3rem, 2.4vw, 1.8rem);
+  line-height: 1.05;
+}
+.exhibit-rule {
+  flex: 1;
+  border-top: 1px solid var(--color-line);
+  align-self: center;
+}
+html[data-dir="a"] .exhibit-rule { border-top-style: dotted; }
+
+/* Dossier card — a case file with physical presence */
+.dossier {
+  position: relative;
+  display: block;
+  background: var(--color-raised);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+html[data-dir="a"] .dossier {
+  box-shadow: 0 18px 34px -20px rgba(0, 0, 0, 0.7), 0 3px 8px -4px rgba(0, 0, 0, 0.45);
+}
+html[data-dir="a"] .dossier:nth-child(odd) { transform: rotate(-0.45deg); }
+html[data-dir="a"] .dossier:nth-child(even) { transform: rotate(0.35deg); }
+html[data-dir="a"] .dossier:hover { transform: rotate(0deg) translateY(-2px); border-color: var(--color-line-bright); }
+html[data-dir="b"] .dossier { border-left: 3px solid var(--color-accent); }
+html[data-dir="b"] .dossier:hover { border-color: var(--color-accent); }
+
+/* Redaction bar — visible honesty for data that is not retained */
+.redact {
+  display: inline-block;
+  min-height: 1em;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-raised) 0px,
+    var(--color-raised) 5px,
+    var(--color-line) 5px,
+    var(--color-line) 6px
+  );
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  vertical-align: text-bottom;
+}
+
+/* Fingerprint strip — chunked hash/address, unmistakably data */
+.mono-strip {
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--color-dim);
+  word-break: break-all;
+}
+.mono-strip b { color: var(--color-text); font-weight: 500; }
+
+/* Panel section header — replaces the old "verdex@cmc:~$" chrome */
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.65rem 1rem;
+  font-family: var(--font-data);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-dim);
+}
+
+/* Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: 0.3em 0.7em;
+  font-family: var(--font-data);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-dim);
+  transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+}
+button.chip:hover { border-color: var(--color-line-bright); color: var(--color-text); }
+.chip[aria-pressed="true"], .chip.on {
+  border-color: color-mix(in srgb, var(--color-accent) 65%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-accent);
+}
+
+/* Primary run button — the one big affirmative action */
+.btn-run {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  border-radius: var(--radius-sm);
+  padding: 0 1.5rem;
+  transition: filter 140ms ease, transform 80ms ease;
+}
+.btn-run:hover:not(:disabled) { filter: brightness(1.08); }
+.btn-run:active:not(:disabled) { transform: translateY(1px); }
+.btn-run:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Ghost button — secondary actions (copy, download, share) */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: 0.4em 0.85em;
+  font-family: var(--font-data);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-dim);
+  transition: color 140ms ease, border-color 140ms ease;
+}
+.btn-ghost:hover { border-color: var(--color-accent); color: var(--color-accent); }
 
 /* Skeleton shaped like content, not a generic spinner */
 @keyframes vdx-shimmer {
@@ -95,8 +342,8 @@ body::before {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .skeleton { animation: none; }
-  .case-row { transition: none; }
+  .reveal, .skeleton, .stamp-in { animation: none; }
+  .dossier, .chip, .btn-ghost, .btn-run { transition: none; }
 }
 
 /* Numeric data always tabular */

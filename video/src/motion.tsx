@@ -45,8 +45,9 @@ export function count(frame: number, at: number, to: number, span = 22) {
   return Math.round(interpolate(frame, [at, at + span], [0, to], { ...clamp, easing: easeOut }));
 }
 
-// Voiceover track, identical for all variants. s4c is 0.6s over its window,
-// so it runs at 1.06x (inaudible shift, fits the scene).
+// Voiceover track, identical for all variants. ElevenLabs "River" (premade,
+// free tier) — 2026-09-30 regeneration. s5 is 0.15s over its window, so it
+// runs at 1.02x (inaudible shift, fits the scene).
 export const VoTrack: React.FC = () => (
   <>
     <Sequence durationInFrames={240}><Audio src={staticFile("vo/s1.mp3")} /></Sequence>
@@ -54,8 +55,8 @@ export const VoTrack: React.FC = () => (
     <Sequence from={450} durationInFrames={300}><Audio src={staticFile("vo/s3.mp3")} /></Sequence>
     <Sequence from={750} durationInFrames={290}><Audio src={staticFile("vo/s4a.mp3")} /></Sequence>
     <Sequence from={1040} durationInFrames={290}><Audio src={staticFile("vo/s4b.mp3")} /></Sequence>
-    <Sequence from={1330} durationInFrames={290}><Audio src={staticFile("vo/s4c.mp3")} playbackRate={1.06} /></Sequence>
-    <Sequence from={1620} durationInFrames={330}><Audio src={staticFile("vo/s5.mp3")} /></Sequence>
+    <Sequence from={1330} durationInFrames={290}><Audio src={staticFile("vo/s4c.mp3")} /></Sequence>
+    <Sequence from={1620} durationInFrames={330}><Audio src={staticFile("vo/s5.mp3")} playbackRate={1.02} /></Sequence>
     <Sequence from={1950} durationInFrames={330}><Audio src={staticFile("vo/s6.mp3")} /></Sequence>
     <Sequence from={2280} durationInFrames={420}><Audio src={staticFile("vo/s7.mp3")} /></Sequence>
   </>

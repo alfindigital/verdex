@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { VerdictCard } from "@/components/verdict-card";
+import { DirToggle } from "@/components/dir-toggle";
 import { listSnapshotIds, listSnapshotSlugs, loadVerdict, snapshotPath } from "@/lib/verdict-store";
 
 // Bake every committed snapshot (hex ids + stable slugs) into static pages at
@@ -36,30 +38,35 @@ export default async function VerdictPage({ params }: { params: Promise<{ id: st
       )}&url=${encodeURIComponent(shareUrl)}&hashtags=BuildwithCMC`
     : null;
   return (
-    <main className="relative z-[1] mx-auto max-w-7xl px-4 py-6 sm:px-6">
-      <header className="mb-5 flex items-center justify-between border-b border-line pb-3">
-        <Link href="/" className="font-data text-xs font-bold tracking-[0.25em] text-dim transition-colors hover:text-safe">
-          ← VERDEX
+    <main className="relative z-[1] mx-auto max-w-7xl px-4 py-5 sm:px-6">
+      <header className="mb-6 flex items-center justify-between gap-4 border-b border-line pb-4">
+        <Link href="/" className="flex items-center gap-3">
+          <Image src="/logo.png" alt="Verdex" width={26} height={26} className="rounded-sm" />
+          <span className="deco text-lg leading-none">Verdex</span>
         </Link>
-        <div className="flex items-center gap-4">
-          <span className="font-data text-[10px] uppercase tracking-widest text-faint">
-            verdict/{v.id} · {exactPath ? "recorded archive" : "transient live result"}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="hidden font-data text-[10px] uppercase tracking-widest text-dim sm:inline">
+            exhibit/{v.id} · {exactPath ? "recorded archive" : "transient live result"}
           </span>
+          <DirToggle />
           {tweet ? (
             <a
               href={tweet}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-data text-[10px] font-bold uppercase tracking-widest text-dim transition-colors hover:text-safe"
+              className="font-data text-[10px] font-bold uppercase tracking-widest text-dim transition-colors hover:text-accent"
             >
               share on X ↗
             </a>
           ) : (
-            <span className="font-data text-[10px] uppercase tracking-widest text-faint">no permanent share link</span>
+            <span className="font-data text-[10px] uppercase tracking-widest text-dim">no permanent share link</span>
           )}
         </div>
       </header>
       <VerdictCard v={v} />
+      <p className="mt-6 text-center font-data text-[10px] uppercase tracking-widest text-dim">
+        deterministic rules · second opinion labeled · not financial advice
+      </p>
     </main>
   );
 }

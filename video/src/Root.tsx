@@ -5,6 +5,7 @@ import { VerdexDemo } from "./VerdexDemo";
 import { VerdexA } from "./VariantA";
 import { VerdexB } from "./VariantB";
 import { VerdexC } from "./VariantC";
+import { VerdexD } from "./VariantD";
 import { VerdexAlpha } from "./VerdexAlpha";
 import { VerdexBeta } from "./VerdexBeta";
 import { VerdexGamma } from "./VerdexGamma";
@@ -19,6 +20,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="VerdexA-SlamCut" component={VerdexA} {...conf} />
       <Composition id="VerdexB-EvidenceTape" component={VerdexB} {...conf} />
       <Composition id="VerdexC-VerdictField" component={VerdexC} {...conf} />
+      <Composition id="VerdexD-Dossier" component={VerdexD} {...conf} />
       <Composition id="VerdexAlpha" component={VerdexAlpha} {...conf} />
       <Composition id="VerdexBeta" component={VerdexBeta} {...conf} />
       <Composition
