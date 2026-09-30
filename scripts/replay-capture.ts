@@ -110,7 +110,7 @@ async function main() {
     }
     return source;
   });
-  const record = { ...replayed, sources };
+  const record = { ...replayed, sources, mode: "replay" as const };
   const bundle: EvidenceBundle = {
     schemaVersion: 2,
     record,

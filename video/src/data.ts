@@ -18,20 +18,20 @@ export interface CaseData {
 
 export const CASES: CaseData[] = [
   {
-    token: "GMX",
-    chain: "arbitrum",
-    verdict: "LAYAK",
-    label: "ENTRY-WORTHY",
-    color: C.safe,
-    score: 100,
+    token: "RAY",
+    chain: "solana",
+    verdict: "RAWAN",
+    label: "CAUTION",
+    color: C.warn,
+    score: 85,
     rows: [
       ["SAFETY", "CLEAN"],
-      ["FLOW", "CLEAN"],
+      ["top5MakerShare 0.92 vs <0.50", "DANGER"],
       ["LIQUIDITY", "CLEAN"],
       ["PUMP", "CLEAN"],
     ],
-    foot: "Recorded archive (2026-09-26): Jev second opinion",
-    footAccent: "0.10 · consensus",
+    foot: "Recorded archive (2026-09-30): one failing row, named. Jev:",
+    footAccent: "unavailable in replay — labeled",
   },
   {
     token: "SUSHI",
@@ -50,6 +50,22 @@ export const CASES: CaseData[] = [
     footAccent: "contested",
   },
   {
+    token: "GMX",
+    chain: "arbitrum",
+    verdict: "JANGAN",
+    label: "AVOID",
+    color: C.danger,
+    score: 60,
+    rows: [
+      ["SAFETY", "CLEAN"],
+      ["top5MakerShare 0.81 vs <0.50", "DANGER"],
+      ["netBuyRatio -0.28 vs >0", "WARN"],
+      ["LIQUIDITY / PUMP", "CLEAN"],
+    ],
+    foot: "Recorded archive (2026-09-30): FLOW danger on blue-chip governance token",
+    footAccent: "coverage limited — truncation disclosed",
+  },
+  {
     token: "AAVE",
     chain: "ethereum · mcap $2.4B",
     verdict: "RAWAN",
@@ -58,33 +74,33 @@ export const CASES: CaseData[] = [
     score: 70,
     rows: [
       ["centralizationFlags: upgradeable", "WARN"],
-      ["top5MakerShare 0.76, mature tier", "WARN"],
-      ["netBuyRatio -0.14, mature tier", "WARN"],
+      ["top5MakerShare 0.87 vs <0.50", "DANGER"],
       ["LIQUIDITY / PUMP", "CLEAN"],
+      ["", "CLEAN"],
     ],
-    foot: "Recorded archive (2026-09-26): rules caution. Jev: 0.27.",
-    footAccent: "Contested, shown not hidden",
+    foot: "Recorded archive (2026-09-30): rules caution",
+    footAccent: "failing rows named, not hidden",
   },
 ];
 
-// Recorded SHA-256 prefixes from verdict 8d3ea1d0c471 (GMX archive).
+// Recorded SHA-256 prefixes from verdict 0153cafc32e5 (RAY archive, 2026-09-30).
 export const RECEIPTS: [string, string, string][] = [
-  ["/v1/dex/search", "GMX · Arbitrum", "e8517296"],
-  ["/v1/dex/tokens/transactions", "100 swaps", "8a6b0f55"],
-  ["/v1/dex/token/pools", "pool depth", "cabe41d1"],
-  ["/v1/dex/liquidity-change/list", "LP events", "4b1b7fa4"],
-  ["/v1/dex/security/detail", "risk flags", "e9a5b0b1"],
-  ["/v1/dex/token", "creator meta", "4708ce14"],
-  ["/v1/global-metrics/quotes/historical", "market ctx", "9b364428"],
-  ["/v3/fear-and-greed/latest", "market ctx", "acb39ab9"],
-  ["/v1/global-metrics/quotes/latest", "market ctx", "8bd80c85"],
+  ["/v1/dex/search", "RAY · Solana", "f7b472e6"],
+  ["/v1/dex/tokens/transactions", "100 swaps", "df85aafc"],
+  ["/v1/dex/token/pools", "pool depth", "8a05ca4d"],
+  ["/v1/dex/liquidity-change/list", "LP events", "42186ccf"],
+  ["/v1/dex/security/detail", "risk flags", "8eff059e"],
+  ["/v1/dex/token", "creator meta", "fbbaf934"],
+  ["/v1/global-metrics/quotes/latest", "market ctx", "2aaae67d"],
+  ["/v1/global-metrics/quotes/historical", "market ctx", "d6e5def9"],
+  ["/v3/fear-and-greed/latest", "market ctx", "fd47e326"],
 ];
 
 export const STATS: [string, string][] = [
-  ["34", "recorded verdicts on file"],
-  ["7", "chains covered"],
-  ["306", "recorded API receipts"],
-  ["30 · 3 · 1", "recorded caution · avoid · entry-worthy"],
+  ["41", "recorded verdicts on file"],
+  ["8", "chains covered"],
+  ["369", "recorded API receipts"],
+  ["31 · 4 · 6", "recorded caution · avoid · insufficient"],
 ];
 
 // Timeline windows (frames @30fps). Shared by every variant so the VO syncs identically.
