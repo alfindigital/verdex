@@ -10,8 +10,8 @@ This file is a truthful copy pack. URLs that require a user action remain explic
 | Vision | Make “what was observed before a DEX swap?” checkable with source-backed flow, liquidity, safety, and coverage evidence. |
 | Category | Markets and Trading Tools |
 | GitHub | `https://github.com/alfindigital/verdex` — verify public visibility before submitting |
-| Project website | `https://verdex-alpha.vercel.app` — production alias verified HTTP 200 |
-| Demo video | **not published** — rendered file ready at `video/out/verdex-B-evidencetape.mp4` (90s, 1080p, re-rendered 2026-09-29 with final copy); owner uploads to YouTube |
+| Project website | `https://verdex-alpha.vercel.app` — production alias verified HTTP 200; **final domain `verdex.web.id`** pending Cloudflare provisioning |
+| Demo video | **not published** — 5 new rendered candidates in `video/out/`: `verdex-delta-receipt-ticker.mp4` (~105s), `verdex-epsilon-case-file.mp4` (~128s), `verdex-zeta-the-scan.mp4` (~89s), `verdex-eta-market-tape.mp4` (~78s), `verdex-theta-before-after.mp4` (~70s); pick one, owner uploads to YouTube. Legacy: `verdex-B-evidencetape.mp4` (90s) + `verdex-alpha/beta/gamma-*.mp4` |
 | Social link | **not published** — post only after the BUIDL URL and video URL exist |
 | Logo | `public/logo.png`; verify PNG/JPEG size is under 2 MB in the DoraHacks form |
 | Track | Markets and Trading Tools |
