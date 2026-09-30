@@ -15,14 +15,6 @@ const TEXT: Record<string, string> = {
   unknown: "text-unknown",
 };
 
-const SORTABLE: { key: CaseSortKey; label: string }[] = [
-  { key: "score", label: "score" },
-  { key: "mcap", label: "mcap" },
-  { key: "liq", label: "liq" },
-  { key: "net", label: "net flow" },
-  { key: "captured", label: "captured" },
-];
-
 export function CaseTable({ rows }: { rows: CaseRow[] }) {
   const [verdicts, setVerdicts] = useState<Set<string>>(new Set());
   const [chains, setChains] = useState<Set<string>>(new Set());

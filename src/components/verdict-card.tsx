@@ -156,7 +156,7 @@ function FlowViz({ m }: { m: MetricsBag }) {
   );
 }
 
-function LiqViz({ m }: { m: MetricsBag }) {
+function LiqViz({ m, unavailable }: { m: MetricsBag; unavailable?: boolean }) {
   const adds = num(m.addCount);
   const pulls = num(m.removeCount);
   const pullPct = num(m.maxSinglePullPct);
@@ -164,17 +164,17 @@ function LiqViz({ m }: { m: MetricsBag }) {
     <div className="space-y-4">
       <div>
         <div className="mb-1.5 flex justify-between font-data text-[11px] text-dim">
-          <span>LP ADDS {fmtNum(adds)}</span>
-          <span>LP REMOVES {fmtNum(pulls)}</span>
+          <span>LP ADDS {unavailable ? "—" : fmtNum(adds)}</span>
+          <span>LP REMOVES {unavailable ? "—" : fmtNum(pulls)}</span>
         </div>
-        <SplitBar buy={adds} sell={pulls} />
+        <SplitBar buy={unavailable ? 0 : adds} sell={unavailable ? 0 : pulls} />
       </div>
       <div>
         <div className="mb-1.5 flex justify-between font-data text-[11px] text-dim">
           <span>MAX SINGLE PULL</span>
-          <span className={pullPct > THRESHOLDS.maxSinglePullPct.danger ? "text-danger" : pullPct >= THRESHOLDS.maxSinglePullPct.warn ? "text-warn" : "text-text"}>{fmtPct(pullPct)}</span>
+          <span className={unavailable ? "text-dim" : pullPct > THRESHOLDS.maxSinglePullPct.danger ? "text-danger" : pullPct >= THRESHOLDS.maxSinglePullPct.warn ? "text-warn" : "text-text"}>{unavailable ? "—" : fmtPct(pullPct)}</span>
         </div>
-        <HBar value={pullPct} max={1} tone={pullPct > THRESHOLDS.maxSinglePullPct.danger ? "bg-danger" : pullPct >= THRESHOLDS.maxSinglePullPct.warn ? "bg-warn" : "bg-safe"} />
+        <HBar value={unavailable ? 0 : pullPct} max={1} tone={unavailable ? "bg-line" : pullPct > THRESHOLDS.maxSinglePullPct.danger ? "bg-danger" : pullPct >= THRESHOLDS.maxSinglePullPct.warn ? "bg-warn" : "bg-safe"} />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <Stat k="liquidity" v={fmtUsd(num(m.totalLiqUsd))} />
@@ -255,7 +255,6 @@ function SafetyViz({ m }: { m: MetricsBag }) {
 
 const DIM_VIZ: Record<string, (m: MetricsBag) => React.ReactNode> = {
   FLOW: (m) => <FlowViz m={m} />,
-  LIQUIDITY: (m) => <LiqViz m={m} />,
   PUMP: (m) => <PumpViz m={m} />,
   SAFETY: (m) => <SafetyViz m={m} />,
 };
@@ -272,6 +271,7 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
   const subs = (isV2 && v.result.v2Subs?.length ? v.result.v2Subs : v.result.subs);
   const rawEvidence = v.sources?.some((source) => source.bodyBase64) ?? false;
   const coverage = isV2 ? v.coverage?.level ?? "insufficient" : "archived";
+  const lpUnknown = v.coverage?.reasons.some((reason) => /lp|liquidity/i.test(reason)) ?? false;
 
   return (
     <section className="reveal overflow-hidden rounded-md border border-line bg-panel" aria-label={`Verdict for ${v.token.symbol}`}>
@@ -353,12 +353,14 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
       <div className="grid lg:grid-cols-2">
         {subs.map((s) => (
           <DimPanel key={s.dim} sub={s}>
-            {(DIM_VIZ[s.dim] ?? (() => null))(v.metrics[DIM_KEY[s.dim] ?? s.dim.toLowerCase()] ?? {})}
+            {s.dim === "LIQUIDITY"
+              ? <LiqViz m={v.metrics[DIM_KEY[s.dim]] ?? {}} unavailable={lpUnknown} />
+              : (DIM_VIZ[s.dim] ?? (() => null))(v.metrics[DIM_KEY[s.dim] ?? s.dim.toLowerCase()] ?? {})}
           </DimPanel>
         ))}
       </div>
 
-      {v.coverage?.reasons.some((reason) => /lp|liquidity/i.test(reason)) && (
+      {lpUnknown && (
         <div className="flex items-center gap-3 border-t border-warn/30 bg-warn/5 px-5 py-3.5 sm:px-6">
           <span className="redact w-8 shrink-0" aria-hidden="true">&nbsp;</span>
           <p className="text-xs leading-relaxed text-warn">

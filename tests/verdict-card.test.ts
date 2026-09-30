@@ -23,4 +23,12 @@ describe("VerdictCard evidence framing", () => {
     const html = renderToStaticMarkup(createElement(VerdictCard, { v: lpFailureFixture }));
     expect(html).toContain("LP evidence unavailable");
   });
+
+  it("renders missing LP event metrics as unknown, not zeros", () => {
+    const html = renderToStaticMarkup(createElement(VerdictCard, { v: lpFailureFixture }));
+    expect(html).not.toContain("LP ADDS 0");
+    expect(html).not.toContain("LP REMOVES 0");
+    expect(html).toContain("LP ADDS —");
+    expect(html).toContain("LP REMOVES —");
+  });
 });

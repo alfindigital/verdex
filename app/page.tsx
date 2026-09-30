@@ -12,14 +12,15 @@ import { resolveScanMode } from "@/lib/scan-policy";
 export const dynamic = "force-dynamic";
 
 const ENDPOINTS = [
-  "dex/search",
-  "dex/tokens/transactions",
-  "dex/token/pools",
-  "dex/token",
-  "dex/liquidity-change/list",
-  "dex/security/detail",
-  "global-metrics/quotes",
-  "fear-and-greed/latest",
+  "/v1/dex/search",
+  "/v1/dex/tokens/transactions",
+  "/v1/dex/token/pools",
+  "/v1/dex/token",
+  "/v1/dex/liquidity-change/list",
+  "/v1/dex/security/detail",
+  "/v1/global-metrics/quotes/latest",
+  "/v1/global-metrics/quotes/historical",
+  "/v3/fear-and-greed/latest",
 ];
 
 const TEXT: Record<string, string> = {
@@ -265,7 +266,7 @@ export default function Home() {
             <div className="flex flex-wrap content-start gap-1.5 p-4 sm:p-5">
               {ENDPOINTS.map((e) => (
                 <code key={e} className="rounded-sm border border-line bg-raised px-2 py-1 font-data text-[10px] text-dim">
-                  /v1/{e}
+                  {e}
                 </code>
               ))}
               <p className="mt-4 w-full text-xs leading-relaxed text-dim">

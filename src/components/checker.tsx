@@ -20,7 +20,7 @@ const PLATFORMS = [
 
 function ScanSkeleton() {
   return (
-    <div className="mt-5 overflow-hidden rounded-md border border-line bg-raised" role="status" aria-label="Scanning token">
+    <div className="mt-5 overflow-hidden rounded-md border border-line bg-raised" aria-hidden="true">
       <div className="flex flex-wrap items-center gap-6 border-b border-line px-5 py-6 sm:px-6">
         <div className="space-y-3">
           <div className="skeleton h-11 w-44 -rotate-2" />
@@ -139,10 +139,27 @@ export function Checker({ live }: { live: boolean }) {
       </form>
 
       {!loading && !out && (
-        <p className="mt-4 font-data text-[11px] leading-relaxed text-dim">
-          Exact identity only — tickers collide across chains, so an ambiguous query returns a candidate list,
-          never a guess. Or open a recorded exhibit below.
-        </p>
+        <div className="mt-4">
+          <p className="font-data text-[11px] leading-relaxed text-dim">
+            Exact identity only — tickers collide across chains, so an ambiguous query returns a candidate list,
+            never a guess. Or open a recorded exhibit below.
+          </p>
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+            {["gmx", "jup", "sushi"].map((ex) => (
+              <button
+                key={ex}
+                type="button"
+                onClick={() => setQuery(ex)}
+                className="chip font-data"
+              >
+                try {ex}
+              </button>
+            ))}
+            <a href="#ex2-title" className="chip font-data">
+              recorded case files ↓
+            </a>
+          </div>
+        </div>
       )}
 
       {loading && <ScanSkeleton />}

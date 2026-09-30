@@ -278,7 +278,7 @@ const ReceiptsD: React.FC = () => {
   const f = useCurrentFrame();
   return (
     <AbsoluteFill style={STAGE}>
-      <Exhibit no="05" title="Evidence receipts" frame={f} at={2} />
+      <Exhibit no="04" title="Evidence receipts" frame={f} at={2} />
       <div style={{ fontFamily: serif, fontWeight: 560, fontSize: 56, color: C.text, marginTop: 30, lineHeight: 1.15, ...snap(f, 8, 5) }}>
         Nine API calls. <span style={{ color: C.dim }}>Every response hashed.</span>
       </div>
@@ -313,7 +313,7 @@ const ScaleD: React.FC = () => {
   const f = useCurrentFrame();
   return (
     <AbsoluteFill style={STAGE}>
-      <Exhibit no="06" title="The corpus" frame={f} at={2} />
+      <Exhibit no="05" title="The corpus" frame={f} at={2} />
       <div style={{ display: "flex", gap: 20, marginTop: 44 }}>
         {STATS.map(([n, l], i) => (
           <div
