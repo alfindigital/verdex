@@ -87,8 +87,38 @@ mapan (tidak boleh JANGAN). Hasil pada `rulesVersion 2.3.0`:
   majors mendapat RAWAN karena tape DEX padat-arsip mereka menembak
   threshold FLOW, bukan karena scam. Trade-off disengaja; sensitivitas
   masih bisa dinaikkan tapi presisi menurun.
-- Receipt membuktikan reproduksibilitas, bukan kebenaran prediksi — belum
-  ada outcome follow-up 24h/7d (semua capture 30 Sep 2026).
+- Receipt membuktikan reproduksibilitas, bukan kebenaran prediksi.
+
+### Baseline comparison (same evidence, naive judges)
+
+`scripts/eval-baselines.ts` mengulang 59 label lewat aturan naif yang lazim
+dipakai orang ("cek flag security vendor" ≈ GoPlus-style, dan "likuiditas
+di bawah $X → avoid"). Semua sel dihitung dari evidence yang sama:
+
+| Judge | dead→JANGAN | dead miss | faded green | major FP |
+|---|---|---|---|---|
+| **verdex-rules** | **4/6** | **0** | **0/7** | 3/46 |
+| sec-flags-only | 0/6 | 2 | 5/7 | 0/46 |
+| liq<$10k → avoid | 2/6 | 4 | 6/7 | 1/46 |
+| liq<$50k → avoid | 2/6 | 1 | 2/7 | 1/46 |
+
+Yang dipisah Verdex dari baseline naif: **nol zombie dapat stamp hijau**
+(sec-flags memberi LAYAK ke NORMIE pasca-exploit, FTT, dan 5/7 faded;
+liq<$10k memberi LAYAK ke CEL dan FTT), sambil tetap menangkap dead tokens
+paling banyak. Harganya: 3 major false-positive di chain tipis dan nol
+major LAYAK — trade-off recall-vs-precision yang disengaja dan dipublikasi.
+
+### Outcome recheck (follow-up loop, bukan proof)
+
+`scripts/recheck-outcomes.ts` me-refetch `/v1/dex/token` untuk ke-59 label
+dan membandingkan harga/likuiditas sekarang vs nilai di capture (`dossier.
+market`). Hasil per run disimpan ke `data/recheck-*.json` agar
+direproduksi. **Status jujur:** run pertama menunjukkan elapsed 0,5–27 jam
+(capture memang baru) — median priceΔ per verdict belum memisah (JANGAN
++0,0% vs RAWAN −1,0%, n kecil, window sub-24h). Ini infrastruktur recheck,
+bukan hasil 24h/7d — klaim outcome baru sah kalau script ini dijalankan
+ulang saat horizonnya benar-benar lewat, dan itu butuh API key yang masih
+hidup.
 
 Kalibrasi `rulesVersion 2.2.0` (2026-09-30): `totalLiqUsd <$1k` naik dari
 WARN ke DANGER dan dieskalasikan ke JANGAN — pool yang ada tapi berkedalaman
