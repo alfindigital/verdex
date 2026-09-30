@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { evaluateCoverage, labelRisk, buildRecheck } from "@/engine/coverage";
 import type { Coverage, ObservationWindow, SourceEvidence } from "@/lib/verdict-types";
-import type { SubVerdict } from "@/engine/rules";
+import type { SubVerdict, VerdictLevel } from "@/engine/rules";
 
 const source = (key: SourceEvidence["key"], status: SourceEvidence["status"] = "ok"): SourceEvidence => ({
   key, status, endpoint: `/test/${key}`, params: {}, fetchedAt: "2026-09-29T00:00:00.000Z", providerAt: "2026-09-29T00:00:00.000Z",
@@ -19,13 +19,18 @@ const cov = (level: Coverage["level"]): Coverage => ({
 
 describe("coverage policy", () => {
   it.each([
-    ["CLEAN", "sufficient", "NO_FLAGS_OBSERVED"],
-    ["CLEAN", "insufficient", "INSUFFICIENT_EVIDENCE"],
-    ["WARN", "insufficient", "CAUTION"],
-    ["DANGER", "insufficient", "HIGH_RISK_FLAGS"],
-  ] as const)("safety %s and coverage %s gives %s", (level, coverage, expected) => {
-    const subs = [{ dim: "SAFETY", level, metrics: [] }] as SubVerdict[];
-    expect(labelRisk(subs, cov(coverage))).toBe(expected);
+    ["LAYAK", "sufficient", "NO_FLAGS_OBSERVED"],
+    ["LAYAK", "limited", "INSUFFICIENT_EVIDENCE"],
+    ["LAYAK", "insufficient", "INSUFFICIENT_EVIDENCE"],
+    ["RAWAN", "sufficient", "CAUTION"],
+    ["RAWAN", "insufficient", "CAUTION"],
+    ["JANGAN", "sufficient", "HIGH_RISK_FLAGS"],
+    ["JANGAN", "limited", "HIGH_RISK_FLAGS"],
+    ["BELUM_CUKUP_BUKTI", "sufficient", "INSUFFICIENT_EVIDENCE"],
+  ] as const)("verdict %s + coverage %s stamps %s", (verdict, coverage, expected) => {
+    // label derives from the composite verdict (never recomputed on its
+    // own axis), and positive verdicts still require complete evidence.
+    expect(labelRisk(verdict as VerdictLevel, cov(coverage))).toBe(expected);
   });
 
   it("requires a fresh, complete fifty-swap window", () => {

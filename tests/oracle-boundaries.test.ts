@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { labelRisk } from "@/engine/coverage";
 import type { Coverage } from "@/lib/verdict-types";
+import type { VerdictLevel } from "@/engine/rules";
 
 const coverage = (level: Coverage["level"]): Coverage => ({
   level,
@@ -13,17 +14,18 @@ const coverage = (level: Coverage["level"]): Coverage => ({
 
 describe("hand-calculated policy oracle boundaries", () => {
   it.each([
-    ["CLEAN", "sufficient", "NO_FLAGS_OBSERVED"],
-    ["CLEAN", "limited", "INSUFFICIENT_EVIDENCE"],
-    ["CLEAN", "insufficient", "INSUFFICIENT_EVIDENCE"],
-    ["WARN", "sufficient", "CAUTION"],
-    ["WARN", "limited", "CAUTION"],
-    ["WARN", "insufficient", "CAUTION"],
-    ["DANGER", "sufficient", "HIGH_RISK_FLAGS"],
-    ["DANGER", "limited", "HIGH_RISK_FLAGS"],
-    ["DANGER", "insufficient", "HIGH_RISK_FLAGS"],
-    ["INSUFFICIENT", "sufficient", "NO_FLAGS_OBSERVED"],
-  ] as const)("%s + %s => %s", (level, coverageLevel, expected) => {
-    expect(labelRisk([{ dim: "SAFETY", level, metrics: [] }], coverage(coverageLevel))).toBe(expected);
+    ["LAYAK", "sufficient", "NO_FLAGS_OBSERVED"],
+    ["LAYAK", "limited", "INSUFFICIENT_EVIDENCE"],
+    ["LAYAK", "insufficient", "INSUFFICIENT_EVIDENCE"],
+    ["RAWAN", "sufficient", "CAUTION"],
+    ["RAWAN", "limited", "CAUTION"],
+    ["RAWAN", "insufficient", "CAUTION"],
+    ["JANGAN", "sufficient", "HIGH_RISK_FLAGS"],
+    ["JANGAN", "limited", "HIGH_RISK_FLAGS"],
+    ["JANGAN", "insufficient", "HIGH_RISK_FLAGS"],
+    ["BELUM_CUKUP_BUKTI", "sufficient", "INSUFFICIENT_EVIDENCE"],
+    ["BELUM_CUKUP_BUKTI", "limited", "INSUFFICIENT_EVIDENCE"],
+  ] as const)("%s + %s => %s", (verdict, coverageLevel, expected) => {
+    expect(labelRisk(verdict as VerdictLevel, coverage(coverageLevel))).toBe(expected);
   });
 });

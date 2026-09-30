@@ -208,7 +208,7 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     evalPump(metrics.pump, { btcDomDelta7d: ctx.btcDomDelta7d, fearGreed: ctx.fearGreed }),
   ];
   result.v2Subs = v2Subs;
-  result.label = labelRisk(v2Subs, coverage);
+  result.label = labelRisk(result.verdict, coverage);
   result.recheck = buildRecheck(v2Subs, coverage);
 
   // --- Jev cross-examination + narration (both optional, never blocking) ---

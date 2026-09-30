@@ -1,4 +1,4 @@
-import type { SubVerdict } from "@/engine/rules";
+import type { SubVerdict, VerdictLevel } from "@/engine/rules";
 import type { Coverage, CoverageLevel, ObservationWindow, RecheckCondition, RiskLabel, SourceEvidence, SourceKey } from "@/lib/verdict-types";
 
 const required = (sources: SourceEvidence[], key: SourceKey): SourceEvidence | undefined => sources.find((source) => source.key === key);
@@ -77,10 +77,12 @@ export function evaluateCoverage(
   return { level: worstLevel(Object.values(dimensions)), reasons: unique(reasons), checkedAt, stale, exclusionStatus, dimensions };
 }
 
-export function labelRisk(subs: SubVerdict[], coverage: Coverage): RiskLabel {
-  if (subs.some((sub) => sub.dim === "SAFETY" && sub.level === "DANGER")) return "HIGH_RISK_FLAGS";
-  if (subs.some((sub) => sub.level === "DANGER" || sub.level === "WARN")) return "CAUTION";
-  if (coverage.level !== "sufficient") return "INSUFFICIENT_EVIDENCE";
+export function labelRisk(verdict: VerdictLevel, coverage: Coverage): RiskLabel {
+  if (verdict === "JANGAN") return "HIGH_RISK_FLAGS";
+  if (verdict === "RAWAN") return "CAUTION";
+  // positive or unresolved verdicts require complete evidence —
+  // a failed/limited source can never stamp NO_FLAGS_OBSERVED.
+  if (verdict === "BELUM_CUKUP_BUKTI" || coverage.level !== "sufficient") return "INSUFFICIENT_EVIDENCE";
   return "NO_FLAGS_OBSERVED";
 }
 
