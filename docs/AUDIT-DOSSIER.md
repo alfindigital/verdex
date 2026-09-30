@@ -49,7 +49,7 @@ available or that its old observations are current.
 | Product | **Verdex** — deterministic pre-buy verdict engine for DEX tokens |
 | Track | DoraHacks "Build with CMC: API Hackathon" — **Markets & Trading Tools** |
 | Deadline | 2026-09-30 23:59:59 UTC |
-| Live app | https://verdex-alpha.vercel.app |
+| Live app | https://verdex.web.id (canonical; verdex-alpha.vercel.app alias retained) |
 | Repo (public) | https://github.com/alfindigital/verdex |
 | Local workspace | `C:\Users\GEEKOM A8\Documents\Crypto\cmc-api-hackaton` |
 | BUIDL page | **NOT YET CREATED** — `SUBMISSION.md` still contains `buidl/XXXX` placeholder |

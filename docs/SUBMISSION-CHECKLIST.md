@@ -12,11 +12,12 @@ Status: **not submitted** as of 2026-09-29. This checklist separates local evide
 - [x] Full tests, typecheck, docs verifier, build, and gitleaks pass; see [`validation-matrix.md`](evidence/validation-matrix.md).
 - [x] README, demo walkthrough, and handoff describe the current V2/replay boundary.
 - [x] Production alias returns HTTP 200 and an archived verdict API path returns HTTP 200.
-- [x] Fresh authorized CMC raw-body captures verified: 18 capture files across 8 chains (Solana/Ethereum/Arbitrum/Base/BSC/Optimism/Polygon/Gnosis), 9 endpoints HTTP 200 each, exact-body bundles verify and replay to matching verdicts (`data/captures/`, `tests/fixtures/cmc/real-capture-*.json`, `scripts/replay-capture.ts`).
+- [x] Fresh authorized CMC raw-body captures verified: 120+ capture sets across 9 chains (Ethereum/Solana/Base/BSC/Arbitrum/Optimism/Polygon/Gnosis/Avalanche), 9 endpoints HTTP 200 each, exact-body bundles verify and replay to matching verdicts (`data/captures/`, `tests/fixtures/cmc/real-capture-*.json`, `scripts/replay-capture.ts`).
 - [x] Rich dossier shipped: profile, market, per-window activity (5m/1h/4h/24h/1m), pool register, swap & LP tapes, security register, macro context — all seven dossier sections in the verdict page.
-- [x] Snapshot corpus deduplicated per canonical identity: 41 unique snapshots, 41 slugs, ~3,900 swaps represented; replays stamp `mode: replay`.
+- [x] Snapshot corpus deduplicated per canonical identity: **130 unique snapshots** (LAYAK 6 · RAWAN 88 · JANGAN 30 · BELUM_CUKUP_BUKTI 6), slug-routed stable URLs; replays stamp `mode: replay`. FLOW rules recalibrated to v2.1.0 (compound insider-tape danger) — see `docs/CLAIMS.md`.
+- [x] Header polish: anchor nav (scanner/cases/files/method), honest replay/live chip with tooltip, icon-only GitHub link, persisted dark/light toggle (paper-desk light palette), verified live at `verdex.web.id`.
 - [x] Jev second-opinion smoke test passed (`scripts/jev-smoke.ts`: available, dimension probabilities, agreement=contested vs RAWAN).
-- [x] Logo concepts: 8 candidates in `public/logo-concepts/` (a/b/c + new D–H); verdict-stamp (D) and exhibit-tag (E) strongest.
+- [x] Logo: **concept A "Verdict Scanner" adopted** as `public/logo.png` + `app/icon.png` favicon; original archived as `logo-legacy-original.png`, 7 alternates in `public/logo-concepts/`.
 - [x] 5 new video variants rendered (`video/out/verdex-{delta,epsilon,zeta,eta,theta}-*.mp4`), typecheck clean, TL timing rebuilt from real VO durations.
 - [x] Mobile 390px pass recorded on production (`demo-shots/mobile-390-home.png`, `demo-shots/mobile-390-verdict.png`).
 - [ ] Three consenting trader utility checks recorded.
@@ -28,8 +29,8 @@ Status: **not submitted** as of 2026-09-29. This checklist separates local evide
 - Vision: `Make what was observed before a DEX swap checkable with source-backed evidence.`
 - Track: `Markets and Trading Tools`
 - GitHub: `https://github.com/alfindigital/verdex` (verify visibility)
-- Project website: `https://verdex-alpha.vercel.app` (production alias verified); **final domain `verdex.web.id`** pending Cloudflare provisioning
-- Logo: `public/logo.png` (verify form size); 7 alternates in `public/logo-concepts/` if a refresh is wanted
+- Project website: **`https://verdex.web.id`** (apex 200, www→apex 308, SSL issued); `verdex-alpha.vercel.app` remains as Vercel alias
+- Logo: `public/logo.png` — concept A "Verdict Scanner" (verify form size)
 - Demo video URL: **not published**
 - X/social URL: **not published**
 
