@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { VerdictCard } from "@/components/verdict-card";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { listSnapshotIds, listSnapshotSlugs, loadVerdict, snapshotPath } from "@/lib/verdict-store";
 
 // Bake every committed snapshot (hex ids + stable slugs) into static pages at
@@ -30,7 +31,7 @@ export default async function VerdictPage({ params }: { params: Promise<{ id: st
   const v = loadVerdict(id);
   if (!v) notFound();
   const exactPath = snapshotPath(v.id);
-  const shareUrl = exactPath ? `https://verdex-alpha.vercel.app${exactPath}` : null;
+  const shareUrl = exactPath ? `https://verdex.web.id${exactPath}` : null;
   const tweet = shareUrl
     ? `https://x.com/intent/tweet?text=${encodeURIComponent(
         `${v.token.symbol} verdict: ${v.result.verdict} (${v.result.score}/100) — evidence-backed, falsifiable, receipts included.`,
@@ -59,6 +60,7 @@ export default async function VerdictPage({ params }: { params: Promise<{ id: st
           ) : (
             <span className="font-data text-[10px] uppercase tracking-widest text-dim">no permanent share link</span>
           )}
+          <ThemeToggle />
         </div>
       </header>
       <VerdictCard v={v} />

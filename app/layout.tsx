@@ -36,12 +36,19 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0c0a",
+  themeColor: "#060807",
 };
+
+// Reads the persisted theme before first paint so a light-mode visitor never
+// sees a dark flash. Missing/invalid values fall back to the dark default.
+const THEME_INIT = `try{var t=localStorage.getItem("vdx-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${fraunces.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${archivo.variable} ${fraunces.variable} ${plexMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+      </head>
       <body className="relative min-h-screen bg-ink font-display text-text">
         {children}
       </body>

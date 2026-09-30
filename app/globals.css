@@ -41,6 +41,35 @@ html {
   color-scheme: dark;
 }
 
+/* Theme icons — CSS-only swap so SSR/hydration always agree. */
+.icon-sun { display: inline; }
+.icon-moon { display: none; }
+html[data-theme="light"] .icon-sun { display: none; }
+html[data-theme="light"] .icon-moon { display: inline; }
+
+section[id] { scroll-margin-top: 1.25rem; }
+
+/* Light "paper desk" theme — utilities all reference tokens, so the flip
+   re-skins every surface. Accent darkens to keep contrast on paper. */
+html[data-theme="light"] {
+  color-scheme: light;
+  --color-ink: #f1eee0;
+  --color-panel: #faf7ec;
+  --color-raised: #e9e5d2;
+  --color-line: #d6d1b6;
+  --color-line-bright: #b4ad8d;
+  --color-text: #191b0f;
+  --color-dim: #4e5642;
+  --color-faint: #6f795c;
+  --color-paper: #222417;
+  --color-paper-ink: #efe9d0;
+  --color-safe: #0a8a4f;
+  --color-warn: #9a6a06;
+  --color-danger: #c6282e;
+  --color-unknown: #68735e;
+  --color-accent: #0a8a4f;
+}
+
 body {
   background-color: var(--color-ink);
   color: var(--color-text);
