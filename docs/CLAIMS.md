@@ -11,7 +11,7 @@ gray zone selalu menghasilkan `BELUM_CUKUP_BUKTI`, bukan tebakan.
 ## V2 evidence contract (2026-09-29)
 
 The legacy rules below remain attached to historical v1 snapshots. New V2
-records use `schemaVersion: 2` and `rulesVersion: 2.3.0`:
+records use `schemaVersion: 2` and `rulesVersion: 2.4.0`:
 
 - `observedSellMakers` means distinct maker identities observed in valid sell
   rows after pool/creator/owner exclusions. It is not a claim of independent
@@ -25,9 +25,12 @@ records use `schemaVersion: 2` and `rulesVersion: 2.3.0`:
 - The swap window is the endpoint response that was actually captured. A
   universal pagination or CMC cap claim is not published until a current
   authorized probe verifies it.
-- A bounded live smoke test passed with an authorized key, but current tier
-  entitlement, pagination, and a real exact-body capture remain unverified
-  because no exact raw bundle was retained.
+- A bounded live smoke test passed with an authorized key. Exact raw-body
+  captures are retained for three identities
+  (`tests/fixtures/cmc/real-capture-2026-09-29-{jup,gmx,xvs}.json`, 9
+  endpoints each, `verify-evidence` pass). Tier entitlement beyond the
+  observed plan and pagination past the observed 100-row cap remain
+  unverified.
 
 ## SAFETY (sumber: `dex/security/detail`)
 
@@ -67,7 +70,7 @@ baru berlaku saat outflow material (<−0.10), DANGER saat <−0.30.
 `scripts/eval-verdicts.ts` menguji corpus terhadap ground truth publik —
 **59 label dalam 3 kelas**: 6 dead (harus JANGAN), 7 faded/zombie (tidak
 boleh LAYAK — stamp hijau pada zombie adalah miss terburuk), dan 46 majors
-mapan (tidak boleh JANGAN). Hasil pada `rulesVersion 2.3.0`:
+mapan (tidak boleh JANGAN). Hasil pada `rulesVersion 2.4.0`:
 
 - Dead tertangkap JANGAN: **4/6** (TITANO $0, VGX $2, NORMIE exploit, CEL
   dead-tape 13 swap/hari).
@@ -101,12 +104,26 @@ di bawah $X → avoid"). Semua sel dihitung dari evidence yang sama:
 | sec-flags-only | 0/6 | 2 | 5/7 | 0/46 |
 | liq<$10k → avoid | 2/6 | 4 | 6/7 | 1/46 |
 | liq<$50k → avoid | 2/6 | 1 | 2/7 | 1/46 |
+| always-RAWAN | 0/6 | 0 | 0/7 | 0/46 |
+| always-JANGAN | 6/6 | 0 | 0/7 | 46/46 |
+| always-LAYAK | 0/6 | 6 | 7/7 | 0/46 |
 
+Dua baris terakhir sengaja degenerate: **always-RAWAN "memenangkan" metrik
+dead-miss dan major-FP sekaligus** — bukti bahwa skor ini saja tidak bisa
+membedakan juri nyata dari juri yang selalu bilang hati-hati. Angka Verdex
+baru bermakna dibaca bersama kolom yang tidak bisa dimenangkan sekaligus:
+dead-caught 4/6 vs always-RAWAN 0/6, dan abstain/discreet distribution.
 Yang dipisah Verdex dari baseline naif: **nol zombie dapat stamp hijau**
 (sec-flags memberi LAYAK ke NORMIE pasca-exploit, FTT, dan 5/7 faded;
 liq<$10k memberi LAYAK ke CEL dan FTT), sambil tetap menangkap dead tokens
 paling banyak. Harganya: 3 major false-positive di chain tipis dan nol
 major LAYAK — trade-off recall-vs-precision yang disengaja dan dipublikasi.
+
+**Batas evaluasi ini (ditulis eksplisit, jangan di-skip):** 59 label adalah
+ground truth *retrospektif* — event collapse sudah terjadi saat capture.
+Hasil ini membuktikan aturannya menolak tape yang rusak, **bukan** bahwa
+rules memprediksi rug sebelum terjadi. Klaim prospektif baru sah dari
+label ber-horizon yang dibekukan sebelum outcome (lihat recheck loop).
 
 ### Outcome recheck (follow-up loop, bukan proof)
 
@@ -136,6 +153,19 @@ dead tape di-cap WARN karena aset CEX-listed wajar punya DEX footprint kecil.
 Efek samping yang diakui: JONES turun LAYAK→RAWAN (20 swap/hari — tape
 memang tipis) dan LAYAK corpus menjadi 5.
 
+Kalibrasi `rulesVersion 2.4.0` (2026-10-01, hasil audit output-honesty):
+satu evaluator menghasilkan verdict **dan** detail yang ditampilkan — tidak
+lagi ada panel V2 yang bisa berseberangan dengan stamp. Perubahan konkret:
+(a) detail FLOW mengikuti mature-cap yang sama dengan verdict; (b) LIQUIDITY
+memakai evaluator null-aware — LP events yang gagal/tidak terekam menjadi
+baris INSUFFICIENT, bukan "0 pull = clean"; (c) source yang stale (>15
+menit dari `providerAt`) men-cap dimensinya maksimal `limited`, sehingga
+bukti basi tidak akan pernah men-stamp `NO_FLAGS_OBSERVED`; (d) falsifier
+ditulis dari aturan yang sama — LAYAK flip pada SATU WARN (bukan "dua");
+(e) `confidence` = kedalaman window yang di-gate coverage (insufficient /
+stale → low), ditampilkan sebagai *evidence confidence*, bukan keyakinan
+akan hasil.
+
 Dimensi = worst-of metrics; `swaps < 50` → INSUFFICIENT.
 
 **Mature-asset tier (published):** token dengan `mcapUsd ≥ $100M` diperdagangkan
@@ -151,10 +181,11 @@ continuum.
 
 | Metric | CLEAN | WARN | DANGER |
 |---|---|---|---|
-| `netLpDelta` (adds − removes, USD) | ≥0 | −10%..0 | <−10% total liq |
-| `maxSinglePullPct` (remove terbesar vs **pool yang ditarik**; pool tak dikenal → total liq) | <15% | 15–50% | >50% |
+| `netLpDeltaPct` (adds − removes vs depth) | ≥0 | −10%..0 | <−10% total liq |
+| `removalVsCurrentDepth` (remove terbesar vs **pool yang ditarik**; pool tak dikenal → unknown) | <15% | 15–50% | >50% |
 | `totalLiqUsd` | ≥$10k | <$10k | **<$1k dust** (exit mustahil — pools ada tapi kosong) |
 | `poolCount` | ≥1 valid pool | — | 0 → INSUFFICIENT |
+| LP source failed/not-captured | — | — | LP rows → INSUFFICIENT (bukan nol) |
 
 ## PUMP (sumber: `dex/search` stats + `dex/tokens/transactions` + market ctx)
 
@@ -201,7 +232,7 @@ Badge akhir: contested jika salah satu jalur contested, consensus hanya jika
 kedua jalur sepakat. Jev tidak pernah mengubah verdict rules — ia second
 opinion yang ditampilkan berdampingan.
 
-Hasil aktual di corpus 301 record (rules 2.3.0): **8 consensus · 43 lean ·
+Hasil aktual di corpus 301 record (rules 2.4.0): **8 consensus · 43 lean ·
 250 contested**. Polanya konsisten dan dilaporkan apa adanya: Jev setuju
 keras pada dimensi SAFETY (P 0.64–0.72 tepat di token yang rules flag
 danger) dan pada delapan LAYAK (P 0.07–0.10), tetapi sistematis menilai

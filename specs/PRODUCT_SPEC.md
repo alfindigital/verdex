@@ -3,15 +3,18 @@
 ## 1. Why (Konteks & Masalah)
 
 Trader memecoin/small-cap di DEX menghadapi keputusan harian: "token ini layak
-dibeli atau jebakan?" Tools existing (RugCheck, GoPlus, TokenSniffer,
-Bubblemaps) hanya mengukur **struktur kontrak** — "bisakah ini rug?" — tapi
-tidak menjawab **"apakah ini SEDANG berperilaku seperti scam?"** Riset forum
-menunjukkan check paling prediktif justru yang jarang diotomatiskan: bukti flow
-riil (apakah ada sell pihak ketiga, apakah buying tersebar atau terkonsentrasi
-di sedikit wallet, apakah LP dicabut saat harga naik).
+dibeli atau jebakan?" Tools existing sudah mengecek potongan masalah ini —
+RugCheck/TokenSniffer membaca struktur kontrak, GoPlus menambah simulasi jual,
+Bubblemaps memetakan klaster holder. Yang tidak mereka berikan adalah
+**bukti yang bisa diaudit ulang**: label muncul tanpa baris mentah, threshold,
+timestamp, atau cara mereproduksinya. Dan saat endpoint-nya down atau datanya
+kosong, umumnya status itu tidak terlihat sama sekali.
 
 Verdex mengisi gap itu: **paste token → vonis berbasis bukti, auditable,
-deterministik** — plus second opinion dari model keputusan terkalibrasi (Jev).
+deterministik** — setiap sinyal membawa receipt SHA-256 dan status coverage,
+plus abstain eksplisit (`BELUM_CUKUP_BUKTI` / `INSUFFICIENT_EVIDENCE`) saat
+bukti kurang atau basi — plus second opinion dari model keputusan
+terkalibrasi (Jev) yang tidak pernah menimpa rules.
 
 Tagline: **"Don't be the exit liquidity."**
 

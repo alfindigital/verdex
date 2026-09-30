@@ -7,7 +7,8 @@ const fm = (o: Partial<FlowMetrics>): FlowMetrics => ({
   netBuyUsd: 200, netBuyRatio: 0.11, uniqueMakers: 30, top5MakerShare: 0.4, thirdPartySells: 8, swapsPerDay: 500, ...o,
 });
 const lm = (o: Partial<LiquidityMetrics>): LiquidityMetrics => ({
-  poolCount: 1, totalLiqUsd: 10000, netLpDeltaUsd: 500, maxSinglePullPct: 0.05, addCount: 4, removeCount: 1, ...o,
+  poolCount: 1, totalLiqUsd: 10000, netLpDeltaUsd: 500, maxSinglePullPct: 0.05, addCount: 4, removeCount: 1,
+  removalVsCurrentDepth: 0.05, ...o,
 });
 const pm = (o: Partial<PumpMetrics>): PumpMetrics => ({ volMcapRatio: 0.2, makersPer100kVol: 8, priceChange24h: 5, ...o });
 const sm = (o: Partial<SafetyMetrics>): SafetyMetrics => ({ level: "safe", hits: [], buyTax: 0, sellTax: 0, flaggedByVendor: false, ...o });
@@ -122,10 +123,12 @@ describe("evalFlow", () => {
     // Zero third-party sells is venue-independent — still DANGER.
     expect(evalFlow(fm({ thirdPartySells: 0, buyCount: 80 }), true).level).toBe("DANGER");
   });
-  it("V2 does not change concentration severity at the mature market-cap boundary", () => {
+  it("V2 detail applies the same mature cap the verdict used", () => {
+    // Detail must reproduce the verdict's own evaluation — an uncapped V2
+    // panel showing DANGER while the verdict said RAWAN contradicts itself.
     const f = fm({ top5MakerShare: 0.8, netBuyRatio: -0.35 });
-    expect(evalFlow(f, true).level).toBe("WARN");
     expect(evalFlowV2(f).level).toBe("DANGER");
+    expect(evalFlowV2(f, true).level).toBe("WARN");
   });
   it("composite wires mcapUsd → mature tier", () => {
     const mature = composite(input({ mcapUsd: 250_000_000, flow: fm({ top5MakerShare: 0.8, netBuyRatio: -0.35 }) }));
@@ -155,6 +158,15 @@ describe("evalLiquidity", () => {
   it("V2 leaves unknown pool mapping unavailable", () => {
     const l = lm({ maxSinglePullPct: 0, removalVsCurrentDepth: null });
     expect(evalLiquidityV2(l).metrics.find((row) => row.name === "removalVsCurrentDepth")?.level).toBe("INSUFFICIENT");
+  });
+  it("unobserved LP events are INSUFFICIENT rows, never clean zeros", () => {
+    // LP source failed/not-captured → metrics carry nulls; the dimension
+    // must abstain instead of printing "0 pulls observed".
+    const dead = lm({ netLpDeltaUsd: null, maxSinglePullPct: null, addCount: null, removeCount: null, removalVsCurrentDepth: null });
+    const v2 = evalLiquidityV2(dead);
+    expect(v2.level).toBe("INSUFFICIENT");
+    expect(v2.metrics.filter((m) => m.level === "INSUFFICIENT").map((m) => m.name)).toEqual(["removalVsCurrentDepth", "netLpDeltaPct"]);
+    expect(evalLiquidity(dead).metrics.filter((m) => m.level === "INSUFFICIENT").map((m) => m.name)).toEqual(["maxSinglePullPct", "netLpDeltaPct"]);
   });
 });
 
@@ -197,7 +209,7 @@ describe("composite", () => {
     expect(composite(input({ liq: lm({ totalLiqUsd: 999 }) })).verdict).toBe("JANGAN");
   });
   it("RAWAN when LIQ/PUMP danger or ≥2 WARN", () => {
-    expect(composite(input({ liq: lm({ maxSinglePullPct: 0.6 }) })).verdict).toBe("RAWAN");
+    expect(composite(input({ liq: lm({ maxSinglePullPct: 0.6, removalVsCurrentDepth: 0.6 }) })).verdict).toBe("RAWAN");
     expect(
       composite(input({ flow: fm({ uniqueMakers: 10 }), pump: pm({ priceChange24h: 0.45 }), context: { btcDomDelta7d: 1.5, fearGreed: 20 } })).verdict,
     ).toBe("RAWAN");
@@ -232,5 +244,19 @@ describe("composite", () => {
     const r = composite(input({ flow: fm({ top5MakerShare: 0.8, netBuyRatio: -0.35, thirdPartySells: 8 }) }));
     expect(r.falsifier).toContain("top5MakerShare");
     expect(r.falsifier).toContain("netBuyRatio");
+  });
+  it("LAYAK falsifier matches the actual rule — one WARN flips, not two", () => {
+    // Verdict code: warns === 0 is required for LAYAK, so the falsifier may
+    // never claim "two dimensions degrade".
+    const r = composite(input({}));
+    expect(r.verdict).toBe("LAYAK");
+    expect(r.falsifier).toMatch(/single dimension|any single/i);
+    expect(r.falsifier).not.toMatch(/two dimensions/i);
+  });
+  it("BELUM_CUKUP_BUKTI falsifier names the missing evidence", () => {
+    const r = composite(input({ safety: sm({ level: "unknown", buyTax: null, sellTax: null }) }));
+    expect(r.verdict).toBe("BELUM_CUKUP_BUKTI");
+    expect(r.falsifier).toContain("securityLevel");
+    expect(r.falsifier).toMatch(/missing evidence/i);
   });
 });

@@ -111,6 +111,16 @@ describe("analyze", () => {
     if (r.kind !== "verdict") throw new Error("expected verdict");
     expect(r.result.label).toBe("INSUFFICIENT_EVIDENCE");
     expect(r.coverage.dimensions.LIQUIDITY).not.toBe("sufficient");
+    // The panel rows must abstain too — unobserved LP events are null,
+    // so the liquidity dimension can't read "0 pulls = clean".
+    expect(r.metrics.liq.addCount).toBeNull();
+    expect(r.metrics.liq.netLpDeltaUsd).toBeNull();
+    const liqSub = r.result.subs.find((s) => s.dim === "LIQUIDITY");
+    expect(liqSub?.level).toBe("INSUFFICIENT");
+    expect(liqSub?.metrics.filter((m) => m.level === "INSUFFICIENT").length).toBeGreaterThan(0);
+    // Detail shown to the user is the same evaluation that produced the verdict.
+    expect(r.result.v2Subs).toBe(r.result.subs);
+    expect(r.result.confidence).toBe("low");
   });
 
   it("market-context calls surface receipts when up and failures when down", async () => {

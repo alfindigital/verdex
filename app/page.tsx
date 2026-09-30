@@ -25,7 +25,8 @@ const SHOWCASE_BLURB: Record<string, string> = {
 };
 
 const FAQ: [string, string][] = [
-  ["What does a verdict mean?", "Deterministic rules read the tape: SAFETY, FLOW, LIQUIDITY, PUMP. DANGER anywhere stamps HIGH RISK FLAGS; all-clean plus score ≥70 stamps NO FLAGS OBSERVED. Published constants — every verdict reproduces from its committed bundle."],
+  ["What does a verdict mean?", "Deterministic rules read the tape: SAFETY, FLOW, LIQUIDITY, PUMP. DANGER anywhere stamps HIGH RISK FLAGS; all-clean with score ≥70 and complete, fresh evidence stamps NO FLAGS OBSERVED. It describes observed evidence in a window — never a prediction or a safety guarantee."],
+  ["What do I do with a CAUTION?", "Treat the flagged rows as the checklist: open the evidence grid, read which threshold tripped, and re-run the scan when the listed recheck conditions change. CAUTION is a prompt to inspect — not to skip reading."],
   ["Where does the data come from?", "9 CoinMarketCap endpoints per scan — swaps, pools, LP events, security detail, market meta, macro context. Every call is SHA-256 receipted and stored in the bundle."],
   ["Live or replay?", "This archive replays committed CMC captures — dated evidence, not live quotes. The scanner runs live when the deployment carries an API key."],
   ["What is Jev?", "An independent model opinion labeled on every case — consensus, lean, or contested. It never overrides the deterministic rules."],

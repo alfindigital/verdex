@@ -45,7 +45,7 @@ On a 59-label hand-checked set: 4/6 collapsed tokens caught, 0 zombie tokens sta
 ```
 Verdex — don't be the exit liquidity.
 
-A pre-trade evidence desk for DEX tokens, built for the CoinMarketCap API hackathon. One scan pulls 9 CMC endpoints; every raw response body is frozen with a SHA-256 receipt. A deterministic rules engine (v2.3.0) scores four dimensions — SAFETY, FLOW, LIQUIDITY, PUMP — plus tape vitality: how fast the last 100 swaps accumulated.
+A pre-trade evidence desk for DEX tokens, built for the CoinMarketCap API hackathon. One scan pulls 9 CMC endpoints; every raw response body is frozen with a SHA-256 receipt. A deterministic rules engine (v2.4.0) scores four dimensions — SAFETY, FLOW, LIQUIDITY, PUMP — plus tape vitality: how fast the last 100 swaps accumulated.
 
 Shown in this cut: RAY (caution — 92% of the tape in 5 wallets), CEL (high-risk flags — a collapsed lender's token on ~13 swaps/day), and the receipt chain you can re-hash yourself.
 

@@ -46,6 +46,17 @@ export type VerdictRecord = {
 const HEX: Record<ToneKey, string> = { safe: "var(--color-safe)", warn: "var(--color-warn)", danger: "var(--color-danger)", unknown: "var(--color-unknown)" };
 const TEXT: Record<ToneKey, string> = { safe: "text-safe", warn: "text-warn", danger: "text-danger", unknown: "text-unknown" };
 
+const STAMP_SCOPE: Record<string, string> = {
+  NO_FLAGS_OBSERVED: "no flags inside the checked scope — not a safety proof",
+  CAUTION: "risk flags observed — recheck conditions listed below",
+  HIGH_RISK_FLAGS: "high-risk flags observed in the checked window",
+  INSUFFICIENT_EVIDENCE: "evidence incomplete — abstain, don't guess",
+  LAYAK: "all-clean inside the checked scope — not a safety proof",
+  RAWAN: "risk flags observed — recheck conditions listed below",
+  JANGAN: "high-risk flags observed in the checked window",
+  BELUM_CUKUP_BUKTI: "evidence incomplete — abstain, don't guess",
+};
+
 const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
 type MetricsBag = Record<string, number | string | boolean | null | (string | number)[]>;
 const age = (iso: string) => {
@@ -305,6 +316,9 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
       <div className="grid gap-6 border-b border-line px-5 py-6 sm:px-6 sm:py-7 lg:grid-cols-[auto_1fr_auto] lg:items-center">
         <div className="min-w-0">
           <span className={`stamp stamp-lg stamp-in ${TEXT[tone]}`}>{style.label}</span>
+          <p className="mt-2 max-w-64 font-data text-[10px] uppercase leading-relaxed tracking-widest text-dim">
+            {STAMP_SCOPE[v.result.label ?? v.result.verdict] ?? "observed evidence inside the checked scope"}
+          </p>
           <h2 className="deco mt-5 text-3xl leading-tight sm:text-4xl">
             {v.token.name}
             <span className="ml-2 align-middle font-data text-sm font-normal uppercase tracking-widest text-dim">
@@ -323,7 +337,7 @@ export function VerdictCard({ v }: { v: VerdictRecord }) {
           <ScoreGauge score={v.result.score} tone={HEX[tone]} size={132} />
           <div className="space-y-3">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.14em] text-dim">confidence</div>
+              <div className="text-[11px] uppercase tracking-[0.14em] text-dim">evidence confidence</div>
               <div className="mt-1 font-data text-base font-bold uppercase">{v.result.confidence}</div>
             </div>
             <div>

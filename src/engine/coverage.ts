@@ -27,10 +27,18 @@ export function evaluateCoverage(
   const reasons: string[] = [];
   const staleSources = sources.filter((source) => source.status === "ok" && sourceAge(source, checkedMs) !== null && sourceAge(source, checkedMs)! > 15 * 60_000);
   if (staleSources.length) reasons.push(`stale source: ${staleSources.map((source) => source.key).join(", ")}`);
+  const staleKeys = new Set(staleSources.map((source) => source.key));
+  // A stale source is degraded evidence, not absent evidence — it caps its
+  // dimension at "limited" so a positive stamp can never ride on old data.
+  const capStale = (level: CoverageLevel, keys: SourceKey[]): CoverageLevel =>
+    level === "sufficient" && keys.some((key) => staleKeys.has(key)) ? "limited" : level;
 
   const security = required(sources, "security");
-  const safety: CoverageLevel = hasFailed(security) ? "insufficient" : security?.status === "empty" ? "limited" : "sufficient";
-  if (safety !== "sufficient") reasons.push("security evidence unavailable or empty");
+  const safety: CoverageLevel = capStale(
+    hasFailed(security) ? "insufficient" : security?.status === "empty" ? "limited" : "sufficient",
+    ["security", "search"],
+  );
+  if (safety !== "sufficient") reasons.push("security evidence unavailable, empty, or stale");
 
   let flow: CoverageLevel = "sufficient";
   const swaps = required(sources, "swaps");
@@ -58,6 +66,7 @@ export function evaluateCoverage(
   if (window.rejectedSwaps > 0) reasons.push(`${window.rejectedSwaps} swap rows rejected`);
   if (exclusionStatus !== "creator-owner-known") reasons.push("creator/owner exclusion coverage is incomplete");
   if (hasFailed(swaps)) reasons.push("swap source failed or was not captured");
+  flow = capStale(flow, ["swaps"]);
 
   const pools = required(sources, "pools");
   const lp = required(sources, "lp");
@@ -65,11 +74,15 @@ export function evaluateCoverage(
   if (hasFailed(pools)) liquidity = "insufficient";
   else if (hasFailed(lp)) liquidity = "limited";
   else if (pools?.status === "empty" || lp?.status === "empty") liquidity = "limited";
+  liquidity = capStale(liquidity, ["pools", "lp"]);
   if (liquidity !== "sufficient") reasons.push("liquidity pool or LP-change evidence is incomplete");
 
   const macroKeys: SourceKey[] = ["meta", "globalLatest", "globalHistorical", "fearGreed"];
   const missingMacro = macroKeys.filter((key) => hasFailed(required(sources, key)));
-  const pump: CoverageLevel = missingMacro.length === macroKeys.length ? "insufficient" : missingMacro.length ? "limited" : "sufficient";
+  const pump: CoverageLevel = capStale(
+    missingMacro.length === macroKeys.length ? "insufficient" : missingMacro.length ? "limited" : "sufficient",
+    macroKeys,
+  );
   if (missingMacro.length) reasons.push(`pump context unavailable: ${missingMacro.join(", ")}`);
 
   const dimensions = { SAFETY: safety, FLOW: flow, LIQUIDITY: liquidity, PUMP: pump };
@@ -80,10 +93,21 @@ export function evaluateCoverage(
 export function labelRisk(verdict: VerdictLevel, coverage: Coverage): RiskLabel {
   if (verdict === "JANGAN") return "HIGH_RISK_FLAGS";
   if (verdict === "RAWAN") return "CAUTION";
-  // positive or unresolved verdicts require complete evidence —
-  // a failed/limited source can never stamp NO_FLAGS_OBSERVED.
-  if (verdict === "BELUM_CUKUP_BUKTI" || coverage.level !== "sufficient") return "INSUFFICIENT_EVIDENCE";
+  // positive or unresolved verdicts require complete AND fresh evidence —
+  // a failed, limited, or stale source can never stamp NO_FLAGS_OBSERVED.
+  if (verdict === "BELUM_CUKUP_BUKTI" || coverage.level !== "sufficient" || coverage.stale) return "INSUFFICIENT_EVIDENCE";
   return "NO_FLAGS_OBSERVED";
+}
+
+/**
+ * Confidence in the evidence behind this verdict — window depth gated by
+ * coverage. Never a claim about outcome prediction.
+ */
+export function deriveConfidence(swapCount: number, insufDims: number, coverage: Coverage): "high" | "medium" | "low" {
+  const base = swapCount >= 100 && insufDims === 0 ? "high" : swapCount >= 50 ? "medium" : "low";
+  if (coverage.level === "insufficient" || coverage.stale) return "low";
+  if (coverage.level === "limited" && base === "high") return "medium";
+  return base;
 }
 
 export function buildRecheck(subs: SubVerdict[], coverage: Coverage): RecheckCondition[] {

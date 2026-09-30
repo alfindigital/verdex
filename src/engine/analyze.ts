@@ -20,8 +20,8 @@ import {
 } from "@/lib/dex";
 import { tokenIdentity, walletIdentity, canonicalChain } from "@/lib/address";
 import { flowMetrics, liquidityMetrics, pumpMetrics, safetyMetrics, type FlowMetrics, type LiquidityMetrics, type PumpMetrics, type SafetyMetrics } from "@/engine/metrics";
-import { composite, evalFlowV2, evalLiquidityV2, evalPump, evalSafety, type CompositeResult, type SubVerdict } from "@/engine/rules";
-import { buildRecheck, evaluateCoverage, labelRisk } from "@/engine/coverage";
+import { composite, type CompositeResult } from "@/engine/rules";
+import { buildRecheck, deriveConfidence, evaluateCoverage, labelRisk } from "@/engine/coverage";
 import type { Coverage, EvidenceSummary, ObservationWindow, SourceEvidence, SourceKey, TokenDossier } from "@/lib/verdict-types";
 import type { MarketContext } from "@/lib/dex";
 import { buildDossier } from "@/engine/dossier";
@@ -60,7 +60,7 @@ export type AnalyzeResult =
       receipts: Receipt[];
       failures: FailedCall[];
       schemaVersion: 2;
-      rulesVersion: "2.3.0";
+      rulesVersion: "2.4.0";
       mode: "live" | "replay";
       computedAt: string;
       sourceRecordId: string;
@@ -187,7 +187,9 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
   // --- metrics → rules ---
   const metrics = {
     flow: flowMetrics(swaps, pools.map((p) => p.address), [metaR?.creator ?? "", metaR?.owner ?? ""], token.platform),
-    liq: liquidityMetrics(events, pools),
+    // liqR === null means the LP endpoint failed — its metrics stay null
+    // (unknown), never collapse into a clean zero.
+    liq: liquidityMetrics(events, pools, liqR !== null),
     pump: pumpMetrics(swaps, token, pools.map((p) => p.address)),
     safety: safetyMetrics(sec),
   };
@@ -201,15 +203,16 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
   });
   const exclusionStatus: Coverage["exclusionStatus"] = !metaR ? "unknown" : metaR.creator && metaR.owner ? "creator-owner-known" : "partial";
   const coverage = evaluateCoverage(sources, window, exclusionStatus, checkedAt);
-  const v2Subs: SubVerdict[] = [
-    evalSafety(metrics.safety),
-    evalFlowV2(metrics.flow),
-    evalLiquidityV2(metrics.liq),
-    evalPump(metrics.pump, { btcDomDelta7d: ctx.btcDomDelta7d, fearGreed: ctx.fearGreed }),
-  ];
-  result.v2Subs = v2Subs;
+  // The displayed detail IS the verdict's own sub-verdict set — a second,
+  // divergent evaluation would let the panel contradict the stamp.
+  result.v2Subs = result.subs;
   result.label = labelRisk(result.verdict, coverage);
-  result.recheck = buildRecheck(v2Subs, coverage);
+  result.recheck = buildRecheck(result.subs, coverage);
+  result.confidence = deriveConfidence(
+    swaps.length,
+    result.subs.filter((s) => s.level === "INSUFFICIENT").length,
+    coverage,
+  );
 
   // --- Jev cross-examination + narration (both optional, never blocking) ---
   const metricsSummary = {
@@ -252,7 +255,7 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     receipts,
     failures,
     schemaVersion: 2,
-    rulesVersion: "2.3.0",
+    rulesVersion: "2.4.0",
     mode: "live",
     computedAt: checkedAt,
     sourceRecordId: id,

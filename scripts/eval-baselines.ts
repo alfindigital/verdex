@@ -37,6 +37,12 @@ const BASELINES: { name: string; fn: Baseline }[] = [
   { name: "sec-flags-only", fn: baseSecurity },
   { name: "liq<$10k→avoid", fn: baseLiq(10_000) },
   { name: "liq<$50k→avoid", fn: baseLiq(50_000) },
+  // Degenerate judges — they exist to show the metric CAN be trivially won
+  // on one axis (always-caution never misses a dead token) while collapsing
+  // on the others. Verdex's numbers only mean something next to these rows.
+  { name: "always-RAWAN", fn: () => "RAWAN" },
+  { name: "always-JANGAN", fn: () => "JANGAN" },
+  { name: "always-LAYAK", fn: () => "LAYAK" },
 ];
 
 const snapDir = path.resolve("snapshots");

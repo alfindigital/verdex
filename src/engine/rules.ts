@@ -129,19 +129,19 @@ export function evalFlow(f: FlowMetrics, mature = false): SubVerdict {
   return { dim: "FLOW", level: worst(rows), metrics: rows };
 }
 
-/** V2 deliberately removes the market-cap cliff; concentration remains a flag. */
-export function evalFlowV2(f: FlowMetrics): SubVerdict {
-  return evalFlow(f, false);
+/** Detail must explain the verdict — V2 applies the same mature cap the composite uses. */
+export function evalFlowV2(f: FlowMetrics, mature = false): SubVerdict {
+  return evalFlow(f, mature);
 }
 
 export function evalLiquidity(l: LiquidityMetrics): SubVerdict {
   if (l.poolCount === 0) {
     return { dim: "LIQUIDITY", level: "INSUFFICIENT", metrics: [lvl("poolCount", 0, "≥1", "INSUFFICIENT")] };
   }
-  const lpDeltaPct = l.totalLiqUsd > 0 ? l.netLpDeltaUsd / l.totalLiqUsd : 0;
+  const lpDeltaPct = l.netLpDeltaUsd !== null && l.totalLiqUsd > 0 ? l.netLpDeltaUsd / l.totalLiqUsd : null;
   const rows: MetricRow[] = [
-    lvl("maxSinglePullPct", round2(l.maxSinglePullPct), "<15%", l.maxSinglePullPct > THRESHOLDS.maxSinglePullPct.danger ? "DANGER" : l.maxSinglePullPct >= THRESHOLDS.maxSinglePullPct.warn ? "WARN" : "CLEAN"),
-    lvl("netLpDeltaPct", round2(lpDeltaPct), "≥0", lpDeltaPct < THRESHOLDS.netLpDeltaPct.danger ? "DANGER" : lpDeltaPct < THRESHOLDS.netLpDeltaPct.warn ? "WARN" : "CLEAN"),
+    lvl("maxSinglePullPct", l.maxSinglePullPct === null ? "unknown" : round2(l.maxSinglePullPct), "<15%", l.maxSinglePullPct === null ? "INSUFFICIENT" : l.maxSinglePullPct > THRESHOLDS.maxSinglePullPct.danger ? "DANGER" : l.maxSinglePullPct >= THRESHOLDS.maxSinglePullPct.warn ? "WARN" : "CLEAN"),
+    lvl("netLpDeltaPct", lpDeltaPct === null ? "unknown" : round2(lpDeltaPct), "≥0", lpDeltaPct === null ? "INSUFFICIENT" : lpDeltaPct < THRESHOLDS.netLpDeltaPct.danger ? "DANGER" : lpDeltaPct < THRESHOLDS.netLpDeltaPct.warn ? "WARN" : "CLEAN"),
     lvl("totalLiqUsd", Math.round(l.totalLiqUsd), "≥$10k (<$1k dust = danger)", l.totalLiqUsd < THRESHOLDS.dustLiqUsd ? "DANGER" : l.totalLiqUsd < 10_000 ? "WARN" : "CLEAN"),
   ];
   return { dim: "LIQUIDITY", level: worst(rows), metrics: rows };
@@ -149,7 +149,7 @@ export function evalLiquidity(l: LiquidityMetrics): SubVerdict {
 
 export function evalLiquidityV2(l: LiquidityMetrics): SubVerdict {
   if (l.poolCount === 0) return { dim: "LIQUIDITY", level: "INSUFFICIENT", metrics: [lvl("poolCount", 0, "≥1", "INSUFFICIENT")] };
-  const lpDeltaPct = l.totalLiqUsd > 0 ? l.netLpDeltaUsd / l.totalLiqUsd : null;
+  const lpDeltaPct = l.netLpDeltaUsd !== null && l.totalLiqUsd > 0 ? l.netLpDeltaUsd / l.totalLiqUsd : null;
   const removal = l.removalVsCurrentDepth ?? null;
   const rows: MetricRow[] = [
     lvl("removalVsCurrentDepth", removal === null ? "unknown" : round2(removal), "<15% of mapped pool depth", removal === null ? "INSUFFICIENT" : removal > THRESHOLDS.maxSinglePullPct.danger ? "DANGER" : removal >= THRESHOLDS.maxSinglePullPct.warn ? "WARN" : "CLEAN"),
@@ -175,7 +175,9 @@ export function evalPump(p: PumpMetrics, ctx: Context | null): SubVerdict {
 }
 
 export function composite(i: EngineInput): CompositeResult {
-  const subs = [evalSafety(i.safety), evalFlow(i.flow, (i.mcapUsd ?? 0) >= THRESHOLDS.matureAssetMcapUsd), evalLiquidity(i.liq), evalPump(i.pump, i.context)];
+  // One evaluation produces both the verdict and the displayed detail — the
+  // V2 evaluators are the only sub-verdict set the UI may show.
+  const subs = [evalSafety(i.safety), evalFlow(i.flow, (i.mcapUsd ?? 0) >= THRESHOLDS.matureAssetMcapUsd), evalLiquidityV2(i.liq), evalPump(i.pump, i.context)];
   const levels = subs.map((s) => s.level);
   const dangers = levels.filter((l) => l === "DANGER").length;
   const warns = levels.filter((l) => l === "WARN").length;
@@ -205,16 +207,20 @@ export function composite(i: EngineInput): CompositeResult {
 }
 
 function buildFalsifier(subs: SubVerdict[], verdict: VerdictLevel): string {
+  const flagged = subs.flatMap((s) => s.metrics.filter((m) => m.level !== "CLEAN"));
+  const failing = flagged.filter((m) => m.level === "DANGER" || m.level === "WARN");
+  const missing = flagged.filter((m) => m.level === "INSUFFICIENT");
   if (verdict === "LAYAK") {
-    return "This verdict flips to RAWAN if two dimensions degrade to WARN (e.g. top-5 maker share rises above 0.50 or a liquidity pull exceeds 15% of pool depth).";
+    return "Flips to RAWAN the moment any single dimension degrades to WARN — e.g. top-5 maker share ≥0.50, one LP pull ≥15% of mapped pool depth, or a warn-level security flag. Any DANGER row flips straight to JANGAN.";
   }
-  const failing = subs
-    .filter((s) => s.level === "DANGER" || s.level === "WARN")
-    .flatMap((s) => s.metrics.filter((m) => m.level === "DANGER" || m.level === "WARN"));
-  const worstMetric = failing.find((m) => m.level === "DANGER") ?? failing[0];
-  if (!worstMetric) return `This verdict (${verdict}) requires all four dimensions to score CLEAN.`;
-  const all = failing.map((m) => `${m.name} (${m.value} vs ${m.threshold})`).join(", ");
-  return `This verdict (${verdict}) flips if ${worstMetric.name} moves back inside ${worstMetric.threshold} — currently ${worstMetric.value}. Failing rows: ${all}.`;
+  const missingList = missing.map((m) => `${m.name} (${m.value})`).join(", ");
+  if (verdict === "BELUM_CUKUP_BUKTI") {
+    const warnNote = failing.length ? ` Also observed but secondary: ${failing.map((m) => `${m.name} (${m.value} vs ${m.threshold})`).join(", ")}.` : "";
+    return `Held back by missing evidence${missingList ? `: ${missingList}` : ""}. Resolves only when those sources return usable data — abstention is not a clean bill.${warnNote}`;
+  }
+  const all = failing.map((m) => `${m.name} (${m.value} vs ${m.threshold})`).join("; ");
+  const missingNote = missingList ? ` Missing evidence must also resolve: ${missingList}.` : "";
+  return `This ${verdict} verdict flips only when every flagged row recovers inside threshold: ${all}.${missingNote} Partial recovery does not change it.`;
 }
 
 function round2(n: number) {

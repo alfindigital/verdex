@@ -44,7 +44,7 @@ Live requests have a 15-second total budget, a 6-second per-attempt timeout, and
 | `/v1/global-metrics/quotes/latest` + `/historical` | optional macro context |
 | `/v3/fear-and-greed/latest` | optional sentiment context |
 
-The normal orchestration estimates nine calls, but receipts record the actual calls and retries. A bounded live smoke test passed with an authorized key; current provider tier entitlement, pagination semantics, and a fresh exact raw-body capture remain **UNVERIFIED** because no bundle was retained.
+The normal orchestration estimates nine calls, but receipts record the actual calls and retries. A bounded live smoke test passed with an authorized key; exact raw-body captures for three identities are retained at `tests/fixtures/cmc/real-capture-2026-09-29-{jup,gmx,xvs}.json` (9 endpoints each, HTTP 200) and pass `verify-evidence`. Provider tier entitlement beyond the observed plan and pagination semantics past the observed 100-row cap remain unverified.
 
 ## Evidence and sharing
 

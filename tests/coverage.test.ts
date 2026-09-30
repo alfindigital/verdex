@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateCoverage, labelRisk, buildRecheck } from "@/engine/coverage";
+import { evaluateCoverage, labelRisk, buildRecheck, deriveConfidence } from "@/engine/coverage";
 import type { Coverage, ObservationWindow, SourceEvidence } from "@/lib/verdict-types";
 import type { SubVerdict, VerdictLevel } from "@/engine/rules";
 
@@ -46,6 +46,49 @@ describe("coverage policy", () => {
     const result = evaluateCoverage(sources, window(100), "creator-owner-known", "2026-09-29T00:00:00.000Z");
     expect(result.dimensions.LIQUIDITY).not.toBe("sufficient");
     expect(result.reasons.join(" ")).toMatch(/lp/i);
+  });
+
+  it("a stale ok-source caps its dimension at limited — never stamps clean", () => {
+    const stale = (key: SourceEvidence["key"]): SourceEvidence => ({
+      ...source(key, "ok"),
+      providerAt: "2026-09-28T23:30:00.000Z", // 30 min before checkedAt
+    });
+    const sources = [
+      source("search"), source("swaps"), source("pools"), source("lp"),
+      stale("security"), source("meta"), source("globalLatest"), source("globalHistorical"), source("fearGreed"),
+    ];
+    const result = evaluateCoverage(sources, window(100), "creator-owner-known", "2026-09-29T00:00:00.000Z");
+    expect(result.stale).toBe(true);
+    expect(result.dimensions.SAFETY).toBe("limited");
+    expect(result.level).not.toBe("sufficient");
+    // …and even a rule-clean verdict may not stamp NO_FLAGS_OBSERVED on it.
+    expect(labelRisk("LAYAK", result)).toBe("INSUFFICIENT_EVIDENCE");
+  });
+
+  it("stale lp source caps LIQUIDITY; stale macro source caps PUMP", () => {
+    const stale = (key: SourceEvidence["key"]): SourceEvidence => ({
+      ...source(key, "ok"), providerAt: "2026-09-28T23:00:00.000Z",
+    });
+    const lpStale = evaluateCoverage(
+      [source("search"), source("swaps"), source("pools"), stale("lp"), source("security"), source("meta"), source("globalLatest"), source("globalHistorical"), source("fearGreed")],
+      window(100), "creator-owner-known", "2026-09-29T00:00:00.000Z",
+    );
+    expect(lpStale.dimensions.LIQUIDITY).toBe("limited");
+    const macroStale = evaluateCoverage(
+      [source("search"), source("swaps"), source("pools"), source("lp"), source("security"), source("meta"), stale("fearGreed"), source("globalLatest"), source("globalHistorical")],
+      window(100), "creator-owner-known", "2026-09-29T00:00:00.000Z",
+    );
+    expect(macroStale.dimensions.PUMP).toBe("limited");
+    expect(macroStale.dimensions.SAFETY).toBe("sufficient");
+  });
+
+  it("confidence is gated by coverage, not just window depth", () => {
+    expect(deriveConfidence(150, 0, cov("sufficient"))).toBe("high");
+    expect(deriveConfidence(150, 0, { ...cov("limited") })).toBe("medium");
+    expect(deriveConfidence(150, 0, { ...cov("insufficient") })).toBe("low");
+    expect(deriveConfidence(150, 0, { ...cov("sufficient"), stale: true })).toBe("low");
+    expect(deriveConfidence(75, 0, cov("sufficient"))).toBe("medium");
+    expect(deriveConfidence(10, 0, cov("sufficient"))).toBe("low");
   });
 
   it("lists every warning and missing dimension for recheck", () => {

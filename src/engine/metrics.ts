@@ -19,10 +19,12 @@ export interface FlowMetrics {
 export interface LiquidityMetrics {
   poolCount: number;
   totalLiqUsd: number;
-  netLpDeltaUsd: number;
-  maxSinglePullPct: number; // largest remove / pool liq
-  addCount: number;
-  removeCount: number;
+  // LP-event-derived fields are null when the LP source failed or was never
+  // captured — "not observed" must never render as "zero observed".
+  netLpDeltaUsd: number | null;
+  maxSinglePullPct: number | null; // largest remove / pool liq
+  addCount: number | null;
+  removeCount: number | null;
   removalVsCurrentDepth?: number | null;
 }
 
@@ -95,8 +97,19 @@ export function flowMetrics(swaps: Swap[], poolAddrs: string[] = [], excluded: s
   };
 }
 
-export function liquidityMetrics(events: LiqEvent[], pools: Pool[]): LiquidityMetrics {
+export function liquidityMetrics(events: LiqEvent[], pools: Pool[], lpObserved = true): LiquidityMetrics {
   const totalLiqUsd = pools.reduce((a, p) => a + p.liqUsd, 0);
+  if (!lpObserved) {
+    return {
+      poolCount: pools.length,
+      totalLiqUsd,
+      netLpDeltaUsd: null,
+      maxSinglePullPct: null,
+      addCount: null,
+      removeCount: null,
+      removalVsCurrentDepth: null,
+    };
+  }
   const liqByPool = new Map(pools.map((p) => [p.address.toLowerCase(), p.liqUsd]));
   let addUsd = 0;
   let removeUsd = 0;

@@ -97,6 +97,18 @@ describe("liquidityMetrics", () => {
     expect(m.poolCount).toBe(0);
     expect(m.totalLiqUsd).toBe(0);
   });
+  it("unobserved LP source → null event metrics, not zeros", () => {
+    // Source failed / not captured: pool depth still reports, LP-event rows
+    // stay null so evaluators abstain instead of reading "0 pulls".
+    const m = liquidityMetrics([], pools, false);
+    expect(m.poolCount).toBe(1);
+    expect(m.totalLiqUsd).toBe(10000);
+    expect(m.addCount).toBeNull();
+    expect(m.removeCount).toBeNull();
+    expect(m.netLpDeltaUsd).toBeNull();
+    expect(m.maxSinglePullPct).toBeNull();
+    expect(m.removalVsCurrentDepth).toBeNull();
+  });
 });
 
 describe("pumpMetrics", () => {
