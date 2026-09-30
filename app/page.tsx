@@ -177,11 +177,10 @@ export default function Home() {
         </aside>
       </section>
 
-      {/* ——— EX-01 · Recorded cases ——— */}
+      {/* ——— Recorded cases ——— */}
       {showcase.length > 0 && (
         <section className="mt-14" aria-labelledby="ex1-title">
           <div className="exhibit">
-            <span className="exhibit-no">EX-01</span>
             <h2 id="ex1-title" className="exhibit-title">Recorded cases</h2>
             <span className="exhibit-rule" aria-hidden="true" />
             <span className="hidden font-data text-[10px] uppercase tracking-widest text-dim sm:inline">dated replay · shareable</span>
@@ -208,7 +207,7 @@ export default function Home() {
                     {SHOWCASE_BLURB[v.result.verdict] ?? SHOWCASE_BLURB.BELUM_CUKUP_BUKTI} · captured{" "}
                     {new Date(v.ts).toISOString().slice(0, 10)}
                   </p>
-                  <div className="mt-5 font-data text-[10px] uppercase tracking-[0.16em] text-accent">open exhibit →</div>
+                  <div className="mt-5 font-data text-[10px] uppercase tracking-[0.16em] text-accent">open case file →</div>
                 </Link>
               );
             })}
@@ -216,11 +215,10 @@ export default function Home() {
         </section>
       )}
 
-      {/* ——— EX-02 · Case files ——— */}
+      {/* ——— Case files ——— */}
       {rows.length > 0 && (
         <section className="mt-14" aria-labelledby="ex2-title">
           <div className="exhibit">
-            <span className="exhibit-no">EX-02</span>
             <h2 id="ex2-title" className="exhibit-title">Case files</h2>
             <span className="exhibit-rule" aria-hidden="true" />
             <span className="hidden font-data text-[10px] uppercase tracking-widest text-dim sm:inline">{rows.length} records</span>
@@ -231,10 +229,9 @@ export default function Home() {
         </section>
       )}
 
-      {/* ——— EX-03 · Method ——— */}
+      {/* ——— Method ——— */}
       <section className="mt-14" aria-labelledby="ex3-title">
         <div className="exhibit">
-          <span className="exhibit-no">EX-03</span>
           <h2 id="ex3-title" className="exhibit-title">Method</h2>
           <span className="exhibit-rule" aria-hidden="true" />
         </div>

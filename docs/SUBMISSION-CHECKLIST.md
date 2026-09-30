@@ -13,7 +13,7 @@ Status: **not submitted** as of 2026-09-29. This checklist separates local evide
 - [x] README, demo walkthrough, and handoff describe the current V2/replay boundary.
 - [x] Production alias returns HTTP 200 and an archived verdict API path returns HTTP 200.
 - [x] Fresh authorized CMC raw-body captures verified: 18 capture files across 8 chains (Solana/Ethereum/Arbitrum/Base/BSC/Optimism/Polygon/Gnosis), 9 endpoints HTTP 200 each, exact-body bundles verify and replay to matching verdicts (`data/captures/`, `tests/fixtures/cmc/real-capture-*.json`, `scripts/replay-capture.ts`).
-- [x] Rich dossier shipped: profile, market, per-window activity (5m/1h/4h/24h/1m), pool register, swap & LP tapes, security register, macro context — EX-D1..D7 in verdict page.
+- [x] Rich dossier shipped: profile, market, per-window activity (5m/1h/4h/24h/1m), pool register, swap & LP tapes, security register, macro context — all seven dossier sections in the verdict page.
 - [x] Snapshot corpus deduplicated per canonical identity: 41 unique snapshots, 41 slugs, ~3,900 swaps represented; replays stamp `mode: replay`.
 - [x] Jev second-opinion smoke test passed (`scripts/jev-smoke.ts`: available, dimension probabilities, agreement=contested vs RAWAN).
 - [x] Logo concepts: 8 candidates in `public/logo-concepts/` (a/b/c + new D–H); verdict-stamp (D) and exhibit-tag (E) strongest.

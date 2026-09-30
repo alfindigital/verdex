@@ -16,12 +16,11 @@ const fmtTok = (v: number | null) =>
   v == null ? "—" : v >= 1e9 ? `${(v / 1e9).toFixed(2)}B` : v >= 1e6 ? `${(v / 1e6).toFixed(2)}M` : v >= 1e3 ? `${(v / 1e3).toFixed(2)}K` : String(v);
 const pct = (v: number | null) => (v == null ? "—" : `${v >= 0 ? "+" : ""}${(v * 100).toFixed(2)}%`);
 
-function Section({ no, title, note, children, open = true }: { no: string; title: string; note?: string; children: React.ReactNode; open?: boolean }) {
+function Section({ title, note, children, open = true }: { title: string; note?: string; children: React.ReactNode; open?: boolean }) {
   return (
     <details className="group border-t border-line" open={open}>
       <summary className="cursor-pointer select-none px-5 py-3.5 sm:px-6 [&::-webkit-details-marker]:hidden">
         <span className="mr-2 inline-block transition-transform group-open:rotate-90">▸</span>
-        <span className="exhibit-no">{no}</span>
         <span className="ml-2 text-sm font-semibold uppercase tracking-wide">{title}</span>
         {note && <span className="ml-3 font-data text-[10px] uppercase tracking-widest text-dim">{note}</span>}
       </summary>
@@ -42,8 +41,8 @@ export function DossierSections({ d }: { d: TokenDossier }) {
   const { profile, market, windowStats, pools, topSwaps, recentSwaps, lpEvents, security, global } = d;
   return (
     <>
-      {/* ——— EX-D1 · Token dossier ——— */}
-      <Section no="EX-D1" title="Token dossier" note="provider-reported fields — not independently verified">
+      {/* ——— Token dossier ——— */}
+      <Section title="Token dossier" note="provider-reported fields — not independently verified">
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 lg:grid-cols-6">
           <Stat k="token age" v={profile.ageDays != null ? `${fmtNum(profile.ageDays)}d` : "—"} sub={profile.listedAt?.slice(0, 10) ?? "unlisted date"} />
           <Stat k="holders" v={profile.holders != null ? fmtNum(profile.holders) : "—"} />
@@ -71,8 +70,8 @@ export function DossierSections({ d }: { d: TokenDossier }) {
         )}
       </Section>
 
-      {/* ——— EX-D2 · Market tape ——— */}
-      <Section no="EX-D2" title="Market tape" note="price + per-window activity">
+      {/* ——— Market tape ——— */}
+      <Section title="Market tape" note="price + per-window activity">
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 lg:grid-cols-7">
           <Stat k="price" v={fmtPrice(market.priceUsd)} />
           <Stat k="24h high" v={fmtPrice(market.high24hUsd)} tone="text-safe" />
@@ -110,9 +109,9 @@ export function DossierSections({ d }: { d: TokenDossier }) {
         )}
       </Section>
 
-      {/* ——— EX-D3 · Pool register ——— */}
+      {/* ——— Pool register ——— */}
       {pools.length > 0 && (
-        <Section no="EX-D3" title="Pool register" note={`${pools.length} indexed pools · by liquidity`} open={false}>
+        <Section title="Pool register" note={`${pools.length} indexed pools · by liquidity`} open={false}>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-[11px]">
               <thead>
@@ -140,8 +139,8 @@ export function DossierSections({ d }: { d: TokenDossier }) {
         </Section>
       )}
 
-      {/* ——— EX-D4 · Security register ——— */}
-      <Section no="EX-D4" title="Security register" note={security ? `${security.checkCount} provider checks · ${security.hitCount} hit` : "no provider report"} open={Boolean(security && security.hitCount > 0)}>
+      {/* ——— Security register ——— */}
+      <Section title="Security register" note={security ? `${security.checkCount} provider checks · ${security.hitCount} hit` : "no provider report"} open={Boolean(security && security.hitCount > 0)}>
         {security ? (
           <>
             <div className="mb-3 flex flex-wrap items-center gap-2 font-data text-[11px]">
@@ -173,9 +172,9 @@ export function DossierSections({ d }: { d: TokenDossier }) {
         )}
       </Section>
 
-      {/* ——— EX-D5 · Swap tape ——— */}
+      {/* ——— Swap tape ——— */}
       {(topSwaps.length > 0 || recentSwaps.length > 0) && (
-        <Section no="EX-D5" title="Swap tape" note={`largest ${topSwaps.length} + newest ${recentSwaps.length} of window`} open={false}>
+        <Section title="Swap tape" note={`largest ${topSwaps.length} + newest ${recentSwaps.length} of window`} open={false}>
           <div className="grid gap-5 lg:grid-cols-2">
             {[
               { label: "largest by usd", rows: topSwaps },
@@ -205,9 +204,9 @@ export function DossierSections({ d }: { d: TokenDossier }) {
         </Section>
       )}
 
-      {/* ——— EX-D6 · LP tape ——— */}
+      {/* ——— LP tape ——— */}
       {lpEvents.length > 0 && (
-        <Section no="EX-D6" title="LP tape" note={`newest ${lpEvents.length} liquidity events`} open={false}>
+        <Section title="LP tape" note={`newest ${lpEvents.length} liquidity events`} open={false}>
           <table className="w-full text-[10.5px]">
             <tbody className="font-data">
               {lpEvents.map((e, i) => (
@@ -225,8 +224,8 @@ export function DossierSections({ d }: { d: TokenDossier }) {
         </Section>
       )}
 
-      {/* ——— EX-D7 · Macro tape ——— */}
-      <Section no="EX-D7" title="Macro tape" note="global context at capture time" open={false}>
+      {/* ——— Macro tape ——— */}
+      <Section title="Macro tape" note="global context at capture time" open={false}>
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 lg:grid-cols-7">
           <Stat k="btc dom" v={global.btcDom != null ? `${global.btcDom.toFixed(2)}%` : "—"} sub={global.btcDom24hChange != null ? `${global.btcDom24hChange >= 0 ? "+" : ""}${global.btcDom24hChange.toFixed(2)}% 24h` : undefined} />
           <Stat k="eth dom" v={global.ethDom != null ? `${global.ethDom.toFixed(2)}%` : "—"} />
