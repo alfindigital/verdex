@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "record": {
     "kind": "verdict",
-    "id": "f18119878eb7",
+    "id": "d90d9a211b54",
     "ts": "2026-09-29T12:06:15.327Z",
     "token": {
       "platform": "Arbitrum",
@@ -53,8 +53,8 @@
       }
     },
     "result": {
-      "verdict": "JANGAN",
-      "score": 60,
+      "verdict": "RAWAN",
+      "score": 85,
       "subs": [
         {
           "dim": "SAFETY",
@@ -94,7 +94,7 @@
         },
         {
           "dim": "FLOW",
-          "level": "DANGER",
+          "level": "WARN",
           "metrics": [
             {
               "name": "mcapTier",
@@ -117,14 +117,14 @@
             {
               "name": "top5MakerShare",
               "value": 0.81,
-              "threshold": "<0.50",
-              "level": "DANGER"
+              "threshold": "<0.50 (>0.70 & <20 makers = danger)",
+              "level": "WARN"
             },
             {
               "name": "netBuyRatio",
               "value": -0.28,
-              "threshold": ">0",
-              "level": "DANGER"
+              "threshold": "≥ -0.10",
+              "level": "WARN"
             }
           ]
         },
@@ -172,7 +172,7 @@
         }
       ],
       "confidence": "high",
-      "falsifier": "This verdict (JANGAN) flips if top5MakerShare moves back inside <0.50 — currently 0.81. Failing rows: top5MakerShare (0.81 vs <0.50), netBuyRatio (-0.28 vs >0).",
+      "falsifier": "This verdict (RAWAN) flips if top5MakerShare moves back inside <0.50 (>0.70 & <20 makers = danger) — currently 0.81. Failing rows: top5MakerShare (0.81 vs <0.50 (>0.70 & <20 makers = danger)), netBuyRatio (-0.28 vs ≥ -0.10).",
       "v2Subs": [
         {
           "dim": "SAFETY",
@@ -212,7 +212,7 @@
         },
         {
           "dim": "FLOW",
-          "level": "DANGER",
+          "level": "WARN",
           "metrics": [
             {
               "name": "mcapTier",
@@ -235,14 +235,14 @@
             {
               "name": "top5MakerShare",
               "value": 0.81,
-              "threshold": "<0.50",
-              "level": "DANGER"
+              "threshold": "<0.50 (>0.70 & <20 makers = danger)",
+              "level": "WARN"
             },
             {
               "name": "netBuyRatio",
               "value": -0.28,
-              "threshold": ">0",
-              "level": "DANGER"
+              "threshold": "≥ -0.10",
+              "level": "WARN"
             }
           ]
         },
@@ -295,14 +295,14 @@
           "dimension": "FLOW",
           "metric": "top5MakerShare",
           "observed": 0.81,
-          "requirement": "<0.50",
+          "requirement": "<0.50 (>0.70 & <20 makers = danger)",
           "reason": "FLOW evidence requires review"
         },
         {
           "dimension": "FLOW",
           "metric": "netBuyRatio",
           "observed": -0.28,
-          "requirement": ">0",
+          "requirement": "≥ -0.10",
           "reason": "FLOW evidence requires review"
         },
         {
@@ -425,10 +425,10 @@
     ],
     "failures": [],
     "schemaVersion": 2,
-    "rulesVersion": "2.0.0",
+    "rulesVersion": "2.1.0",
     "mode": "replay",
     "computedAt": "2026-09-29T12:06:15.327Z",
-    "sourceRecordId": "f18119878eb7",
+    "sourceRecordId": "d90d9a211b54",
     "coverage": {
       "level": "limited",
       "reasons": [
@@ -1337,7 +1337,7 @@
   },
   "manifest": {
     "capturedAt": "2026-09-29T12:06:15.327Z",
-    "rulesVersion": "2.0.0",
+    "rulesVersion": "2.1.0",
     "parserVersion": "v1-normalizer",
     "origin": "real-capture",
     "completeRawEvidence": true

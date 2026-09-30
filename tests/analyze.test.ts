@@ -202,8 +202,9 @@ describe("analyze", () => {
   });
 
   it("token.mcapUsd is wired into composite — mature tier caps flow at WARN", async () => {
-    // 70 small buys ×70 makers + 30 big sells ×4 makers → top5Share≈0.81,
-    // netBuy≈−0.62 (both DANGER rows). Deleting analyze.ts's mcapUsd line
+    // 70 small buys ×70 makers + 30 big sells ×4 makers → netBuy≈−0.62
+    // (DANGER); top5Share≈0.81 stays WARN because breadth is broad (74 makers).
+    // Deleting analyze.ts's mcapUsd line
     // makes this test fail — it proves the wiring, not just the rule.
     const concentrated = {
       ...healthyHandlers,

@@ -11,7 +11,7 @@ gray zone selalu menghasilkan `BELUM_CUKUP_BUKTI`, bukan tebakan.
 ## V2 evidence contract (2026-09-29)
 
 The legacy rules below remain attached to historical v1 snapshots. New V2
-records use `schemaVersion: 2` and `rulesVersion: 2.0.0`:
+records use `schemaVersion: 2` and `rulesVersion: 2.1.0`:
 
 - `observedSellMakers` means distinct maker identities observed in valid sell
   rows after pool/creator/owner exclusions. It is not a claim of independent
@@ -52,8 +52,14 @@ address pool juga dikecualikan dari statistik maker.
 |---|---|---|---|
 | `thirdPartySellCount` (sell oleh ≥3 maker unik non-pool & non-creator) | ≥3 sells | 1–2 | **0 sells dengan ≥20 buys** |
 | `uniqueMakers` (distinct `ma`) | ≥20 | 5–19 | <5 |
-| `top5MakerShare` (share volume USD 5 maker terbesar) | <0.50 | 0.50–0.70 | >0.70 |
-| `netBuyRatio` = (buyUSD − sellUSD)/totalUSD | >0 | −0.2..0 | <−0.2 |
+| `top5MakerShare` (share volume USD 5 maker terbesar) | <0.50 | 0.50–0.70 | >0.70 **dan** uniqueMakers <20 |
+| `netBuyRatio` = (buyUSD − sellUSD)/totalUSD | ≥ −0.10 | −0.3..−0.1 | <−0.3 |
+
+Kalibrasi `rulesVersion 2.1.0` (2026-10-01): konsentrasi top-5 pada window
+100-swap hanya berstatus DANGER bila breadth juga tipis — di sampel terbatas,
+share besar dengan banyak maker unik lebih tepat dibaca whale/MM flow, bukan
+insider tape. `netBuyRatio` di bawah nol tipis adalah hari merah biasa; WARN
+baru berlaku saat outflow material (<−0.10), DANGER saat <−0.30.
 
 Dimensi = worst-of metrics; `swaps < 50` → INSUFFICIENT.
 

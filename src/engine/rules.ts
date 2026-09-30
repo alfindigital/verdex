@@ -46,11 +46,14 @@ export interface CompositeResult {
 export const THRESHOLDS = {
   sellTaxDanger: 0.1,
   top5MakerShare: { warn: 0.5, danger: 0.7 },
+  // Concentration only DANGERs when breadth is thin: 70%+ top-5 share on a
+  // healthy maker count reads as MM/whale flow, not an insider tape.
+  top5DangerMakersCap: 20,
   maxSinglePullPct: { warn: 0.15, danger: 0.5 },
   netLpDeltaPct: { warn: 0, danger: -0.1 },
   volMcapRatio: { warn: 0.5, danger: 1.0 },
   makersPer100k: { warn: 5, danger: 1 },
-  netBuyRatio: { warnAbove: 0, danger: -0.2 },
+  netBuyRatio: { warn: -0.1, danger: -0.3 },
   thirdPartySellsClean: 3,
   // Assets ≥$100M mcap trade across CEX+DEX — their on-chain window is
   // dominated by arbitrage infrastructure, so concentration/direction
@@ -111,8 +114,8 @@ export function evalFlow(f: FlowMetrics, mature = false): SubVerdict {
     lvl("thirdPartySells", f.thirdPartySells, "≥3 (0 sells w/ buys = hidden honeypot)",
       f.thirdPartySells === 0 && f.buyCount >= 20 ? "DANGER" : f.thirdPartySells >= THRESHOLDS.thirdPartySellsClean ? "CLEAN" : "WARN"),
     lvl("uniqueMakers", f.uniqueMakers, "≥20", f.uniqueMakers < 5 ? "DANGER" : f.uniqueMakers < 20 ? "WARN" : "CLEAN"),
-    lvl("top5MakerShare", round2(f.top5MakerShare), "<0.50", cap(f.top5MakerShare > THRESHOLDS.top5MakerShare.danger ? "DANGER" : f.top5MakerShare >= THRESHOLDS.top5MakerShare.warn ? "WARN" : "CLEAN")),
-    lvl("netBuyRatio", round2(f.netBuyRatio), ">0", cap(f.netBuyRatio < THRESHOLDS.netBuyRatio.danger ? "DANGER" : f.netBuyRatio <= THRESHOLDS.netBuyRatio.warnAbove ? "WARN" : "CLEAN")),
+    lvl("top5MakerShare", round2(f.top5MakerShare), "<0.50 (>0.70 & <20 makers = danger)", cap(f.top5MakerShare > THRESHOLDS.top5MakerShare.danger && f.uniqueMakers < THRESHOLDS.top5DangerMakersCap ? "DANGER" : f.top5MakerShare >= THRESHOLDS.top5MakerShare.warn ? "WARN" : "CLEAN")),
+    lvl("netBuyRatio", round2(f.netBuyRatio), "≥ -0.10", cap(f.netBuyRatio < THRESHOLDS.netBuyRatio.danger ? "DANGER" : f.netBuyRatio < THRESHOLDS.netBuyRatio.warn ? "WARN" : "CLEAN")),
   ];
   return { dim: "FLOW", level: worst(rows), metrics: rows };
 }

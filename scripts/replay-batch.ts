@@ -57,6 +57,16 @@ function replayClient(capture: CaptureFile): DexClient {
   };
 }
 
+// Prefer newer capture ts; on a tie (same frozen evidence), prefer the record
+// produced by the newer rulesVersion so threshold recalibrations propagate.
+function better(a: any, b: any): boolean {
+  const ta = Date.parse(a.ts), tb = Date.parse(b.ts);
+  if (ta !== tb) return ta > tb;
+  const rv = (r: any) => String(r?.rulesVersion ?? "0").split(".").map(Number);
+  const [aMaj, aMin] = rv(a), [bMaj, bMin] = rv(b);
+  return aMaj !== bMaj ? aMaj > bMaj : aMin > bMin;
+}
+
 async function main() {
   const capDir = path.resolve("data/captures");
   const bundleDir = path.resolve("data/bundles");
@@ -117,7 +127,7 @@ async function main() {
       if (rec?.kind !== "verdict") continue;
       const k = tokenIdentity(rec.token.platform, rec.token.address) ?? `${rec.token.platform}:${rec.token.address}`;
       const prev = best.get(k);
-      if (!prev || Date.parse(rec.ts) > Date.parse(prev.rec.ts)) best.set(k, { file: f, rec });
+      if (!prev || better(rec, prev.rec)) best.set(k, { file: f, rec });
     } catch { /* corrupt file — leave alone */ }
   }
   for (const f of readdirSync(bundleDir).filter((x) => x.endsWith(".json"))) {
@@ -127,7 +137,7 @@ async function main() {
       if (rec?.kind !== "verdict") continue;
       const k = tokenIdentity(rec.token.platform, rec.token.address) ?? `${rec.token.platform}:${rec.token.address}`;
       const prev = best.get(k);
-      if (!prev || Date.parse(rec.ts) > Date.parse(prev.rec.ts)) best.set(k, { file: `bundle:${f}`, rec });
+      if (!prev || better(rec, prev.rec)) best.set(k, { file: `bundle:${f}`, rec });
     } catch { /* skip corrupt */ }
   }
   // Rewrite snapshot dir: keep only winners.

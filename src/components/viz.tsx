@@ -66,9 +66,9 @@ export function SplitBar({ buy, sell }: { buy: number; sell: number }) {
 }
 
 /** Centered -1..+1 needle gauge for netBuyRatio. */
-export function NeedleGauge({ value, min = -1, max = 1 }: { value: number; min?: number; max?: number }) {
+export function NeedleGauge({ value, min = -1, max = 1, warnBelow, dangerBelow }: { value: number; min?: number; max?: number; warnBelow?: number; dangerBelow?: number }) {
   const pct = ((value - min) / (max - min)) * 100;
-  const tone = value >= 0 ? "bg-safe" : "bg-danger";
+  const tone = dangerBelow !== undefined && value < dangerBelow ? "bg-danger" : warnBelow !== undefined && value < warnBelow ? "bg-warn" : value >= 0 ? "bg-safe" : "bg-warn";
   return (
     <div className="relative h-2 w-full rounded-sm bg-line" role="img" aria-label={`needle ${value.toFixed(2)}`}>
       <div className="absolute inset-y-0 left-1/2 w-px bg-text/40" />

@@ -74,8 +74,19 @@ describe("evalFlow", () => {
   it("danger: zero third-party sells with buys present (honeypot shape)", () => {
     expect(evalFlow(fm({ thirdPartySells: 0, buyCount: 80 })).level).toBe("DANGER");
   });
-  it("danger: top5 maker share > 0.70", () => {
-    expect(evalFlow(fm({ top5MakerShare: 0.8 })).level).toBe("DANGER");
+  it("danger: top5 maker share > 0.70 with thin maker breadth (insider tape)", () => {
+    expect(evalFlow(fm({ top5MakerShare: 0.8, uniqueMakers: 10 })).level).toBe("DANGER");
+    const row = evalFlow(fm({ top5MakerShare: 0.8, uniqueMakers: 10 })).metrics.find((m) => m.name === "top5MakerShare");
+    expect(row?.level).toBe("DANGER");
+  });
+  it("warn-only: high top5 share on a broad tape reads as whale/MM flow", () => {
+    const row = evalFlow(fm({ top5MakerShare: 0.8, uniqueMakers: 30 })).metrics.find((m) => m.name === "top5MakerShare");
+    expect(row?.level).toBe("WARN");
+  });
+  it("netBuyRatio: mild red day is clean; material outflow warns; heavy exits danger", () => {
+    expect(evalFlow(fm({ netBuyRatio: -0.05 })).metrics.find((m) => m.name === "netBuyRatio")?.level).toBe("CLEAN");
+    expect(evalFlow(fm({ netBuyRatio: -0.15 })).metrics.find((m) => m.name === "netBuyRatio")?.level).toBe("WARN");
+    expect(evalFlow(fm({ netBuyRatio: -0.35 })).metrics.find((m) => m.name === "netBuyRatio")?.level).toBe("DANGER");
   });
   it("warn: unique makers 5-19, or 1-2 third-party sells", () => {
     expect(evalFlow(fm({ uniqueMakers: 10 })).level).toBe("WARN");

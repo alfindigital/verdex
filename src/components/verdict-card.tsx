@@ -145,7 +145,7 @@ function FlowViz({ m }: { m: MetricsBag }) {
           <span>NET BUY RATIO</span>
           <span className="text-text">{num(m.netBuyRatio).toFixed(2)}</span>
         </div>
-        <NeedleGauge value={num(m.netBuyRatio)} />
+        <NeedleGauge value={num(m.netBuyRatio)} warnBelow={THRESHOLDS.netBuyRatio.warn} dangerBelow={THRESHOLDS.netBuyRatio.danger} />
       </div>
       <div className="flex items-end justify-between gap-3">
         <div className="grid flex-1 grid-cols-2 gap-4">
@@ -155,7 +155,7 @@ function FlowViz({ m }: { m: MetricsBag }) {
           <Stat k="net flow" v={fmtUsd(num(m.netBuyUsd))} />
         </div>
         <div className="text-center">
-          <Donut share={num(m.top5MakerShare)} label="top-5 maker share" tone={num(m.top5MakerShare) > THRESHOLDS.top5MakerShare.danger ? HEX.danger : num(m.top5MakerShare) >= THRESHOLDS.top5MakerShare.warn ? HEX.warn : HEX.safe} />
+          <Donut share={num(m.top5MakerShare)} label="top-5 maker share" tone={num(m.top5MakerShare) > THRESHOLDS.top5MakerShare.danger && num(m.uniqueMakers) < THRESHOLDS.top5DangerMakersCap ? HEX.danger : num(m.top5MakerShare) >= THRESHOLDS.top5MakerShare.warn ? HEX.warn : HEX.safe} />
           <div className="mt-1 font-data text-[9px] uppercase tracking-widest text-dim">top-5 maker</div>
         </div>
       </div>

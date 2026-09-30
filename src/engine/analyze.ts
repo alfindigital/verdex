@@ -60,7 +60,7 @@ export type AnalyzeResult =
       receipts: Receipt[];
       failures: FailedCall[];
       schemaVersion: 2;
-      rulesVersion: "2.0.0";
+      rulesVersion: "2.1.0";
       mode: "live" | "replay";
       computedAt: string;
       sourceRecordId: string;
@@ -252,7 +252,7 @@ export async function analyze(client: DexClient, q: AnalyzeQuery, deps: AnalyzeD
     receipts,
     failures,
     schemaVersion: 2,
-    rulesVersion: "2.0.0",
+    rulesVersion: "2.1.0",
     mode: "live",
     computedAt: checkedAt,
     sourceRecordId: id,

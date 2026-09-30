@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "record": {
     "kind": "verdict",
-    "id": "c19489a7f46c",
+    "id": "ec025ade9452",
     "ts": "2026-09-29T12:06:08.719Z",
     "token": {
       "platform": "Solana",
@@ -117,13 +117,13 @@
             {
               "name": "top5MakerShare",
               "value": 0.95,
-              "threshold": "<0.50",
+              "threshold": "<0.50 (>0.70 & <20 makers = danger)",
               "level": "WARN"
             },
             {
               "name": "netBuyRatio",
               "value": -0.36,
-              "threshold": ">0",
+              "threshold": "≥ -0.10",
               "level": "WARN"
             }
           ]
@@ -172,7 +172,7 @@
         }
       ],
       "confidence": "high",
-      "falsifier": "This verdict (RAWAN) flips if top5MakerShare moves back inside <0.50 — currently 0.95. Failing rows: top5MakerShare (0.95 vs <0.50), netBuyRatio (-0.36 vs >0).",
+      "falsifier": "This verdict (RAWAN) flips if top5MakerShare moves back inside <0.50 (>0.70 & <20 makers = danger) — currently 0.95. Failing rows: top5MakerShare (0.95 vs <0.50 (>0.70 & <20 makers = danger)), netBuyRatio (-0.36 vs ≥ -0.10).",
       "v2Subs": [
         {
           "dim": "SAFETY",
@@ -235,13 +235,13 @@
             {
               "name": "top5MakerShare",
               "value": 0.95,
-              "threshold": "<0.50",
-              "level": "DANGER"
+              "threshold": "<0.50 (>0.70 & <20 makers = danger)",
+              "level": "WARN"
             },
             {
               "name": "netBuyRatio",
               "value": -0.36,
-              "threshold": ">0",
+              "threshold": "≥ -0.10",
               "level": "DANGER"
             }
           ]
@@ -295,14 +295,14 @@
           "dimension": "FLOW",
           "metric": "top5MakerShare",
           "observed": 0.95,
-          "requirement": "<0.50",
+          "requirement": "<0.50 (>0.70 & <20 makers = danger)",
           "reason": "FLOW evidence requires review"
         },
         {
           "dimension": "FLOW",
           "metric": "netBuyRatio",
           "observed": -0.36,
-          "requirement": ">0",
+          "requirement": "≥ -0.10",
           "reason": "FLOW evidence requires review"
         },
         {
@@ -425,10 +425,10 @@
     ],
     "failures": [],
     "schemaVersion": 2,
-    "rulesVersion": "2.0.0",
+    "rulesVersion": "2.1.0",
     "mode": "replay",
     "computedAt": "2026-09-29T12:06:08.719Z",
-    "sourceRecordId": "c19489a7f46c",
+    "sourceRecordId": "ec025ade9452",
     "coverage": {
       "level": "limited",
       "reasons": [
@@ -1283,7 +1283,7 @@
   },
   "manifest": {
     "capturedAt": "2026-09-29T12:06:08.719Z",
-    "rulesVersion": "2.0.0",
+    "rulesVersion": "2.1.0",
     "parserVersion": "v1-normalizer",
     "origin": "real-capture",
     "completeRawEvidence": true
