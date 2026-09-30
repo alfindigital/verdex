@@ -22,9 +22,9 @@ Verdex is a pre-trade DEX evidence desk. A trader enters a ticker or address and
 
 A deterministic rules engine (v2.3.0) evaluates four dimensions — SAFETY, FLOW, LIQUIDITY, PUMP — plus a fifth signal most checkers miss: tape vitality (how fast the last 100 swaps accumulated). That is how it catches what contract-scanners cannot: CEL still lists $65K of nominal pool depth, but the tape records ~13 swaps a day — a dead market wearing a live ticker. The stamp reads HIGH RISK FLAGS.
 
-Every verdict ships with its named falsifier ("this flips if swapsPerDay recovers above 50/day"), the exact threshold each row failed, and a coverage badge. Missing evidence shows as unknown — never zero. Replays are labelled replays. The AI second opinion (Jev, a probability classifier over the same four dimensions) is printed alongside its agreement — 130/130 records examined; the model never writes the rules, and the product is fully functional without it.
+Every verdict ships with its named falsifier ("this flips if swapsPerDay recovers above 50/day"), the exact threshold each row failed, and a coverage badge. Missing evidence shows as unknown — never zero. Replays are labelled replays. The AI second opinion (Jev, a probability classifier over the same four dimensions) is printed alongside its agreement — 301/301 records examined; the model never writes the rules, and the product is fully functional without it.
 
-The archived corpus holds 130 verdicts across 9 chains, 1,170 receipts, 12,800 swap events. Against a 59-label hand-checked set the rules catch 4/6 collapsed tokens with zero zombie/faded tokens stamped clean — while a security-flags-only baseline stamps 5/7 of them entry-safe. Three false positives on thin L2 tapes are disclosed, not hidden.
+The archived corpus holds 301 verdicts across 9 chains, 2,709 receipts, 29,744 swap events. Against a 59-label hand-checked set the rules catch 4/6 collapsed tokens with zero zombie/faded tokens stamped clean — while a security-flags-only baseline stamps 5/7 of them entry-safe. Three false positives on thin L2 tapes are disclosed, not hidden.
 
 Replay is the judging path: committed snapshots open without a key. V2 live requires `VERDEX_V2=1` + `VERDEX_LIVE=1`, a server-only CMC key, and a fresh quota check; live results are transient — only archived snapshots get permanent links.
 

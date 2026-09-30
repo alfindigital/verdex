@@ -25,7 +25,7 @@ Paste a ticker → get an evidence file, not a vibe.
 
 Verdex: deterministic DEX-token verdicts on @CoinMarketCap data — every claim backed by a hashed receipt, every failing row named, missing data shown as unknown.
 
-130 verdicts on file. Zero AI required to run the rules.
+301 verdicts on file. Zero AI required to run the rules.
 
 <BUIDL_URL> #BuildwithCMC
 ```
@@ -64,4 +64,4 @@ DEX token pages show contract checks; they don't show whether anyone can actuall
 All evidence comes from CMC endpoints: `/v1/dex/search`, `/v1/dex/tokens/transactions`, `/v1/dex/token/pools`, `/v1/dex/liquidity-change/list`, `/v1/dex/security/detail`, `/v1/dex/token`, `/v1/global-metrics/quotes/{latest,historical}`, `/v3/fear-and-greed/latest`. Each response body is stored with a SHA-256 receipt, so every verdict is independently re-verifiable.
 
 **What makes it different?**
-Verdicts are falsifiable — each names the metric that would flip it. Missing data degrades coverage instead of pretending to be zero. The corpus is replayable offline: 130 archived verdicts, no key needed to judge. An AI second opinion (Jev) is cross-examined against the rules and printed with its disagreement — it never overrides them.
+Verdicts are falsifiable — each names the metric that would flip it. Missing data degrades coverage instead of pretending to be zero. The corpus is replayable offline: 301 archived verdicts, no key needed to judge. An AI second opinion (Jev) is cross-examined against the rules and printed with its disagreement — it never overrides them.

@@ -201,10 +201,10 @@ Badge akhir: contested jika salah satu jalur contested, consensus hanya jika
 kedua jalur sepakat. Jev tidak pernah mengubah verdict rules — ia second
 opinion yang ditampilkan berdampingan.
 
-Hasil aktual di corpus 130 record (rules 2.3.0): **5 consensus · 16 lean ·
-109 contested**. Polanya konsisten dan dilaporkan apa adanya: Jev setuju
+Hasil aktual di corpus 301 record (rules 2.3.0): **8 consensus · 43 lean ·
+250 contested**. Polanya konsisten dan dilaporkan apa adanya: Jev setuju
 keras pada dimensi SAFETY (P 0.64–0.72 tepat di token yang rules flag
-danger) dan pada kelima LAYAK (P 0.07–0.10), tetapi sistematis menilai
+danger) dan pada delapan LAYAK (P 0.07–0.10), tetapi sistematis menilai
 konsentrasi maker FLOW dan likuiditas dust lebih rendah risikonya daripada
 rules. Kedua lensa berdiri berdampingan — contested bukan kegagalan, tapi
 bukti bahwa rules memang sengaja lebih strict pada tape/exit-risk.
