@@ -78,8 +78,8 @@ async function main() {
   } catch { /* no .env.local — jev stays stubbed unless key is in env */ }
 
   const FORCE = process.argv.includes("--force");
-  const JEV = process.argv.includes("--jev") && Boolean(process.env.GROQ_API_KEY);
-  if (process.argv.includes("--jev") && !JEV) console.log("note: --jev given but GROQ_API_KEY unset — jev stays stubbed");
+  const JEV = process.argv.includes("--jev") && Boolean(process.env.TYPESAFE_API_KEY ?? process.env.TYPESAFE_API_KEYS);
+  if (process.argv.includes("--jev") && !JEV) console.log("note: --jev given but TYPESAFE_API_KEYS unset — jev stays stubbed");
 
   const capDir = path.resolve("data/captures");
   const bundleDir = path.resolve("data/bundles");
@@ -150,7 +150,9 @@ async function main() {
       if (rec?.kind !== "verdict") continue;
       const k = tokenIdentity(rec.token.platform, rec.token.address) ?? `${rec.token.platform}:${rec.token.address}`;
       const prev = best.get(k);
-      if (!prev || better(rec, prev.rec)) best.set(k, { file: `bundle:${f}`, rec });
+      // Bundles are the newest derivation — on a ts/rulesVersion tie they
+      // must beat a bare snapshot file (which may carry a stale label/jev).
+      if (!prev || !better(prev.rec, rec)) best.set(k, { file: `bundle:${f}`, rec });
     } catch { /* skip corrupt */ }
   }
   // Rewrite snapshot dir: keep only winners.
