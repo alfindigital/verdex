@@ -11,7 +11,7 @@ This file is a truthful copy pack. URLs that require a user action remain explic
 | Category | Markets and Trading Tools |
 | GitHub | `https://github.com/alfindigital/verdex` — verify public visibility before submitting |
 | Project website | **`https://verdex.web.id`** — live HTTPS 200, canonical (Cloudflare DNS → Vercel); `verdex-alpha.vercel.app` remains working alias |
-| Demo video | **not published** — 5 re-rendered candidates in `video/out/` (rules 2.4.0 data, fresh VO): `verdex-delta-receipt-ticker.mp4` (~85s, flagship receipt-tape), `verdex-theta-before-after.mp4` (~73s, contract-check vs behavior split-screen), `verdex-eta-market-tape.mp4` (~79s), `verdex-zeta-the-scan.mp4` (~91s), `verdex-epsilon-case-file.mp4` (~131s); pick one, owner uploads to YouTube. Legacy renders retained for comparison |
+| Demo video | **not published** — 5 re-rendered candidates in `video/out/` (rendered on rules 2.3.0 corpus — no on-screen distribution figures changed under 2.4.0; fresh VO): `verdex-delta-receipt-ticker.mp4` (~85s, flagship receipt-tape), `verdex-theta-before-after.mp4` (~73s, contract-check vs behavior split-screen), `verdex-eta-market-tape.mp4` (~79s), `verdex-zeta-the-scan.mp4` (~91s), `verdex-epsilon-case-file.mp4` (~131s); pick one, owner uploads to YouTube. Legacy renders retained for comparison |
 | Social link | **not published** — post only after the BUIDL URL and video URL exist |
 | Logo | `public/logo.png` — concept **A "Verdict Scanner"** chosen (teal geometric V on paper); verify PNG/JPEG size is under 2 MB in the DoraHacks form; 7 alternates preserved in `public/logo-concepts/` |
 | Track | Markets and Trading Tools |
